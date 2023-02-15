@@ -1,0 +1,21 @@
+ERASABLE
+  
+  br.powUp[i]   
+  
+  the many calls to: gl.uniform3fv( program.unifLoc.pos,   [ 0.0, 0.0, 0.0 ] );
+  
+  br.col, br.pos?, .....
+  
+  activate br.changed for all buffers
+  
+  function vertexWPos3( wPos, numObjects-. null )
+  
+ToDo
+  Reverse all loops (ex. --i)
+  All loops ++i NOT i++
+
+
+  ### 2
+  Make texture creating and loading robust 
+    When creating the font texture we want texWidth and height in the glTexture object(for use)
+    OR connect the font texture(with an array index??) with the glTexture object

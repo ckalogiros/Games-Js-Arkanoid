@@ -1,0 +1,113 @@
+STAGE 1
+
+[ 103,113,123,133,143,155,167,
+  179,191,203,193,183,173,163,
+  153,141,129,117,105,92,82 ]
+index 103  unbreakable IronBlack 
+index 113  unbreakable IronBlack 
+index 123  unbreakable IronBlack 
+index 133  unbreakable IronBlack 
+index 143  unbreakable IronBlack 
+index 155  unbreakable IronBlack 
+index 167  unbreakable IronBlack 
+index 179  unbreakable IronBlack 
+index 191  unbreakable IronBlack 
+index 203  unbreakable IronBlack 
+index 193  unbreakable IronBlack 
+index 183  unbreakable IronBlack 
+index 173  unbreakable IronBlack 
+index 163  unbreakable IronBlack 
+index 153  unbreakable IronBlack 
+index 141  unbreakable IronBlack 
+index 129  unbreakable IronBlack 
+index 117  unbreakable IronBlack 
+index 105  unbreakable IronBlack 
+index 92   unbreakable IronBlack 
+index 82   unbreakable IronBlack 
+
+[ 114,116,124,125,126,127,
+  128,134,135,136,137,138,
+  139,140,144,145,146,147,
+  148,149,150,151,152,156,
+  157,158,159,160,161,162,
+  168,169,170,171,172,180,
+  181,182,192 ]
+--- 114,    SandStone
+--- 116,    SandStone
+--- 124,    SandStone
+--- 125,    SandStone
+--- 126,    SandStone
+--- 127,    SandStone
+--- 128,    SandStone
+--- 134,    SandStone
+--- 135,    SandStone
+--- 136,    SandStone
+--- 137,    SandStone
+--- 138,    SandStone
+--- 139,    SandStone
+--- 140,    SandStone
+--- 144,    SandStone
+--- 145,    SandStone
+--- 146,    SandStone
+--- 147,    SandStone
+--- 148,    SandStone
+--- 149,    SandStone
+--- 150,    SandStone
+--- 151,    SandStone
+--- 152,    SandStone
+--- 156,    SandStone
+--- 157,    SandStone
+--- 158,    SandStone
+--- 159,    SandStone
+--- 160,    SandStone
+--- 161,    SandStone
+--- 162,    SandStone
+--- 168,    SandStone
+--- 169,    SandStone
+--- 170,    SandStone
+--- 171,    SandStone
+--- 172,    SandStone
+--- 180,    SandStone
+--- 181,    SandStone
+--- 182,    SandStone
+--- 192,    SandStone
+
+STAGE 2
+
+137,138,147,150,157,162
+
+137, "ironBlack"
+138, "ironBlack"
+147, "ironBlack"
+150, "ironBlack" 
+157, "ironBlack" 
+162, "ironBlack"
+
+[ 115,116,125,126,128,135,136,
+  139,140,145,146,148,149,152,
+  155,156,158,161,163,164,166,175 ]
+
+115, "sandStone"               
+116, "sandStone" 
+125, "sandStone"                
+126, "sandStone"
+127, "sandStone"
+128, "sandStone"
+135, "sandStone"
+136, "sandStone"
+139, "sandStone"
+140, "sandStone"
+145, "sandStone"
+146, "sandStone"
+148, "sandStone"
+149, "sandStone"
+151, "sandStone"
+152, "sandStone"
+155, "sandStone"
+156, "sandStone"
+158, "sandStone"
+161, "sandStone"
+163, "sandStone"
+164, "sandStone"
+166, "sandStone"
+175, "sandStone"

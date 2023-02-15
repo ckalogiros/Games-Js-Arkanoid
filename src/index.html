@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>WebGL_Basic</title>
+	<link rel="stylesheet" type="text/css" href="style/style.css">
+</head>
+
+<body>
+    <centerFrame>
+
+    	<div id="image"></div>
+    	<div id="fps"></div>
+    	<div id="TimeMesure"></div>
+    	<!-- Ui Helpers -->
+    	<div class="ui reset">
+    		<div class="flex">
+    			<div class="container">
+    				<p>Text Inner Value: <span id="sdf-param1-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="30" id="sdf-param1">
+    			</div>
+    			<div class="container">
+    				<p>Text Outer Value: <span id="sdf-param2-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="20" id="sdf-param2">
+    			</div>
+    		</div>
+    	</div>
+    	<div class="ui reset">
+    		<div class="flex">
+    			<div class="container">
+    				<p>Button's Round Corner: <span id="button-round-corner-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="button-round-corner">
+    			</div>
+    			<div class="container">
+    				<p>Button's Border Width: <span id="button-border-width-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="button-border-width">
+    			</div>
+    			<div class="container">
+    				<p>Button's Border Feather: <span id="button-border-feather-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="button-border-feather">
+    			</div>
+    		</div>
+    	</div>
+    	<div class="ui reset">
+    		<div class="flex">
+    			<div class="container">
+    				<p>Bricks's Round Corner: <span id="brick-round-corner-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="brick-round-corner">
+    			</div>
+    			<div class="container">
+    				<p>Bricks's Border Width: <span id="brick-border-width-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="brick-border-width">
+    			</div>
+    			<div class="container">
+    				<p>Bricks's Border Feather: <span id="brick-border-feather-val"></span></p>
+    				<input class="slider" type="range" min="0" max="100" value="0" id="brick-border-feather">
+    			</div>
+    		</div>
+    	</div>
+        
+    	<canvas id="glCanvas" width="700" height="800"></canvas>
+    </center-frame>
+
+	<script>
+
+	</script>
+</body>
+<script type="text/javascript" src="scripts/Engine/Global/EngineConstants.js"></script>
+<script type="text/javascript" src="scripts/Graphics/Global/GfxConstants.js"></script>
+<script type="text/javascript" src="scripts/App/Global/AppConstants.js"></script>
+<script type='module' src="scripts/Entry.js "></script>
+
+</html>

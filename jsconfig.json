@@ -1,0 +1,10 @@
+// https://code.visualstudio.com/docs/languages/jsconfig
+
+// {
+//     "compilerOptions": {
+//       "module": "commonjs",
+//       "target": "es6"
+//     },
+//     "exclude": ["node_modules", "images", "saves"],
+//     "include": ["src/**/*"]
+// }

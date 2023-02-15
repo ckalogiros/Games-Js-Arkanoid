@@ -1,0 +1,90 @@
+@ https://github.com/ckalogiros/Games-Js-Arkanoid.git
+/***************************
+#First push
+    git init
+    git add README.md
+    git status // See any modified and untracked files
+    git add <file>
+    git commit -m ''
+    git branch -M main
+    git remote add origin https://github.com/ckalogiros/<repo name> // origin is the alias for the URL address
+    git push -u origin main 
+
+
+/***************************
+#push
+    git status
+    git add file 
+    git add -u so that it will stage the modified and deleted files
+    git commit -m '<message>'
+    git push -u origin main
+
+
+/***************************
+# remove files from Cash
+git rm --cached resources/ // Where 'resources' is a folder
+AND recursive remove all sub-content with -r
+git rm --cached -r resources/
+
+
+/***************************
+#add all untract files
+    git add -i
+THEN
+    'a' and enter // for untract
+    '*' and enter // select all 
+    'q' to exit
+
+
+/***************************
+#Basic commands
+    git switch|checkout <branch name> // to navigate to another branch
+
+    git log --oneline --graph --decorate --all // Shows the project tree
+OR 
+    git config --global alias.tree log --oneline --graph --decorate --all
+AND THEN 
+    git tree // to show the project tree with alias
+
+/***************************
+#Rewrite a repo (duplicate a git project)
+TODO
+
+/***************************
+Create a new branch
+    git branch <new branch name>
+    git checkout <new branch name> // Switch to branch '<new branch name>'
+
+/***************************
+    git filter-branch
+
+
+/*************************** Tutorial
+https://www.delftstack.com/howto/git/git-commit-to-new-branch/
+Move Commits to an Existing Synchronized Branch in Git
+#To understand this feature better, we will use a practical example. We made commits to the <wrong branch> instead of the <right branch>.
+
+#Assuming the two are synchronized, how do you bring the commits to the <right branch>?
+#Navigate to the existing branch with the git checkout command.
+    git checkout <right branch>
+
+#Move the commits with the git merge command.
+    git merge <wrong branch>
+
+#To remove the mistaken commits, got to the <wrong branch>.
+    git checkout <wrong branch>
+
+#Use the git reset command to revert the commits.
+    git reset --keep HEAD~N
+
+/********
+#Move Commits to an Existing Branch in Git
+
+#Let us use a practical example to understand this better. How would you go about it if you want to move a specific commit without merging the branches?
+#We will move one commit from the <wrong branch> to the <right branch> in the example below.
+
+#Switch to the <right branch>.
+    git checkout <right branch>
+
+#Use the git cherry-pick command and the commit’s hash to move it, as shown below.
+    git cherry-pick <sha1-commit-hash>

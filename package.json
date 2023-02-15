@@ -1,0 +1,20 @@
+{
+    "//": "npm run lite",
+    "//": "nodemon ./src/scripts/Entry.js",
+    "name": "arkanoid",
+    "version": "1.0.0",
+    "description": "WebGL Game",
+    "main": "Entry.js",
+    "scripts": {
+        "lite": "lite-server --port 5501",
+        "start": "npm run lite"
+    },
+    "dependencies": {
+        "fs-extra": "^11.1.0",
+        "lite-server": "^2.2.0",
+        "nodemon": "^2.0.20"
+    },
+    "type": "module",
+    "author": "",
+    "license": "ISC"
+}

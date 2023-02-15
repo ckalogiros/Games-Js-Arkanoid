@@ -1,0 +1,1070 @@
+
+#version 330 core
+layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec3 textureCoordinates;
+layout(location = 2) in vec4 vertexColor;
+out vec3 texCoords;
+
+out vec4 fragColor;
+uniform mat4 MVP;
+
+void main()
+{
+    gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
+    texCoords = textureCoordinates;
+    fragColor = vertexColor;
+}
+
+
+
+#version 330 core
+
+in vec3 texCoords;
+in vec4 fragColor;
+out vec4 color;
+uniform sampler2DArray msdf;
+
+float median(float r, float g, float b) 
+{
+    return max(min(r, g), min(max(r, g), b));
+} 
+
+void main()
+{    
+    vec3 flipped_texCoords = vec3(texCoords.x, 1.0 - texCoords.y, texCoords.z);
+    vec2 pos = flipped_texCoords.xy;
+    vec3 sample = texture(msdf, flipped_texCoords).rgb;
+    ivec2 sz = textureSize(msdf, 0).xy;
+    float dx = dFdx(pos.x) * sz.x; 
+    float dy = dFdy(pos.y) * sz.y;
+    float toPixels = 8.0 * inversesqrt(dx * dx + dy * dy);
+    float sigDist = median(sample.r, sample.g, sample.b);
+    float w = fwidth(sigDist);
+    float opacity = smoothstep(0.5 - w, 0.5 + w, sigDist); 
+    color = vec4(fragColor.rgb, opacity);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// star like explosion waves
+--vol2
+
+float snoise(vec3 uv, float res)
+{
+	const vec3 s = vec3(1e0, 1e2, 1e3);
+	
+	uv *= res;
+	
+	vec3 uv0 = floor(mod(uv, res))*s;
+	vec3 uv1 = floor(mod(uv+vec3(1.), res))*s;
+	
+	vec3 f = fract(uv); f = f*f*(3.0-2.0*f);
+
+	vec4 v = vec4(uv0.x+uv0.y+uv0.z, uv1.x+uv0.y+uv0.z,
+		      	  uv0.x+uv1.y+uv0.z, uv1.x+uv1.y+uv0.z);
+
+	vec4 r = fract(sin(v*1e-1)*1e3);
+	float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+	
+	r = fract(sin((v + uv1.z - uv0.z)*1e-1)*1e3);
+	float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+	
+	return mix(r0, r1, f.z)*2.-1.;
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) 
+{
+	vec2 p = -.5 + fragCoord.xy / iResolution.xy;
+	//p.x *= iResolution.x/iResolution.y;
+	
+	float color = 3.0 - (2.*length(3.*p));
+	
+	vec3 coord = vec3((p.x,p.y)/6.2832+.5, length(p)*.9, .5);
+	
+	for(int i = 1; i <= 15; i++)
+	{
+		float power = pow(2.0, float(i));
+		color += (1.5 / power) * snoise(coord + vec3(0.,-iTime*.05, iTime*.01), power*16.);
+	}
+	fragColor = vec4( color, pow(max(color,0.),2.)*0.4, pow(max(color,0.),3.)*0.15 , 1.0);
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+--vol2
+float snoise(vec3 uv, float res)
+{
+	const vec3 s = vec3(1e0, 1e2, 1e3);
+	
+	uv *= res;
+	
+	vec3 uv0 = floor(mod(uv, res))*s;
+	vec3 uv1 = floor(mod(uv+vec3(1.), res))*s;
+	
+	vec3 f = fract(uv); f = f*f*(3.0-2.0*f);
+
+	vec4 v = vec4(uv0.x+uv0.y+uv0.z, uv1.x+uv0.y+uv0.z,
+		      	  uv0.x+uv1.y+uv0.z, uv1.x+uv1.y+uv0.z);
+
+	vec4 r = fract(sin(v*1e-1)*1e3);
+	float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+	
+	r = fract(sin((v + uv1.z - uv0.z)*1e-1)*1e3);
+	float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+	
+	return mix(r0, r1, f.z)*2.-1.;
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) 
+{
+	vec2 p = -.5 + fragCoord.xy / iResolution.xy;
+	//p.x *= iResolution.x/iResolution.y;
+	
+	float color = 2.0 - (1.*length(3.5*p));
+	
+	vec3 coord = vec3((p.x,p.y)/6.2832+.5, length(p)*.9, .5);
+	
+	for(int i = 1; i <= 15; i++)
+	{
+		float power = pow(2.0, float(i));
+		color += (2.7 / power) * snoise(coord + vec3(0.,-iTime*.05, iTime*.01), power*24.);
+	}
+	fragColor = vec4( 0., pow(max(color,0.),2.)*0.3, pow(max(color,0.),3.)*1.5 , 1.0);
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+// spiders moving web
+
+/* 
+    Combustible Voronoi Layers
+	--------------------------
+
+    The effect itself is nothing new or exciting, just some moving 3D Voronoi layering. 
+    However, the fire palette might prove useful to some.
+
+*/
+
+
+// This is my favorite fire palette. It's trimmed down for shader usage, and is based on an 
+// article I read at Hugo Elias's site years ago. I'm sure most old people, like me, have 
+// visited his site at one time or another:
+//
+// http://freespace.virgin.net/hugo.elias/models/m_ffire.htm
+//
+vec3 firePalette(float i){
+
+    float T = 1400. + 1300.*i; // Temperature range (in Kelvin).
+    vec3 L = vec3(7.4, 5.6, 4.4); // Red, green, blue wavelengths (in hundreds of nanometers).
+    L = pow(L,vec3(5)) * (exp(1.43876719683e5/(T*L)) - 1.);
+    return 1. - exp(-5e8/L); // Exposure level. Set to "50." For "70," change the "5" to a "7," etc.
+}
+
+/*
+vec3 firePalette(float i){
+
+    float T = 1400. + 1300.*i; // Temperature range (in Kelvin).
+    // Hardcode red, green and blue wavelengths (in hundreds of nanometers).
+    vec3 L = (exp(vec3(19442.7999572, 25692.271372, 32699.2544734)/T) - 1.);
+    // Exposure level. Set to "50" For "70," change the ".5" to a ".7," etc.
+    return 1. - exp(-vec3(22532.6051122, 90788.296915, 303184.239775)*2.*.5/L); 
+}
+*/
+
+// Hash function. This particular one probably doesn't disperse things quite as nicely as some 
+// of the others around, but it's compact, and seems to work.
+//
+vec3 hash33(vec3 p){ 
+    
+    float n = sin(dot(p, vec3(7, 157, 113)));    
+    return fract(vec3(2097152, 262144, 32768)*n); 
+}
+
+// 3D Voronoi: Obviously, this is just a rehash of IQ's original.
+//
+float voronoi(vec3 p){
+
+	vec3 b, r, g = floor(p);
+	p = fract(p); // "p -= g;" works on some GPUs, but not all, for some annoying reason.
+	
+	// Maximum value: I think outliers could get as high as "3," the squared diagonal length 
+	// of the unit cube, with the mid point being "0.75." Is that right? Either way, for this 
+	// example, the maximum is set to one, which would cover a good part of the range, whilst 
+	// dispensing with the need to clamp the final result.
+	float d = 1.; 
+     
+    // I've unrolled one of the loops. GPU architecture is a mystery to me, but I'm aware 
+    // they're not fond of nesting, branching, etc. My laptop GPU seems to hate everything, 
+    // including multiple loops. If it were a person, we wouldn't hang out. 
+	for(int j = -1; j <= 1; j++) {
+	    for(int i = -1; i <= 1; i++) {
+    		
+		    b = vec3(i, j, -1);
+		    r = b - p + hash33(g+b);
+		    d = min(d, dot(r,r));
+    		
+		    b.z = 0.0;
+		    r = b - p + hash33(g+b);
+		    d = min(d, dot(r,r));
+    		
+		    b.z = 1.;
+		    r = b - p + hash33(g+b);
+		    d = min(d, dot(r,r));
+    			
+	    }
+	}
+	
+	return d; // Range: [0, 1]
+}
+
+// Standard fBm function with some time dialation to give a parallax 
+// kind of effect. In other words, the position and time frequencies 
+// are changed at different rates from layer to layer.
+//
+float noiseLayers(in vec3 p) {
+
+    // Normally, you'd just add a time vector to "p," and be done with 
+    // it. However, in this instance, time is added seperately so that 
+    // its frequency can be changed at a different rate. "p.z" is thrown 
+    // in there just to distort things a little more.
+    vec3 t = vec3(0., 0., p.z + iTime*1.2);
+
+    const int iter = 1; // Just five layers is enough.
+    float tot = 0., sum = 0., amp = 1.; // Total, sum, amplitude.
+
+    for (int i = 0; i < iter; i++) {
+        tot += voronoi(p + t) * amp; // Add the layer to the total.
+        p *= 2.; // Position multiplied by two.
+        t *= 1.5; // Time multiplied by less than two.
+        sum += amp; // Sum of amplitudes.
+        amp *= .5; // Decrease successive layer amplitude, as normal.
+    }
+    
+    return tot/sum; // Range: [0, 1].
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Screen coordinates.
+	vec2 uv = (fragCoord - iResolution.xy*.5) / iResolution.y;
+	
+	// Shifting the central position around, just a little, to simulate a 
+	// moving camera, albeit a pretty lame one.
+	uv += vec2(sin(iTime*.5)*.25, cos(iTime*.5)*.125);
+	
+    // Constructing the unit ray. 
+	vec3 rd = normalize(vec3(uv.x, uv.y, 3.1415926535898/8.));
+
+    // Rotating the ray about the XY plane, to simulate a rolling camera.
+	float cs = cos(iTime*.25), si = sin(iTime*.25);
+    // Apparently "r *= rM" can break in some older browsers.
+	rd.xy = rd.xy*mat2(cs, -si, si, cs); 
+	
+	// Passing a unit ray multiple into the Voronoi layer function, which 
+	// is nothing more than an fBm setup with some time dialation.
+	float c = noiseLayers(rd*2.);
+	
+	// Optional: Adding a bit of random noise for a subtle dust effect. 
+	c = max(c + dot(hash33(rd)*2. - 1., vec3(.015)), 0.);
+
+    // Coloring:
+    
+    // Nebula.
+    c *= sqrt(c)*1.5; // Contrast.
+    vec3 col = firePalette(c); // Palettization.
+    //col = mix(col, col.zyx*.1+ c*.9, clamp((1.+rd.x+rd.y)*0.45, 0., 1.)); // Color dispersion.
+    col = mix(col, col.zyx*.15 + c*.85, min(pow(dot(rd.xy, rd.xy)*1.2, 1.5), 1.)); // Color dispersion.
+    col = pow(col, vec3(1.25)); // Tweaking the contrast a little.
+    
+    // The fire palette on its own. Perhaps a little too much fire color.
+    //c = pow(c*1.33, 1.25);
+    //vec3 col =  firePalette(c);
+   
+    // Black and white, just to keep the art students happy. :)
+	//c *= c*1.5;
+	//vec3 col = vec3(c);
+	
+	// Rough gamma correction, and done.
+	fragColor = vec4(sqrt(clamp(col, 0., 1.)), 1);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Round corner with sdf box
+const FS_SDF_BOX_ROUND_CORNER = `#version 300 es
+    
+#define WHITE vec3(1., 1., 1.)
+#define YELLOW vec3(1., 1., 0.)
+#define PURPLE vec3(0.7, 0., 0.9)
+#define GREEN  vec3(0.3, 0.9, 0.1)
+#define GREY   vec3(0.5, 0.5, 0.5)
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Color;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump vec2  v_Scale;
+in mediump float v_RoundCorners;
+in mediump float v_Border;
+in mediump float v_Feather;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];         
+
+out vec4 FragColor;
+
+float Box(vec2 uv, vec2 topLeft, vec2 bottomRight)
+{
+    return (uv.x > topLeft.x && uv.x < bottomRight.x && uv.y < topLeft.y && uv.y > bottomRight.y ? 1. : 0.);
+}
+
+float SdfBox(vec2 p, vec2 size)
+{
+    vec2 d = abs(p) - size;  
+	return (length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0));
+}
+
+float SdfBox2(vec2 uv, vec2  p)
+{
+    return (length(max(abs(uv) - p, 0.0)));
+}
+
+void main(void) {
+    
+    vec2 resolution = vec2(700./300., 800./300.);
+    vec2 wpos = vec2(v_Wpos.x, 800. - v_Wpos.y); // Reverse top to be 0 and bottom max height
+    // vec2 wpos = v_Wpos; // Reverse top to be 0 and bottom max height
+    vec2 uv = (gl_FragCoord.xy-wpos); // Center = 0.
+    float left  = -v_Dim.x; 
+    float right = v_Dim.x; 
+    float bottom   = -v_Dim.y; 
+    float top = v_Dim.y; 
+    
+    vec2 pos = vec2(200., 200.0);
+    vec2 dim = vec2(80., 80.);
+    vec3 col = v_Color.rgb;
+    
+    if(uv.x > left+10. && uv.x < right - 10. && uv.y > bottom + 10. && uv.y < top - 10.) col = GREY;
+    if(uv.x > -2. && uv.x < 2. || uv.y > -2. && uv.y < 2.) col = GREEN;
+
+    
+    float val = v_Params[3];
+    float time = v_Params[2];
+    
+    // float a = sin(time*5.)*20.;
+    float a = 1.;
+    mat2 rot = mat2(cos(a), sin(a), -sin(a), cos(a));
+    // pos *= rot;
+    // dim*=rot;
+
+    // sdf box
+    float d = SdfBox(uv, dim);
+    // float d = SdfBox2(uv, dim);
+    
+
+    // distance < 0 (negative) is inside the box
+    if(mod(d, 20.) < 1.) col = WHITE;
+    // if(d < val && d > val-20.) col = YELLOW;
+
+    if(d < val && d > val-20.) col = YELLOW;
+    
+
+    FragColor = vec4(col, 1.);
+}
+`;
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Shotting Particles
+
+const FS_EXPLOSION = `#version 300 es
+    
+#define WHITE vec3(1., 1., 1.)
+#define YELLOW vec3(1., 1., 0.)
+#define PURPLE vec3(0.7, 0., 0.9)
+#define GREEN  vec3(0.3, 0.9, 0.1)
+#define ORANGE vec3(0.9, 0.5, 0.)
+#define GREY   vec3(0.5, 0.5, 0.5)
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Color;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump vec2  v_Scale;
+in mediump float v_RoundCorners;
+in mediump float v_Border;
+in mediump float v_Feather;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];         
+
+out vec4 FragColor;
+
+// Random Function, from 1 val to 2 and from 0.0 to 1.0
+// Subtract 0.5 for a -.5 to .5
+vec2 Hash12(float seed)
+{
+    float x = fract(sin(seed*674.3)*453.2);
+    float y = fract(sin((seed+x)*714.3)*263.2);
+
+    return vec2(x, y);
+}
+
+vec2 Route(vec2 p, float t)
+{
+    float x = sin(t);
+    float y = sin(t);
+    return vec2(x, y);
+}
+
+float Box(vec2 uv, vec2 topLeft, vec2 bottomRight)
+{
+    return (uv.x > topLeft.x && uv.x < bottomRight.x && uv.y < topLeft.y && uv.y > bottomRight.y ? 1. : 0.);
+}
+
+float SdfBox(vec2 p, vec2 size)
+{
+    vec2 d = abs(p) - size;  
+	return smoothstep(.01, .02, length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0));
+	// return length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0);
+}
+
+float SdfBox2(vec2 uv, vec2  p)
+{
+    // return smoothstep(.01, .0, length(max(abs(uv) - p, 0.0)));
+    return length(max(abs(uv) - p, 0.0));
+}
+
+float seed = 0.32; //----------------------------------------------------------starting seed
+const float particles = 200.0; //----------------------------------------------change particle count
+float res = 32.0; //-----------------------------------------------------------pixel resolution
+float gravity = 0.62; //-------------------------------------------------------set gravity
+
+void main(void)
+{
+    float time = v_Params[2];
+    // vec2 resolution = vec2(700./300., 800./300.);
+    vec2 resolution = vec2(300., 300.);
+    vec2 wpos = vec2(v_Wpos.x, 800. - v_Wpos.y); // Reverse top to be 0 and bottom max height
+    // vec2 wpos = v_Wpos; // Reverse top to be 0 and bottom max height
+    float left  = -v_Dim.x; 
+    float right = v_Dim.x; 
+    float bottom   = -v_Dim.y; 
+    float top = v_Dim.y; 
+    
+
+    // vec2 uv = (gl_FragCoord.xy-wpos); // Center = 0.
+	// vec2 uv = (-iResolution.xy + 2.0*gl_FragCoord.xy) / iResolution.y;
+	
+    vec2 uv = (-resolution.xy + 2.0*gl_FragCoord.xy) / resolution.y;
+    float clr = 0.0;  
+    float timecycle = time-floor(time);  
+    seed = (seed+floor(time));
+    
+    //testing
+    float invres=1.0/res;
+    float invparticles = 1.0/particles;
+
+    
+    for( float i=0.0; i<particles; i++ )
+    {
+		seed+=i+tan(seed);
+        vec2 tPos = (vec2(log(seed),sin(seed)))*i*invparticles;
+        
+        vec2 pPos = vec2(2.0,2.0);
+        pPos.x= ((tPos.x) * timecycle);
+		pPos.y = -gravity*(timecycle*timecycle)+tPos.y*timecycle+pPos.y;
+        
+        pPos.x += 1.;
+
+        // pPos = floor(pPos*res)*invres; 
+
+    	vec2 p1 = pPos;
+    	vec4 r1 = vec4(vec2(step(p1,uv)), 1.0-vec2(step(p1+invres,uv)));
+    	float px1 = r1.x*r1.y*r1.z*r1.w;
+        // float px2 = smoothstep(0.0, 800.0,(1.0/distance(uv, pPos)));//added glow
+        // px1=max(px1,px2);
+        
+	    clr += px1*(sin(time*20.0+i)+1.0);
+        clr *= 1.5;
+    }
+    
+	FragColor = vec4(clr*(1.0-timecycle))*vec4(.3, 0.5, 1.1, 1.0);
+	// if(uv.x < left+100.)
+    //     FragColor = vec4(0.,0.,0.,1.);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Laser Beam in whole Y axis
+
+const FIRE_FS = `#version 300 es
+
+#define MAX_NUM_PARAMS_BUFFER 7
+precision highp float;
+
+// procedural noise from IQ
+vec2 hash(vec2 p)
+{
+    p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
+    return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+}
+
+float noise(in vec2 p)
+{
+    const float K1 = 0.366025404; // (sqrt(3)-1)/2;
+    const float K2 = 0.211324861; // (3-sqrt(3))/6;
+    
+    vec2 i = floor( p + (p.x+p.y)*K1 );
+    vec2 a = p - i + (i.x+i.y)*K2;
+    vec2 o = (a.x>a.y) ? vec2(1.0,0.0) : vec2(0.0,1.0);
+    vec2 b = a - o + K2;
+    vec2 c = a - 1.0 + 2.0*K2;
+    
+    vec3 h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
+    
+    vec3 n = h*h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
+    return dot( n, vec3(100.0) );
+}
+
+float fbm(vec2 uv)
+{
+    float f; float n = 1.4; float a = 0.1;
+    mat2 m = mat2( n, -n, n,  n );
+    f  = 0.5000 * noise(uv); uv = m*uv; f += 0.2500 * noise(uv); uv = m*uv; f += 0.1250 * noise(uv); uv = m*uv; f += 0.0625 * noise(uv); uv = m*uv; f = 0.55 + 0.5*f; 
+    return f;
+}
+
+in mediump vec4 v_Color;
+in mediump vec2 v_Dim;
+in mediump vec2 v_Wpos;
+in mediump float v_ParamsFireShader[MAX_NUM_PARAMS_BUFFER];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+
+out vec4 FragColor;
+
+void main(void)
+{
+    float xdir = v_ParamsFireShader[0];
+    float ydir = v_ParamsFireShader[1];
+    float time = v_ParamsFireShader[2];
+    float xdir2 = v_ParamsFireShader[5];
+    float ydir2 = v_ParamsFireShader[6];
+
+    
+    vec2 dim = vec2(700., 800.0);
+    vec2 mpos = vec2(v_ParamsFireShader[3]/dim.x-.5, 1.-(v_ParamsFireShader[4]/dim.y)-.5); 
+    
+    vec2 uv = gl_FragCoord.xy / dim;
+    
+    vec2 q = uv - vec2(.5, 0.5);
+    q = q - mpos;
+    vec3 col = v_Color.xyz;
+    // float complexity = q.y*12.;
+    float complexity = 2.;
+    float noise = fbm(complexity * q * vec2(1., 0.6) - vec2(0.,time*2.));
+    
+    float num = 20.0;
+    // float s = 0.01 * cos(atan(q.y/q.x)* num);
+    float r = .2;
+    
+    complexity = (length(uv.y-mpos.y)*15.);
+    // float shape = fbm(complexity * q * vec2(1., 0.6) - vec2(0.,time*2.)) * 3.3;
+    float shape = fbm(complexity * q * vec2(1., 0.6) - vec2(xdir,ydir*2.)) * 3.3;
+    float speed = 2.2; // Reversed. Greater = less tail 
+    float d = length(q*shape*vec2(3.4-q.y*4., .45*speed));
+    // float d = pow(max(0.01, length(q*shape*vec2(2.4-q.y*2., .75*speed))),1.);
+    float c1 = shape*d+1.3;
+    
+    q.y *= floor(xdir2);
+    
+    float dirSpeed = 2.;
+    noise = fbm(complexity * q * vec2(4.5, 4.5) - vec2(xdir*dirSpeed,ydir*dirSpeed));
+    // complexity = (length(uv.x-mpos.x)*15.);
+    complexity = 8.;
+    shape = fbm(complexity * q * vec2(2., 2.) - vec2(xdir*dirSpeed,ydir*dirSpeed)) * 4.3;
+    // shape = fbm(complexity * q * vec2(2., 2.) - vec2(xdir*dirSpeed,ydir*dirSpeed)) * 5.3;
+    float ballRadius = 3.5;
+    d = length(q*shape*vec2(ballRadius, ballRadius));
+    c1 = shape*d+1.3;
+   
+    col = vec3(1.5*c1, 1.5*c1*c1*c1, c1*c1*c1*c1*c1*c1*c1) * 0.3;
+    
+    // Color
+    col += smoothstep(r, r+0.08, d);
+    // col += smoothstep(r, r+0.01, d);
+    col *= 2.0 - 4.5 * pow( max( 0., d ), .7 );
+    col *= noise;
+    
+    
+    // col = col.zyx;                                      // Red flame
+    // float a = d * (pow(uv.y, 1.));
+    // FragColor = vec4(mix(vec3(0.),col, noise), 1.);   
+    
+    float alpha = smoothstep(0.0, 1., mix(FragColor.r, FragColor.g, FragColor.r));
+    FragColor = vec4(col, 1.);    
+    // FragColor.a *= alpha;
+    // FragColor = vec4(col, alpha);    
+    FragColor = vec4((col*col*col), alpha);    
+    
+}
+`;
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Whirlpool Particles
+
+const FS_EXPLOSION = `#version 300 es
+    
+#define WHITE vec3(1., 1., 1.)
+#define YELLOW vec3(1., 1., 0.)
+#define PURPLE vec3(0.7, 0., 0.9)
+#define GREEN  vec3(0.3, 0.9, 0.1)
+#define ORANGE vec3(0.9, 0.5, 0.)
+#define GREY   vec3(0.5, 0.5, 0.5)
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Color;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump vec2  v_Scale;
+in mediump float v_RoundCorners;
+in mediump float v_Border;
+in mediump float v_Feather;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];         
+
+out vec4 FragColor;
+
+// Random Function, from 1 val to 2 and from 0.0 to 1.0
+// Subtract 0.5 for a -.5 to .5
+vec2 Hash12(float seed)
+{
+    float x = fract(sin(seed*674.3)*453.2);
+    float y = fract(sin((seed+x)*714.3)*263.2);
+
+    return vec2(x, y);
+}
+
+vec2 Route(vec2 p, float t)
+{
+    float x = sin(t);
+    float y = sin(t);
+    return vec2(x, y);
+}
+
+float Box(vec2 uv, vec2 topLeft, vec2 bottomRight)
+{
+    return (uv.x > topLeft.x && uv.x < bottomRight.x && uv.y < topLeft.y && uv.y > bottomRight.y ? 1. : 0.);
+}
+
+float SdfBox(vec2 p, vec2 size)
+{
+    vec2 d = abs(p) - size;  
+	return smoothstep(.01, .02, length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0));
+	// return length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0);
+}
+
+float SdfBox2(vec2 uv, vec2  p)
+{
+    // return smoothstep(.01, .0, length(max(abs(uv) - p, 0.0)));
+    return length(max(abs(uv) - p, 0.0));
+}
+
+float seed = 0.32; //----------------------------------------------------------starting seed
+const float particles = 9.0; //----------------------------------------------change particle count
+float res = 32.0; //-----------------------------------------------------------pixel resolution
+float gravity = 0.62; //-------------------------------------------------------set gravity
+
+void main(void)
+{
+    float time = v_Params[2];
+    // vec2 resolution = vec2(700./300., 800./300.);
+    vec2 resolution = vec2(300., 300.);
+    vec2 wpos = vec2(v_Wpos.x, 800. - v_Wpos.y); // Reverse top to be 0 and bottom max height
+    // vec2 wpos = v_Wpos; // Reverse top to be 0 and bottom max height
+    float left  = -v_Dim.x; 
+    float right = v_Dim.x; 
+    float bottom   = -v_Dim.y; 
+    float top = v_Dim.y; 
+    
+
+    // vec2 uv = (gl_FragCoord.xy-wpos); // Center = 0.
+	// vec2 uv = (-iResolution.xy + 2.0*gl_FragCoord.xy) / iResolution.y;
+	
+    vec2 uv = (-resolution.xy + 2.0*gl_FragCoord.xy) / resolution.y;
+    float clr = 0.0;  
+    float timecycle = time-floor(time);  
+    seed = (seed+floor(time));
+    
+    //testing
+    float invres=1.0/res;
+    float invparticles = 1.0/particles;
+
+    float k = 1.;
+
+    for( float i=0.0; i<particles; i++ )
+    {
+        float d = 1.-length(uv);
+        float t = fract(time);
+		// seed+=i+tan(t);
+		seed+=i+sqrt(tan((t)));
+        //seed+=(sqrt(t)); // BETTER WHIRLPOOL EFFECT
+		// seed+=(log(t));
+        
+        vec2 tPos = (vec2(sin(seed),cos(seed)))*k*invparticles;
+        // vec2 tPos = (vec2((seed),(seed)))*k*invparticles;
+
+        vec2 pPos = vec2(2.0,2.0);
+        pPos.x= ((tPos.x) * timecycle);
+		pPos.y = -gravity*(timecycle*timecycle)+tPos.y*timecycle+pPos.y;
+        
+        pPos.x += 1.;
+
+        // pPos = floor(pPos*res)*invres; 
+
+    	vec2 p1 = pPos;
+    	// vec4 r1 = vec4(vec2(step(p1,uv)), 1.0-vec2(((p1+invres)*0.001, uv)));
+    	// vec4 r1 = vec4(vec2(step(p1,uv)), 1.0-vec2(step(p1+invres, uv)));
+    	vec4 r1 = vec4(vec2(step(p1,uv)), 1.-vec2(step(p1, uv)));
+    	// vec4 r1 = vec4(vec2(step(p1,uv)), 1.0-vec2(smoothstep(.8, .9, uv)));
+    	
+        float px1 = (r1.x)*(r1.y)*(r1.z)*(r1.w);
+    	// float px1 = d;
+        
+        // float px2 = smoothstep(0.0, 100.001,(1.0/distance(uv, pPos)));//added glow
+        // float px2 = smoothstep(0.0, .1,(1./distance(uv, pPos)*.0001));//added glow
+        float px2 = (1./distance(uv, pPos)*.01);//added glow
+        px1=max(px1,px2);
+        
+	    // clr += px1*(sin(time*2.+i)+1.0);
+	    // clr = min(clr, px1*(sin(t+i)+1.0));
+	    clr += (clr, px1*(sin(t+i)+1.0));
+        // clr *= 2.5;
+        k+=.7; // Larger number = Larger area 
+    }
+    
+	FragColor = vec4(clr*(1.0-timecycle))*vec4(.0, 0.5, 1.1, 1.0);
+	// if(uv.x < left+100.)
+    //     FragColor = vec4(0.,0.,0.,1.);
+}
+`;
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Exploding Balls
+
+const FS_EXPLOSION = `#version 300 es
+    
+#define WHITE vec3(1., 1., 1.)
+#define YELLOW vec3(1., 1., 0.)
+#define PURPLE vec3(0.7, 0., 0.9)
+#define GREEN  vec3(0.3, 0.9, 0.1)
+#define ORANGE vec3(0.9, 0.5, 0.)
+#define GREY   vec3(0.5, 0.5, 0.5)
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Color;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump vec2  v_Scale;
+in mediump float v_RoundCorners;
+in mediump float v_Border;
+in mediump float v_Feather;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];         
+
+out vec4 FragColor;
+
+// Random Function, from 1 val to 2 and from 0.0 to 1.0
+// Subtract 0.5 for a -.5 to .5
+vec2 Hash12(float seed)
+{
+    float x = fract(sin(seed*674.3)*453.2);
+    float y = fract(sin((seed+x)*714.3)*263.2);
+
+    return vec2(x, y);
+}
+float Hash11(float seed)
+{
+    float x = fract(sin(seed*674.3)*453.2);
+    float y = fract(sin((seed)*714.3)*263.2);
+    // float y = fract(((seed)*714.3)*263.2);
+
+    return y;
+}
+
+vec2 Route(vec2 p, float t)
+{
+    float x = sin(t);
+    float y = sin(t);
+    return vec2(x, y);
+}
+
+float Box(vec2 uv, vec2 topLeft, vec2 bottomRight)
+{
+    return (uv.x > topLeft.x && uv.x < bottomRight.x && uv.y < topLeft.y && uv.y > bottomRight.y ? 1. : 0.);
+}
+
+float SdfBox(vec2 p, vec2 size)
+{
+    vec2 d = abs(p) - size;  
+	return smoothstep(.01, .02, length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0));
+	// return length(max(d, vec2(0))) + min(max(d.x, d.y), 0.0);
+}
+
+float SdfBox2(vec2 uv, vec2  p)
+{
+    // return smoothstep(.01, .0, length(max(abs(uv) - p, 0.0)));
+    return length(max(abs(uv) - p, 0.0));
+}
+
+
+
+    float seed = 0.32; //----------------------------------------------------------starting seed
+    const float particles = 90.0; //----------------------------------------------change particle count
+    float res = 832.0; //-----------------------------------------------------------pixel resolution
+    float gravity = 0.82; //-------------------------------------------------------set gravity
+    
+    void main(void)
+    {
+        float time = v_Params[2];
+        // vec2 resolution = vec2(700./300., 800./300.);
+        vec2 resolution = vec2(300., 300.);
+        vec2 uv = (-resolution.xy + 2.0*gl_FragCoord.xy) / resolution.y;
+        // vec2 uv = (-iResolution.xy + 2.0*fragCoord.xy) / iResolution.y;
+
+        float clr = 0.0;  
+        float timecycle = time-floor(time);  
+        seed = (seed+floor(time));
+        
+        //testing
+        float invres=1.0/res;
+        float invparticles = 1.0/particles;
+    
+        float BRICK_POS_X = 1.;
+        
+        for( float i=0.0; i<particles; i+=1.0 )
+        {
+            seed+=i+tan(seed);
+            vec2 tPos = (vec2(cos(seed),sin(seed)))*i*invparticles;
+            
+            vec2 pPos = vec2(0.0,2.0);
+            pPos.x=((tPos.x) * timecycle)+BRICK_POS_X;
+            pPos.y = (-gravity*(timecycle*timecycle)+tPos.y*timecycle+pPos.y)+1.*timecycle;
+            
+            pPos = floor(pPos*res)*invres; 
+    
+            vec2 p1 = pPos;
+            vec4 r1 = vec4(vec2(step(p1,uv)),1.0-vec2(step(p1+invres,uv)));
+            float px1 = r1.x*r1.y*r1.z*r1.w;
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // Exploding Balls. Change the smoothstep
+            float px2 = smoothstep(5.4,20.0,(1.0/distance(uv, pPos+.015)));//added glow
+            px1=max(px1,px2);
+            
+            clr += px1*(sin(time*20.0+i)+1.0);
+        }
+        
+        FragColor = vec4(clr*(1.0-timecycle))*vec4(.3, 0.5, 1.1,1.0);
+    }
+`;
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Explosion-GOOD
+// https://www.shadertoy.com/view/tsVBWK 
+// Substitute buffer A with the code below
+
+#define particles 50.
+vec3 c1 = vec3(0.,0.3,1.);
+vec3 c2 = vec3(1.,0.5,.3);
+
+mat2 rot(float a)
+{
+    float s=sin(a),c=cos(a);
+    return mat2(c,s,-s,c);
+}
+
+
+vec3 noise(float n) {
+	vec3 t = texture(iChannel0,vec2(floor(n)/particles)).xyz;
+    vec3 u = texture(iChannel0,vec2(ceil(n)/particles)).xyz;
+    return mix(t,u,fract(n));
+}
+
+vec3 render_points(vec2 uv) {
+    uv*=.8;
+    vec3 c=vec3(0.);
+	for (float i=0.; i<particles; i++) {
+		//vec3 point=noise(i+floor(iTime/2.)*.1)-.5;
+        vec3 point=noise(i)-.5;
+        float a=4.*smoothstep(3.,9.1,mod(iTime,10.));
+        //point.xz*=rot(a);
+        //point.yz*=rot(a*.2);
+		point=pow(abs(point),vec3(1.3))*sign(point);
+        point*=mod(iTime,2.);
+        float e=pow(mod(dot(point,point)*.05*.01,.1)/.1,1.5);
+        point.xy/=max(0.,1.5+point.z);
+        point.x*=1.5;
+		float l=max(0., .104-distance(uv,point.xy))/.1;
+        vec3 col=mix(c1,c2,e);
+        c+=pow(l,20.)*col*2.;
+		c+=pow(l,40.)*col*5.;
+        c+=pow(max(0.,1.-length(uv)),15.)*.03*c2*pow(mod(10.,10.)*.1,10.);
+	}
+	return c;
+}
+
+
+void mainImage( out vec4 o, vec2 fragCoord )
+{
+	vec2 uv=fragCoord/iResolution.xy;
+    vec3 feedback = texture(iChannel1,uv).rgb;
+    uv-=.5;
+	uv.x*=iResolution.x/iResolution.y;
+    vec3 c=render_points(uv);
+    o=vec4(mix(c,feedback,.8),.1);
+    //o=vec4(feedback,1.);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Explosion-GOOD-2
+// https://www.shadertoy.com/view/tsVBWK 
+// Substitute buffer A with the code below
+
+#define particles 45.
+vec3 c1 = vec3(0.,0.3,1.);
+vec3 c2 = vec3(1.,0.5,.3);
+
+mat2 rot(float a)
+{
+    float s=sin(a),c=cos(a);
+    return mat2(c,s,-s,c);
+}
+
+
+vec3 noise(float n) {
+	vec3 t = texture(iChannel0,vec2(floor(n)/particles)).xyz;
+    vec3 u = texture(iChannel0,vec2(ceil(n)/particles)).xyz;
+    return mix(t,u,fract(n));
+}
+
+vec3 render_points(vec2 uv) {
+    uv*=.8;
+    vec3 c=vec3(0.);
+	for (float i=0.; i<particles; i++) {
+		//vec3 point=noise(i+floor(iTime/2.)*.1)-.5;
+        vec3 point=noise(i)-.5;
+        float a=4.*smoothstep(3.,9.1,mod(iTime,10.));
+        //point.xz*=rot(a);
+        //point.yz*=rot(a*.2);
+		point=pow(abs(point),vec3(1.3))*sign(point);
+        //point*=mod(iTime,2.);   
+        point+=fract(iTime)*.2;
+
+        float e=pow(mod(dot(point,point)*.05*.01,.1)/.1,1.5);
+        //point.xy/=max(0.,1.5+point.z);
+        point.x*=1.5;
+		float l=max(0., .104-distance(uv,point.xy))/.1;
+        vec3 col=mix(c1,c2,e);
+        //c+=pow(l,20.)*col*2.;
+		c+=pow(l,40.)*col*5.;
+        c+=pow(max(0.,1.-length(uv)),15.)*.03*c2*pow(mod(10.,10.)*.1,10.);
+	}
+	return c;
+}
+
+
+void mainImage( out vec4 o, vec2 fragCoord )
+{
+	vec2 uv=fragCoord/iResolution.xy;
+    vec3 feedback = texture(iChannel1,uv).rgb;
+    //uv-=.5;
+	uv.x*=iResolution.x/iResolution.y;
+    vec3 c=render_points(uv);
+    o=vec4(mix(c,feedback,.8),.1);
+    //o=vec4(c,1.);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// NICE round buttons
+
+const FS_EXPLOSION2 = `#version 300 es
+    
+#define BLACK vec4(.0,.0,.0,1.)
+#define MAX_NUM_PARAMS_BUFFER 1
+#define MAX_SPEED 20.
+precision highp float;
+
+// procedural noise from IQ
+vec2 hash(vec2 p)
+{
+    p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
+    return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+}
+
+float noise(in vec2 p)
+{
+    const float K1 = 0.366025404; // (sqrt(3)-1)/2;
+    const float K2 = 0.211324861; // (3-sqrt(3))/6;
+    
+    vec2 i = floor( p + (p.x+p.y)*K1 );
+    vec2 a = p - i + (i.x+i.y)*K2;
+    vec2 o = (a.x>a.y) ? vec2(1.0,0.0) : vec2(0.0,1.0);
+    vec2 b = a - o + K2;
+    vec2 c = a - 1.0 + 2.0*K2;
+    
+    vec3 h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
+    
+    vec3 n = h*h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
+    return dot( n, vec3(100.0) );
+}
+
+float fbm(vec2 uv)
+{
+    float f; float n = 1.4; float a = 0.1;
+    mat2 m = mat2( n, -n, n,  n );
+    f  = 0.5000 * noise(uv); uv = m*uv; f += 0.2500 * noise(uv); uv = m*uv; f += 0.1250 * noise(uv); uv = m*uv; f += 0.0625 * noise(uv); uv = m*uv; f = 0.55 + 0.5*f; 
+    return f;
+}
+
+in mediump vec4  v_Col;
+in mediump vec2  v_Wpos;
+in mediump float v_Time;
+in mediump vec2  v_Dim;
+in mediump float v_ParamsParticlesShader[MAX_NUM_PARAMS_BUFFER]; 
+
+out vec4 FragColor;
+
+void main(void)
+{
+    float time  = v_Time;
+    float revT  = 1.-time; // Reverse time to be from 1 to 0
+    float speed = v_ParamsParticlesShader[0];
+    // speed = min(speed, MAX_SPEED/2.);
+    speed = 10.;
+    
+    vec2 res    = vec2(700., 800.);
+    vec2 dim = v_Dim/res;
+    float ratio = res.x/res.y;
+    res.x /= ratio;
+    vec2 uv  = vec2(gl_FragCoord.x / res.x, gl_FragCoord.y / (res.y));
+    vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+    
+    
+    // float d  = 1.- smoothstep(.0, .3, (length(uv-pos)*10.));
+    // float d  = 1.- smoothstep(.0, dim.x*10., (length(uv-pos)*10.));
+    float d  = 1.- smoothstep(6.*dim.x*revT, 9.3*dim.x*revT, (length(uv-pos)*10.));
+    
+    // float complexity = 10.2;
+    float complexity = 4.2;
+    float noise = fbm(complexity * uv * vec2(4.5, 4.5));
+    // float shape = fbm(complexity * uv * vec2(2., 2.));
+    float shape = fbm(complexity * uv * d);
+    
+    // d *= min(2.9, speed*.5);
+    d *= min(1.0, speed*.5);
+
+    // if(speed*.5>1.4 && complexity < 1.6) complexity *= speed;
+    // d *= revT*(MAX_SPEED-speed)*.1;
+    // complexity *= length(uv-pos)*10.; 
+
+    float c1 = noise*d+1.;
+    // float c1 = shape*d+.5;
+    // float c1 = noise;
+    // vec3 col = vec3(c1, c1*c1*c1, c1*c1*c1*c1*c1*c1*c1) *.3;
+    vec3 col = v_Col.rgb*c1*c1*c1;
+    col *= pow(shape, 3.); // Longer tail = smaller float
+    
+    float r = .3;
+    col += (col, 1.-smoothstep(r, r+.6, d)) * c1 ;
+
+    FragColor = vec4(col*d*revT , d*1.-c1);    
+    // FragColor = vec4(col*revT , 1.-c1);    
+}
+`;
+/////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,71 @@
+typed Arrays views: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+// for transforming all kind of arrays to typed ones. ex. "brIndex = new Array"
+
+typed Arrays methods : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+
+change powUp.type from string to contant number
+
+change all arrays [] to new32FloatArrays or uints
+
+try to make one for loop for drawing everything in render
+
+try to create rectangles with general call to createRect
+
+use return in all if 's (like collisions, for unnecessary for loops)
+
+Display realFps with call to date.now()(instead of for loop)
+
+create unsignedInt or bool type
+
+brake the createData function into seperate for each  type
+
+//if( powUps[i].pos[1] < player[ plIndex ].pos[1] +1 )
+
+make the .split for texts inside CalculateTextDimentions so it finds
+all characters
+
+Make:	bricksCollumsIndexArr	//for collisions
+Make:	bricksRowsIndexArr		//for collisions
+Make:	bricksPowUpsIndexArr 	//for different texturing
+
+
+
+
+
+
+/// STAGES
+
+// Bonus Stages
+
+Rush stages
+
+May have some stages as bonus for extra points
+	the player have to hit a moving target ( or more )
+	there will be a timer. As the time goes by, points to earn by hitting the target will decrease
+	
+Have a shield going up 
+
+Have a stage that balls x pos is controlled by players x pos
+  to avoid -score modifier
+
+have a target with desent score modifier
+  passing by the screen
+	
+	
+	
+	
+-Earth,Jungle,desert
+
+-Ice,Diamond
+-Fire,Dark-red
+	
+
+
+/// PURCHASES
+
+may purchase a save ( for high score achievements )
+may purchase lives
+
+
+/// POWER UPS
+  create a "reduceBallSpeed", for sloMotion.
