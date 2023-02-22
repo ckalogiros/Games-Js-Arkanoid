@@ -10,7 +10,7 @@ import { PrintShaderInfo, PrintAttributes } from './GfxDebug.js'
 /*
  * Initialize default Web Gl Program. 
  */
-export function GfxCreatePorgrams(gl) {
+export function GfxCreatePrograms(gl) {
 
     const progs = g_glPrograms;
 

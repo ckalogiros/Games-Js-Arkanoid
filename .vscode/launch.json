@@ -8,20 +8,11 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "http://localhost:5501/src",
-            "webRoot": "${workspaceFolder}"
+            "url": "http://localhost:5501",
+            "webRoot": "${workspaceFolder}/src"
         },
-        // {
-        //     "name": "GameLaunch",
-        //     "type": "chrome",
-        //     "request": "launch",
-        //     // "program": "app.ts",
-        //     "url": "http://localhost:5500",
-        //     "webRoot": "${workspaceFolder}/src/index.html"
-        // },
+
     ],
-    // "scripts": {
-    //     "debug": "node Main.js"
-    // },
+
     
 }

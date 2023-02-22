@@ -1,7 +1,7 @@
 "use strict";
 import { GfxInitGraphics } from '../Graphics/GfxInit.js'
 import { LoadFontTextures, FontCreateUvMap } from '../Engine/Loaders/Font/LoadFont.js'
-import { CreateScene, LoadScene } from './Scenes.js'
+import { ScenesLoadScene, ScenesCreateAllMeshes, ScenesCreateScene } from './Scenes.js'
 import { Render } from '../Engine/Renderer/Render.js'
 import { SetTimer } from '../Engine/Timer/Timer.js'
 import { AddEventListeners, AddCssUiListeners } from '../Engine/Events/Events.js';
@@ -26,16 +26,22 @@ export function AppInit() {
 
     // * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * * 
     // Graphics Initialization
-    GfxInitGraphics();
+    GfxInitGraphics(); // Creation of some commonly used gl programs(like simple rect rendering and texture rendering)
 
     AddEventListeners();
     AddCssUiListeners();
 
+    // Init all app's meshes
+    ScenesCreateAllMeshes();
     // Create Scene
-    CreateScene(SCENE.startMenu);
-    CreateScene(SCENE.play);
-    LoadScene(SCENE.startMenu);
+    ScenesCreateScene(SCENE.startMenu);
+    // TODO: CONTINUE: create the meshes for the particle system(ballTail etc.)
+
+    // CreateScene(SCENE.startMenu);
+    // CreateScene(SCENE.play);
+    // LoadScene(SCENE.startMenu);
     // LoadScene(SCENE.play);
+
     // * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * * 
     // Display Frames per second
     SetTimer(DisplayFps, TIMER_FPS_TIME, FpsNode);

@@ -8,6 +8,7 @@ import { GlGetProgram } from "../../Graphics/GlProgram.js";
 // import { ParticlesSetUniforms } from "../ParticlesSystem/Particles.js";
 import { BallSetSpeed } from "../../App/Drawables/Ball.js";
 import { PrintVertexBufferAll } from "../../Graphics/GfxDebug.js";
+import { GlFrameBuffer } from "../../Graphics/I_GlProgram.js";
 
 
 const events = []; // Aplication's events array
@@ -63,7 +64,7 @@ export function AddEventListeners(){
         }
         else if (event.key === 'M' || event.key === 'm') {
             console.log('M key pressed');
-            const vb = GlGetVB(GlFrameBuffer.progIdx, GlFrameBuffer.vbIdx);
+            const vb = GlGetVB(GlFrameBuffer.progIdx, GlFrameBuffer.vbIdx); 
             console.log('Framebuffer show = ', vb.show);
         }
         else if (event.key === 'A' || event.key === 'a') {

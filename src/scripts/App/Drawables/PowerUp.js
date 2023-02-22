@@ -158,7 +158,7 @@ export function PowerUpRunAnimation(){
             powUps.powUp[i].mesh.pos[1] += yPosAdvance;
             GlSetWpos(powUps.powUp[i].gfxInfo, powUps.powUp[i].mesh.pos);
             
-            if(powUps.powUp[i].mesh.pos[1] > Viewport.bottom){
+            if(powUps.powUp[i].mesh.pos[1] > Viewport.bottom + 100){
                 powUps.powUp[i].inAnimation = false;
                 powUps.powUp[i].isEmpty = true;
                 DestroyPowerUp(i);

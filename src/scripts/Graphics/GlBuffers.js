@@ -348,7 +348,7 @@ function IndexBufferExists(sceneId, prog) {
     return -1;
 }
 
-
+// TODO: the scene id must be a unique hex for bit masking, so we can & it with programs many scene ids.
 export function GfxSetVbShowFromSceneId(sceneId, flag){
 
     const progs = g_glPrograms;

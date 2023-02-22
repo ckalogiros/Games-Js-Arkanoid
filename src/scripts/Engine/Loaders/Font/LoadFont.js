@@ -5,8 +5,10 @@ import { COMIC_FONT_METRICS } from './Metrics.js'
 
 // export const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/comic_bold_sdf35/comic_bold_sdf35.bmp'
 // export const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/consolas_sdf80/consolas_sdf80.bmp'
-export const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/consolas_sdf35/consolas_sdf35.bmp'
-const COMIC_FONT_METRICS_PATH = '../../../../resources/fonts/comicBold_sdf35/metrics/comicBold_sdf35.txt'
+// export const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/consolas_sdf35/consolas_sdf35.bmp'
+// const COMIC_FONT_METRICS_PATH = '../../../../resources/fonts/comicBold_sdf35/metrics/comicBold_sdf35.txt'
+export const COMIC_FONT_TEXTURE_PATH = '../../../../consolas_sdf35/consolas_sdf35.bmp'
+const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf35/metrics/consolas_sdf35.txt'
 
 const COMIC_BOLD_SDF_110 = 0; // Static Indexes forthe array of fonts
 // The maximum number of characters for ASCII

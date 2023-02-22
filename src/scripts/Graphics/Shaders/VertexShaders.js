@@ -77,7 +77,6 @@ out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];
 
 void main(void) 
 {
-
     vec2 scaled = a_Pos * a_Scale;
     gl_Position = u_OrthoProj * vec4(scaled.x + a_Wpos.x, scaled.y + a_Wpos.y, a_Wpos.z, 1.0);
 

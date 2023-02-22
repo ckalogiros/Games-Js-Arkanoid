@@ -39,10 +39,27 @@ const GAME_STATE = {
 
 };
 
+/**
+ * Create an object:
+*       SCENE:{
+*           menu:{
+*               Start menu,
+*               Stage menu (This is the in-between stages menu),
+*               Options menu,
+*               ...
+*           },
+*           play:{
+*               Stage 1,
+*               Stage 2,
+*               ...
+*           }
+*       }
+ */
+
 const SCENE = {
-    none: 0,
-    startMenu: 1,
-    play: 2,
+    // none: 0,
+    startMenu: 0,
+    play: 1,
     active: {
         id: 0,
         idx: -1,

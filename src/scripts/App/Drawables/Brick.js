@@ -7,6 +7,7 @@ import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } fr
 import { ExplosionsCreateExplosion } from '../../Engine/Events/Explosions.js';
 import { GetRandomPos } from '../../Helpers/Helpers.js';
 import { ParticlesCreateParticleSystem } from '../../Engine/ParticlesSystem/Particles.js';
+import { ScenesLoadScene, StageCompleted } from '../Scenes.js';
 
 
 
@@ -30,14 +31,24 @@ class Bricks{
 
     brick = [];
     count = 0;
+    size = 0;
 }
 
 const bricks = new Bricks;
 let destructionParticles = null;
 
 
+export function BrickGetBricksBuffer() {
+    return bricks.brick;
+}
 export function BrickOnUpdate() {
     BrickUpdateParticles();
+
+    // Stage completed
+    if(bricks.count<=0){
+        // LoadScene(SCENE.startMenu);
+        StageCompleted();
+    }
 }
 export function CreateBrick(scene, pos, dim) {
 
@@ -63,11 +74,12 @@ export function CreateBrick(scene, pos, dim) {
     );
     br.gfxInfo = GlAddMesh(br.sid, br.mesh, 1, scene, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     bricks.brick[bricks.count++] = br;
+    bricks.size++;
     return br;
 }
 export function BrickBallCollision() {
 
-    for(let i = 0; i < bricks.count; i++){
+    for(let i = 0; i < bricks.size; i++){
 
         if(bricks.brick[i].active){
 
@@ -106,10 +118,9 @@ export function BrickCreateParticleSystem(scene){
     const meshAttr = {
         sid: SID_EXPLOSION2,
         col:GREEN,
-        pos: [0,0,5],
+        // pos: [Viewport.bottom+100,0,5],
+        pos: [10000,0,5],
         dim:[28/2,16/2],
-        // dim:[50/2,32/2],
-        // dim:[100/2,72/2],
         scale:[1,1],
         time:0,
         style:null,
@@ -159,7 +170,7 @@ function BrickUpdateParticles(){
             destructionParticles.Move(i, tPos[0], tPos[1]-.9);
         }
     }
-    console.log('------------------------')
+    // console.log('------------------------')
     destructionParticles.Update();
 }
 
@@ -172,6 +183,7 @@ function destroyBrick(idx){
   
     GlSetColorAlpha(bricks.brick[idx].gfxInfo, 0.0);
     bricks.brick[idx].active = false;
+    bricks.count--;
 
     // Set active the program that draws the explosions
     ExplosionsCreateExplosion(bricks.brick[idx].mesh.pos);

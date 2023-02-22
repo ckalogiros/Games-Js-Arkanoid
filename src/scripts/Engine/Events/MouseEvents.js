@@ -1,6 +1,6 @@
 "use strict";
 import { GetCanvasSize } from "../../Graphics/GfxInit.js";
-import { LoadScene } from "../../App/Scenes.js";
+import { ScenesLoadScene } from "../../App/Scenes.js";
 import { OnHover, OnPlayerMove } from "./SceneEvents.js";
 import { GetScene } from "../../App/Scenes.js";
 import { BallIsInStartPos, BallRelease } from "../../App/Drawables/Ball.js";

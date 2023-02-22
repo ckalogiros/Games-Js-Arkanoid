@@ -367,18 +367,8 @@ const FS_DEFAULT_TEXTURE = `#version 300 es
 // `;
 
 const FS_EXPLOSION = `#version 300 es
-    
 #define WHITE  vec4(1., 1., 1., 1.)
-#define YELLOW vec4(1., 1., 0., 1.)
-#define PURPLE vec4(0.7, 0., 0.9, 1.)
-#define GREEN  vec4(0.3, 0.9, 0.1, 1.)
-#define ORANGE vec4(0.9, 0.5, 0., 1)
-#define BLUE   vec4(.0, 0.3, 1., 1.4)
-// #define BLUE   vec4(.3, 0.5, 1.1, 1.0)
-#define GREY   vec4(0.5, 0.5, 0.5, 1.)
-
 #define MAX_NUM_PARAMS_BUFFER 5
-#define MAX_NUM_POSITIONS_BUFFER 5
 
 precision mediump float;
 
@@ -388,16 +378,6 @@ in mediump float v_Time;
 in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
-
-float Hash11(float s){ return fract(tan(s*674.3)*453.2); }
-float Hash21(float s, float t){ return fract(sin(s*674.3)*453.2)+t; }
-
-float seed = 0.3298745; 
-const float particles = 15.0; 
-float res = 320.0; 
-float gravity = 3.8; 
-// float gravity = 2.12; 
-// float gravity = 4.12; 
 
 void main(void)
 {
@@ -409,55 +389,8 @@ void main(void)
     vec2 pos = vec2(v_Wpos.x/resolution.x, 1.-v_Wpos.y/resolution.y);
     float col = 0.0;  
     float t = fract(time);  
-    seed += seed+floor(time);
-    
 
-    //testing
-    float invres=1.0/res;
-    float invparticles = 1.0/particles;
-
-    float BRICK_POS_X = pos.x;
     
-    float k = 1.;
-    // for( float i=0.0; i<particles; i+=1.0 )
-    // {
-    //     /* GOOD COMBBBINATION
-    //         seed+=i+tan(seed);
-    //         seed+=-sin(seed)*.2;
-    //     */
-    //     seed+=i+tan(seed);
-    //     vec2 tPos = vec2(cos(seed),sin(seed))*k*invparticles;
-        
-    //     vec2 pPos = vec2(0.0, pos.y);
-    //     pPos.x=((tPos.x) * t)+BRICK_POS_X;
-    //     pPos.y = (-gravity*(t*t)+tPos.y*t+pPos.y)+1.*t;
-        
-    //     vec2 p1 = pPos;
-    //     vec4 r1 = vec4(vec2(step(pPos,uv)),1.0-vec2(step(pPos+invres,uv)));
-    //     float px1 = r1.x*(r1.y)*(r1.z)*(r1.w);
-    //     float dt = max(.05-t, .01);
-    //     float px2 = smoothstep(dt,.0,(distance(uv, pPos+.015)));//added glow
-    //     // float px2 = smoothstep(10.,245.,(1.0/distance(uv, pPos+.015)));//added glow
-    //     // float px2 = smoothstep(20.,245.,(1.0/distance(uv, pPos+.015)));//added glow
-    //     // float px2 = smoothstep(100.,245.,(1.0/distance(uv, pPos+.015)));//added glow
-    //     // float px2 = smoothstep(1.,145.,(1.0/distance(uv, pPos+.015)*1.9));//added glow
-    //     // float px2 = smoothstep(8.0,60.,(1.0/distance(uv, pPos+.015)*1.9)) ;//added glow
-    //     px1=max(px1,px2);
-        
-    //     // Rate of flickering
-    //     float flicker = 0.;
-    //     col += px1*(sin(time*flicker+i)+1.);
-    //     k += .55;
-    // }
-    
-    // float d = 1.-smoothstep(.01, .15, length(vec2((uv.x-pos.x)*.75, uv.y-(pos.y+t*1.)))*1.7)*1.-(t*8.);
-    // float d = 1.-smoothstep(.01, .15, length(vec2((uv.x-pos.x)*.8, uv.y-(pos.y+t*1.)))*1.7)*1.-(t*6.);
-    // float d = 1.-smoothstep(.01, .25, length(vec2((uv.x-pos.x)*.75, uv.y-(pos.y+t*1.)))*1.7)*1.-(t*8.);
-    // FragColor = vec4(col*(1.0-t*2.2)) * v_Color;
-    // FragColor = vec4(col*(1.0-t*2.2)) * v_Color * (-log(t)) * 1.;
-    // FragColor = vec4(d) + vec4(col*(1.5-t*2.2), .8) * v_Color;
-    
-    // float d = 1.-smoothstep(.0, .13, length(vec2((uv.x-pos.x)*.8, uv.y-(pos.y+t*.3))))*1.6-(t*4.);
     float d = 1.-smoothstep(.0, .13, length(vec2((uv.x-pos.x)*.8, uv.y-(pos.y+t*.3))))*1.6-(t*4.);
     vec4 c = v_Color;
     FragColor = vec4(d) + vec4(col*(1.0-t*2.2)) * c;
@@ -557,6 +490,7 @@ void main(void)
 
     FragColor = vec4(col*d*revT , d*1.-c1);    
     // FragColor = vec4(col*revT , 1.-c1);    
+    // FragColor = vec4(col , 1.);    
 }
 `;
 

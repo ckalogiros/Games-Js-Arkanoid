@@ -62,7 +62,8 @@ class Explosions{
             this.buffer[i] = new Explosion;
 
             // Reserve  shader
-            const ex = RectCreateRect('Explosion' + i, SID_EXPLOSION | SID.EXPLOSION_FS, WHITE, EXPLOSIONS_DIM, [1,1], null, [0, 0, 5], null, 0);
+            // Create a dummy explosion to initialize the Gfx buffers
+            const ex = RectCreateRect('Explosion' + i, SID_EXPLOSION | SID.EXPLOSION_FS, WHITE, EXPLOSIONS_DIM, [1,1], null, [OUT_OF_VIEW, 0, 5], null, 0);
             ex.gfxInfo = GlAddMesh(ex.sid, ex.mesh, 1, SCENE.play, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.buffer[i].gfxInfo = ex.gfxInfo;
         }
@@ -78,6 +79,9 @@ class Explosions{
 }
 
 const explosions = new Explosions;
+export function ExplosionsGet(){
+    return explosions;
+}
 
 // Reserve to a buffer all explosions that can be render at one time(until animation expires).
 export function ExplosionsInit(){

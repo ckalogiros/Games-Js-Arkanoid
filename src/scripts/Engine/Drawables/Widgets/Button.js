@@ -122,8 +122,8 @@ function CreateButtonArea(name, col, dim, pos, charWidth, style, pad) {
 /**
  * Buttons Scale Animation, for hovered buttons.
  * 
- * @param {*} idx 
- * @param {*} scaleFactor 
+ * @param {Int} idx 
+ * @param {Float} scaleFactor 
  */
 export function ButtonRunScaleAnimation(idx, scaleFactor) {
 

@@ -1,6 +1,6 @@
 "use strict";
 import { gfxCtx }                       from './I_WebGL.js'
-import { GfxCreatePorgrams }            from './GfxCreateProgram.js';
+import { GfxCreatePrograms }            from './GfxCreateProgram.js';
 import { GlCreateTexture }              from './GlTextures.js'
 import { COMIC_FONT_TEXTURE_PATH }      from '../Engine/Loaders/Font/LoadFont.js'
 // import { GlUniformsSet } from './GlUniforms.js';
@@ -92,7 +92,7 @@ export function GfxInitGraphics() {
     Viewport.bottom = canvasDim.height;
     Viewport.ratio  = canvasDim.width / canvasDim.height;
     
-    const progs = GfxCreatePorgrams(gfxCtx.gl);
+    const progs = GfxCreatePrograms(gfxCtx.gl);
     dbg.PrintAttributes(gfxCtx.gl);
     const texture = GlCreateTexture('FontConsolasSdf35', gfxCtx.gl, COMIC_FONT_TEXTURE_PATH);
 

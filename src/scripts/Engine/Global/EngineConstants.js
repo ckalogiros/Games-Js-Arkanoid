@@ -20,6 +20,7 @@ const TIMER_FPS_TIME = 1000;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Mesh's Constants */
 const SCALE_DEFAULT = [1, 1];
+const OUT_OF_VIEW = 1000; // Out of screen view in pixels
 /* Mesh's Constants 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

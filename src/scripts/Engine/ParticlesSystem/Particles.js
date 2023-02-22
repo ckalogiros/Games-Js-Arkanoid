@@ -34,6 +34,9 @@ class Particles{
             if( this.buffer[i].isAlive){
                 if( this.buffer[i].timer.t >=  this.buffer[i].timer.duration){
                     this.buffer[i].isAlive = false;
+                    // Set the wpos far from screen view, so the dead particle does not interact.
+                    // GlSetWpos(this.buffer[i].gfxInfo,     this.buffer[i].mesh.pos);
+                    GlSetWpos(this.buffer[i].gfxInfo,     [Viewport.bottom+100, 0]);
                 }
                 else{
                     GlSetWpos(this.buffer[i].gfxInfo,     this.buffer[i].mesh.pos);

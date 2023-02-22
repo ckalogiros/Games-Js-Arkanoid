@@ -107,7 +107,8 @@ export function BallsInit(sceneId){
     style.roundCorner = radius - style.feather;
     const sid = SID_DEFAULT;
     let color = [1,1,1,1.0];
-    let pos   = [Viewport.width / 2, Viewport.bottom - 82, 2];
+    // let pos   = [Viewport.width / 2, Viewport.bottom - 82, 2];
+    let pos   = [OUT_OF_VIEW, Viewport.bottom - 82, 2];// Set the pos of every un-rendered ball out of view
     let isFree = false;
     
     for(let i = 0; i < MAX_BALLS_COUNT; i++){
@@ -123,6 +124,7 @@ export function BallsInit(sceneId){
             4, // Ball speed
             isFree,
         );
+
         balls[i].gfxInfo = GlAddMesh(balls[i].sid, balls[i].mesh, 1, sceneId, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     
         // Store to local compilation unit(mainBall and balls[])
@@ -531,6 +533,8 @@ export function BallCreateTail(scene){
     }
     const numParticles = 28;
     ballTail = ParticlesCreateParticleSystem(meshAttr, timerAttr, numParticles, scene, 'Ball Tail');
+
+    return ballTail;
 }
 
 // export function BallUpdateTail(){
