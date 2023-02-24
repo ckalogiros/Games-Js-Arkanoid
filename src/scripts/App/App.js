@@ -35,12 +35,12 @@ export function AppInit() {
     ScenesCreateAllMeshes();
     // Create Scene
     ScenesCreateScene(SCENE.startMenu);
-    // TODO: CONTINUE: create the meshes for the particle system(ballTail etc.)
+    ScenesCreateScene(SCENE.play);
+    // TODO: CONTINUE: Create a gfxBuffers for each scene
+    ScenesLoadScene(SCENE.startMenu);
+    // TODO: CONTINUE: Set the update() in render to update all meshes throug Scene, 
+    // so it can check only for events of meshes that exist in the current scene
 
-    // CreateScene(SCENE.startMenu);
-    // CreateScene(SCENE.play);
-    // LoadScene(SCENE.startMenu);
-    // LoadScene(SCENE.play);
 
     // * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * * 
     // Display Frames per second

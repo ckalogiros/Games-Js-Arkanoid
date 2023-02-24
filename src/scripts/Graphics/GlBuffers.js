@@ -34,7 +34,7 @@ function GlSetReservedBuffer(gfxInfo){
 }
 
 
-export function GlCreateReservedBuffer(sid, sceneId, vbName){
+export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
 
     const progs = g_glPrograms;
     const gfxInfo = new GfxInfoMesh; 
@@ -57,7 +57,7 @@ export function GlCreateReservedBuffer(sid, sceneId, vbName){
         progs[progIdx].vertexBuffer[vbIdx] = new VertexBuffer;  
         const vb = progs[progIdx].vertexBuffer[vbIdx];  
         vb.name = vbName; 
-        vb.sceneId = sceneId; 
+        vb.sceneIdx = sceneIdx; 
         vb.idx = vbIdx;
         
         const vao = gfxCtx.gl.createVertexArray();
@@ -88,7 +88,7 @@ export function GlCreateReservedBuffer(sid, sceneId, vbName){
         gfxInfo.vb.buffer        = vb.buffer;
         gfxInfo.vb.start         = start;
         gfxInfo.vb.count         = 0;
-        gfxInfo.sceneId          = sceneId;
+        gfxInfo.sceneIdx          = sceneIdx;
         gfxInfo.sid              = sid;
 
         progs[progIdx].isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
@@ -103,7 +103,7 @@ export function GlCreateReservedBuffer(sid, sceneId, vbName){
             progs[progIdx].indexBuffer[vbIdx] = new IndexBuffer;
             const ib = progs[progIdx].indexBuffer[vbIdx];
             ib.name = dbg.GetShaderTypeId(sid);
-            ib.sceneId = sceneId;
+            ib.sceneIdx = sceneIdx;
             ib.buffer = gfxCtx.gl.createBuffer();
             gfxCtx.gl.bindBuffer(gfxCtx.gl.ELEMENT_ARRAY_BUFFER, ib.buffer);
             ib.data = new Uint16Array(MAX_INDEX_BUFFER_COUNT);
@@ -132,7 +132,7 @@ export function GlCreateReservedBuffer(sid, sceneId, vbName){
     return gfxInfo;
 }
 
-export function GlAddMesh(sid, mesh, numFaces, sceneId, addNewGlBuffer, addToSpecificGlBuffer) {
+export function GlAddMesh(sid, mesh, numFaces, sceneIdx, addNewGlBuffer, addToSpecificGlBuffer) {
     
     const progs = g_glPrograms;
     const gfxInfo = new GfxInfoMesh; 
@@ -152,7 +152,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneId, addNewGlBuffer, addToSpe
     if(addToSpecificGlBuffer !== INT_NULL)
         vbIdx = addToSpecificGlBuffer;
     else
-        vbIdx = VertexBufferExists(sceneId, progs[progIdx])
+        vbIdx = VertexBufferExists(sceneIdx, progs[progIdx])
     let vb = null;
     let ib = null;
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -164,7 +164,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneId, addNewGlBuffer, addToSpe
             progs[progIdx].vertexBuffer[vbIdx] = new VertexBuffer;  
             vb = progs[progIdx].vertexBuffer[vbIdx];  
             vb.name = dbg.GetShaderTypeId(sid); 
-            vb.sceneId = sceneId; 
+            vb.sceneIdx = sceneIdx; 
             vb.idx = vbIdx;
             
             const vao = gfxCtx.gl.createVertexArray();
@@ -202,7 +202,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneId, addNewGlBuffer, addToSpe
     gfxInfo.vb.buffer        = vb.buffer;
     gfxInfo.vb.start         = start;
     gfxInfo.vb.count         = count;
-    gfxInfo.sceneId          = sceneId;
+    gfxInfo.sceneIdx          = sceneIdx;
     gfxInfo.sid              = sid;
 
 
@@ -255,14 +255,14 @@ export function GlAddMesh(sid, mesh, numFaces, sceneId, addNewGlBuffer, addToSpe
         if(addToSpecificGlBuffer !== INT_NULL)
             ibIdx = addToSpecificGlBuffer;
         else
-            ibIdx = IndexBufferExists(sceneId, progs[progIdx]);
+            ibIdx = IndexBufferExists(sceneIdx, progs[progIdx]);
         if (ibIdx < 0 || addNewGlBuffer) {
 
                 ibIdx = progs[progIdx].indexBufferCount++;
                 progs[progIdx].indexBuffer[vbIdx] = new IndexBuffer;
                 ib = progs[progIdx].indexBuffer[vbIdx];
                 ib.name = dbg.GetShaderTypeId(sid);
-                ib.sceneId = sceneId;
+                ib.sceneIdx = sceneIdx;
 
                 ib.buffer = gfxCtx.gl.createBuffer();
                 gfxCtx.gl.bindBuffer(gfxCtx.gl.ELEMENT_ARRAY_BUFFER, ib.buffer);
@@ -325,23 +325,23 @@ function ProgramExists(sid, progs) {
 
 /**
  * 
- * @param {*} sceneId : The id for the scene the Vertex Buffer belongs to.
+ * @param {*} sceneIdx : The id for the scene the Vertex Buffer belongs to.
  * @param {*} prog : WebGl program
  * @returns 
  */
-function VertexBufferExists(sceneId, prog) {
+function VertexBufferExists(sceneIdx, prog) {
 
     for (let i = 0; i < prog.vertexBufferCount; i++) {
-        if (sceneId === prog.vertexBuffer[i].sceneId)
+        if (sceneIdx === prog.vertexBuffer[i].sceneIdx)
             return i;
 
     }
     return -1;
 }
-function IndexBufferExists(sceneId, prog) {
+function IndexBufferExists(sceneIdx, prog) {
 
     for (let i = 0; i < prog.indexBufferCount; i++) {
-        if (sceneId === prog.indexBuffer[i].sceneId)
+        if (sceneIdx === prog.indexBuffer[i].sceneIdx)
             return i;
 
     }
@@ -349,13 +349,13 @@ function IndexBufferExists(sceneId, prog) {
 }
 
 // TODO: the scene id must be a unique hex for bit masking, so we can & it with programs many scene ids.
-export function GfxSetVbShowFromSceneId(sceneId, flag){
+export function GfxSetVbShowFromSceneId(sceneIdx, flag){
 
     const progs = g_glPrograms;
 
     for (let i = 0; i < progs.length; i++) {
         for (let j = 0; j < progs[i].vertexBufferCount; j++) {
-            if (sceneId === progs[i].vertexBuffer[j].sceneId){
+            if (sceneIdx === progs[i].vertexBuffer[j].sceneIdx){
                 progs[i].vertexBuffer[j].show = flag;
                 progs[i].indexBuffer[j].show  = flag;
             }

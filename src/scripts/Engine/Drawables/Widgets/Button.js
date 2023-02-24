@@ -10,8 +10,8 @@ import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } fr
 const BUTTON_AREA_SHADER_TYPE = SID_DEFAULT;
 
 
-
-class Button {
+// Exporting is only for the class type(to compare with the instanceof operator)
+export class Button {
 
     constructor(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
         this.name = name;
@@ -26,7 +26,7 @@ class Button {
     area = null; // Button's rect area.
     text = null; // Button's text faces.
 
-    state = {         // The state in which a button may be.
+    state = { // The state in which a button may be.
         inHover: false,
         inAnimation: false,
         inUpScale: false,

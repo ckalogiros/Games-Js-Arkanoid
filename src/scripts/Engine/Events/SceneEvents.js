@@ -35,7 +35,7 @@ export function OnHover(scene, mouse) {
         }
     }
 
-    // If none of the meshes are hovered, update the global hovered pointer(pointer to hovered mesh)
+    // If none of the meshes are hovered, update the global state (refference to hovered mesh)
     if (!anyMeshHovered)
         g_state.hovered = null;
 }

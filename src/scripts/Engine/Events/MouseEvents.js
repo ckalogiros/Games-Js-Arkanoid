@@ -2,7 +2,7 @@
 import { GetCanvasSize } from "../../Graphics/GfxInit.js";
 import { ScenesLoadScene } from "../../App/Scenes.js";
 import { OnHover, OnPlayerMove } from "./SceneEvents.js";
-import { GetScene } from "../../App/Scenes.js";
+import { ScenesGetScene } from "../../App/Scenes.js";
 import { BallIsInStartPos, BallRelease } from "../../App/Drawables/Ball.js";
 
 
@@ -64,13 +64,13 @@ export function OnMouseMove(event) {
     mouse.xdiff = mouse.x - mouse.xprev;
     mouse.ydiff = -(mouse.y - mouse.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
-    const scene = GetScene(SCENE.active.idx);
+    const scene = ScenesGetScene(SCENE.active.idx);
 
     if(scene){
         OnHover(scene, mouse);
     }
 
-    if (scene.sceneId === SCENE.play) {
+    if (scene.sceneIdx === SCENE.play) {
         // Move Player 
         OnPlayerMove(mouse.x, mouse.xdiff);
     }
@@ -92,18 +92,18 @@ export function OnMouseClick(event) {
         switch (g_state.hovered.name) {
             // Load Start Menu Scene on pressing the 'Back' button
             case 'ReturnBtn': {
-                LoadScene(SCENE.startMenu);
+                ScenesLoadScene(SCENE.startMenu);
                 break;
             }
             case 'PlayBtn': {
-                LoadScene(SCENE.play);
+                ScenesLoadScene(SCENE.play);
                 break;
             }
         }
     }
 
     // If mouse clicked and ball is not moving(start of a stage), release the ball
-    else if (BallIsInStartPos() && SCENE.active.id === SCENE.play &&
+    else if (BallIsInStartPos() && SCENE.active.idx === SCENE.play &&
         mouse.x > Viewport.left && mouse.x < Viewport.right && 
         mouse.y > Viewport.top && mouse.y < Viewport.bottom)
         BallRelease();

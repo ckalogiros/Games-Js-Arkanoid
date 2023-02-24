@@ -7,11 +7,11 @@ import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } fr
 import { ExplosionsCreateExplosion } from '../../Engine/Events/Explosions.js';
 import { GetRandomPos } from '../../Helpers/Helpers.js';
 import { ParticlesCreateParticleSystem } from '../../Engine/ParticlesSystem/Particles.js';
-import { ScenesLoadScene, StageCompleted } from '../Scenes.js';
+import { ScenesLoadScene } from '../Scenes.js';
 
 
-
-class Brick {
+// Exporting is only for the class type(to compare with the instanceof operator)
+export class Brick {
 
     constructor(sid, col, dim, scale, tex, pos, style) {
         this.sid = sid;
@@ -46,8 +46,8 @@ export function BrickOnUpdate() {
 
     // Stage completed
     if(bricks.count<=0){
-        // LoadScene(SCENE.startMenu);
-        StageCompleted();
+        ScenesLoadScene(SCENE.startMenu);
+        // StageCompleted();
     }
 }
 export function CreateBrick(scene, pos, dim) {

@@ -16,7 +16,8 @@ const SCORE_FOR = {
     brick: 10, 
 };
 
-class UiTextVariable {
+// Exporting is only for the class type(to compare with the instanceof operator)
+export class UiTextVariable {
 
     constructor(style) {
         this.style.pad = style.pad;
@@ -38,9 +39,13 @@ class UiTextVariable {
 
 const uiTexts = [];
 
+export function UiGet(){
+    return uiTexts;
+}
 
 
-function UiCreate(sceneId, constTextStr, variTextStr, constTextcol, variTextcol, pos, fontSize, style, Align) {
+
+function UiCreate(sceneIdx, constTextStr, variTextStr, constTextcol, variTextcol, pos, fontSize, style, Align) {
 
     const uiText = new UiTextVariable(style);
 
@@ -55,15 +60,14 @@ function UiCreate(sceneId, constTextStr, variTextStr, constTextcol, variTextcol,
     // Add constText meshes to Gl buffers 
     for (let i = 0; i < uiText.constText.letters.length; i++) {
         // Update the unchanged text's x pos to fit with the variable one
-        // uiText.constText.letters[i].pos[0] -= uiText.variText.dim[0] + pad;
         // Add to Gl buffers
-        uiText.constText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.constText.letters[i], 1, sceneId, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        uiText.constText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.constText.letters[i], 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     }
 
     for (let i = 0; i < uiText.variText.letters.length; i++) {
         // Update the unchanged text's x pos to fit with the variable one
         // uiText.variText.letters[i].pos[0] += uiText.variText.dim[0] + pad;
-        uiText.variText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.variText.letters[i], 1, sceneId, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        uiText.variText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.variText.letters[i], 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     }
 
     // Move the uiText val to the right so it does not overlap withe the ui text 'uiText:'
@@ -103,7 +107,7 @@ export function UiUpdate(uiTextIndex, val){
     }
 }
 
-export function UiCreateScore(sceneId) {
+export function UiCreateScore(sceneIdx) {
     
     const pos = [30, GAME_AREA_TOP + 20, 4];
     const fontSize = 7;
@@ -114,10 +118,10 @@ export function UiCreateScore(sceneId) {
         feather: 12,
     };
     
-    uiTexts[UI_TEXT_INDEX.SCORE] = UiCreate(sceneId, 'Score: ', '0', WHITE, YELLOW_229_206_0, pos, fontSize, style, ALIGN.LEFT | ALIGN.TOP);
+    uiTexts[UI_TEXT_INDEX.SCORE] = UiCreate(sceneIdx, 'Score: ', '0', WHITE, YELLOW_229_206_0, pos, fontSize, style, ALIGN.LEFT | ALIGN.TOP);
 
 }
-export function UiUpdateScore(sceneId) {
+export function UiUpdateScore(sceneIdx) {
 
     let score = uiTexts[UI_TEXT_INDEX.SCORE].val;
     score = score + (SCORE_FOR.brick * uiTexts[UI_TEXT_INDEX.SCORE_MOD].val);
@@ -129,7 +133,7 @@ export function UiUpdateScore(sceneId) {
         uiTexts[UI_TEXT_INDEX.SCORE].variText.letters[i].tex = uvs;
     }
 }
-export function UiCreateScoreModifier(sceneId) {
+export function UiCreateScoreModifier(sceneIdx) {
 
     const pos = [-70, -20, 6];
     const fontSize = 7;
@@ -140,9 +144,9 @@ export function UiCreateScoreModifier(sceneId) {
         feather: 12,
     };
 
-    uiTexts[UI_TEXT_INDEX.SCORE_MOD] = UiCreate(sceneId, 'Score mod x', '0', WHITE, MAGENTA_RED, pos, fontSize, style, ALIGN.RIGHT | ALIGN.BOTTOM);
+    uiTexts[UI_TEXT_INDEX.SCORE_MOD] = UiCreate(sceneIdx, 'Score mod x', '0', WHITE, MAGENTA_RED, pos, fontSize, style, ALIGN.RIGHT | ALIGN.BOTTOM);
 }
-export function UiCreateLives(sceneId) {
+export function UiCreateLives(sceneIdx) {
 
     const pos = [30, -20, 2];
     const fontSize = 7;
@@ -153,7 +157,7 @@ export function UiCreateLives(sceneId) {
         feather: 12,
     };
 
-    uiTexts[UI_TEXT_INDEX.LIVES] = UiCreate(sceneId, 'Lives: ', '3', WHITE, MAGENTA_RED, pos, fontSize, style, ALIGN.LEFT | ALIGN.BOTTOM);
+    uiTexts[UI_TEXT_INDEX.LIVES] = UiCreate(sceneIdx, 'Lives: ', '3', WHITE, MAGENTA_RED, pos, fontSize, style, ALIGN.LEFT | ALIGN.BOTTOM);
 }
 
 
@@ -191,7 +195,7 @@ export function UiInitMods(){
         mods[i].isEmpty = true;
 
         for (let j = 0; j < mods[i].text.letters.length; j++) {
-            mods[i].text.letters[j].gfxInfo = GlAddMesh(mods[i].text.sid, mods[i].text.letters[j], 1, gfxInfo.sceneId, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+            mods[i].text.letters[j].gfxInfo = GlAddMesh(mods[i].text.sid, mods[i].text.letters[j], 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
         }
     }
     // Connect the font texture with the vertex buffer for text rendering. 

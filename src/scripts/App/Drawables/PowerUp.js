@@ -67,8 +67,8 @@ export function PowerUpInit(){
 
         powUps.powUp[i] = new PowerUp(sid, TRANSPARENT, [28, 14, 0], [1,1], null,  [0,0,3], style);
         powUps.powUp[i].isEmpty = true;
-        // powUps.powUp[i].gfxInfo = GlAddMesh(SID_DEFAULT, powUps.powUp[i].mesh, 1, gfxInfo.sceneId, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
-        powUps.powUp[i].gfxInfo = GlAddMesh(powUps.powUp[i].sid, powUps.powUp[i].mesh, 1, gfxInfo.sceneId, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+        // powUps.powUp[i].gfxInfo = GlAddMesh(SID_DEFAULT, powUps.powUp[i].mesh, 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+        powUps.powUp[i].gfxInfo = GlAddMesh(powUps.powUp[i].sid, powUps.powUp[i].mesh, 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
     }
     
 }

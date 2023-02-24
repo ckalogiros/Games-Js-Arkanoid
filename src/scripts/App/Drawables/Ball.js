@@ -18,8 +18,8 @@ const BALL_MAX_SPEED = 12;
 const BALL_MIN_SPEED = 1.2;
 
 
-
-class Ball {
+// Exporting is only for the class type(to compare with the instanceof operator)
+export class Ball {
     constructor(sid, col, dim, scale, tex, pos, style, speed, isFree) {
         this.sid = sid;
         this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
@@ -95,7 +95,7 @@ export function BallSetSpeed(val){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Functions */
 
-export function BallsInit(sceneId){
+export function BallsInit(sceneIdx){
 
     const radius = 15.0;
     const style = {
@@ -125,7 +125,7 @@ export function BallsInit(sceneId){
             isFree,
         );
 
-        balls[i].gfxInfo = GlAddMesh(balls[i].sid, balls[i].mesh, 1, sceneId, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        balls[i].gfxInfo = GlAddMesh(balls[i].sid, balls[i].mesh, 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     
         // Store to local compilation unit(mainBall and balls[])
         if(!mainBall){ // Case the main ball is created
@@ -141,6 +141,8 @@ export function BallsInit(sceneId){
         }
     }
     blr = balls[0].mesh.dim[0]; // Cache ball radius
+
+    return balls;
 }
 
 export function BallCreate(pos) {

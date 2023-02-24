@@ -1,5 +1,5 @@
 "use strict";
-import { LoadScene } from '../App/Scenes.js'
+import { ScenesLoadScene } from '../App/Scenes.js'
 import { CreateBrick } from '../Drawables/Brick.js'
 
 
@@ -79,7 +79,7 @@ export function OnMouseClick(event) {
 
           case PLAY_TEXT: // 0
             g_text[OPTIONS_TEXT].display = false;
-            LoadScene(case_startGame);
+            ScenesLoadScene(case_startGame);
             break;
 
           case UPGRADE_TEXT: // 1
@@ -150,7 +150,7 @@ export function OnMouseClick(event) {
         else
           g_text[i].display = false;
       }
-      LoadScene(case_mainMenu);
+      ScenesLoadScene(case_mainMenu);
 
     }
   }
@@ -174,7 +174,7 @@ export function OnMouseClick(event) {
             clearText();
             clearButtons();
             // CreateStartMenu( );
-            LoadScene(case_mainMenu);
+            ScenesLoadScene(case_mainMenu);
             return;
           }
           else if (i === 1) {

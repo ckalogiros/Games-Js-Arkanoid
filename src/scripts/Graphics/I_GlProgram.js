@@ -4,7 +4,7 @@ import { Mat4Orthographic } from '../Helpers/Math/Matrix.js'
 export class VertexBuffer {
 
 	name = '';
-	sceneId = INT_NULL;
+	sceneIdx = INT_NULL;
 
 	buffer = null;
 	data = [];
@@ -132,7 +132,7 @@ export class GlProgram {
 
 export class GfxInfoMesh {
 
-	sceneId = INT_NULL;
+	sceneIdx = INT_NULL;
 	sid = INT_NULL;
 	numFaces = 0;
 	vertsPerRect = 0;

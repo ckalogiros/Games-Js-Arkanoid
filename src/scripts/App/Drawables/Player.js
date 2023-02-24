@@ -6,7 +6,8 @@ import { BallPlayerCollision } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
 
 
-class Player {
+// Exporting is only for the class type(to compare with the instanceof operator)
+export class Player {
 
     constructor(sid, col, dim, scale, tex, pos, style, speed) {
         this.sid = sid;

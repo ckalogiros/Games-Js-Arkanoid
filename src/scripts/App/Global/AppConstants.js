@@ -60,10 +60,7 @@ const SCENE = {
     // none: 0,
     startMenu: 0,
     play: 1,
-    active: {
-        id: 0,
-        idx: -1,
-    },
+    active: { idx: -1 },
     testButtons: 10,
 };
 
