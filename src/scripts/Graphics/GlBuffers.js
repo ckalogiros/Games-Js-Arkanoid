@@ -6,7 +6,7 @@ import { VertexBuffer, IndexBuffer } from './I_GlProgram.js'
 import { GlFrameBuffer }        from './I_GlProgram.js'
 
 // For Debuging
-import * as dbg from './GfxDebug.js'
+import * as dbg from './Debug/GfxDebug.js'
 import { GlCreateProgram } from './GfxCreateProgram.js'
 import { GlCreateTexture, GlTexture, glTextures, LoadTexture, StoreGlobalTextureIndex } from './GlTextures.js';
 
@@ -95,7 +95,7 @@ export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * Add Mesh to Index Buffer
-         * TODO: Pt this some place else, but keep  CreateIndices() here
+         * TODO: Put this some place else, but keep  CreateIndices() here
          */
         if (sid & SID.INDEXED || ((sid & SID.INDEXED) && addNewGlBuffer)) {
 
@@ -123,7 +123,7 @@ export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
         progs[progIdx].CameraUpdate(gfxCtx.gl);
         
     } else { // Else create new program
-        alert('Gl Program Does not Exist!. See: GlBuffers.js');
+        // alert('Gl Program Does not Exist!. See: GlBuffers.js');
     }
     // dbg.PrintAttributes(gfxCtx.gl, progs[progIdx]);
 
@@ -132,7 +132,7 @@ export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
     return gfxInfo;
 }
 
-export function GlAddMesh(sid, mesh, numFaces, sceneIdx, addNewGlBuffer, addToSpecificGlBuffer) {
+export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffer, addToSpecificGlBuffer) {
     
     const progs = g_glPrograms;
     const gfxInfo = new GfxInfoMesh; 
@@ -163,7 +163,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, addNewGlBuffer, addToSp
             vbIdx = progs[progIdx].vertexBufferCount++; 
             progs[progIdx].vertexBuffer[vbIdx] = new VertexBuffer;  
             vb = progs[progIdx].vertexBuffer[vbIdx];  
-            vb.name = dbg.GetShaderTypeId(sid); 
+            vb.debug.sidName = dbg.GetShaderTypeId(sid); 
             vb.sceneIdx = sceneIdx; 
             vb.idx = vbIdx;
             
@@ -186,6 +186,9 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, addNewGlBuffer, addToSp
         gfxCtx.gl.bindVertexArray(vb.vao) // TODO: bindVertexArray() is called twice
         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.buffer) 
     }
+
+    AddUnique(vb.debug.meshesNames, meshName); 
+
     // Cash values
     const vertsPerRect = progs[progIdx].shaderInfo.verticesPerRect;
     const attribsPerVertex = progs[progIdx].shaderInfo.attribsPerVertex;
@@ -506,68 +509,15 @@ export function GlCreateFrameBuffer(gl){
     return GlFrameBuffer;
 }
 
-// export function GlCreateFrameBuffer(gl){
-
-//     const fb = gl.createFramebuffer();
-//     if(!fb){ alert('Could not create FrameBuffer.') }
-
-//     const texture = new GlTexture; 
-//     texture.idx = glTextures.count++;
-//     glTextures.texture[texture.idx] = texture;
-//     StoreGlobalTextureIndex('FrameBufferTexture0', texture.idx);
-
-//     texture.name            = 'FrameBufferTexture0';
-//     texture.texId           = gl.TEXTURE0; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
-//     // texture.idx             = 1;
-//     texture.level           = 0;
-// 	texture.internalFormat  = gl.RGBA;
-// 	texture.srcFormat       = gl.RGBA;
-// 	texture.srcType         = gl.UNSIGNED_BYTE;
-
-//     const data = null; // No data yet. E.x. For FrameBuffers.
-//     const border = 0;
-//     texture.width  = 200;
-//     texture.height = 200;
-//     // gl.activeTexture(texture.texId);
-//     gl.activeTexture(gl.TEXTURE0);
-//     gl.bindTexture(gl.TEXTURE_2D, texture.tex);
-//     Texture.boundTexture = texture.idx;
-//     gl.texImage2D(gl.TEXTURE_2D, texture.level,  gl.RGBA,
-//         texture.width, texture.height, border, gl.RGBA, gl.UNSIGNED_BYTE, data);
-//     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-//     texture.tex = gl.createTexture();
-//     if(!texture.tex)
-//         alert('Could not create Texture');
-
-//     const depthBuffer = gl.createRenderbuffer();
-//     if(!depthBuffer){
-//         console.log('Can not initialize depthBuffer')
-//     }
-//     gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-//     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, texture.width, texture.height);
-
-//     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-//     // gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, texture.tex, texture.level);
-//     gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, texture.tex, texture.level);
-//     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
-
-//     GlFrameBuffer.buffer    = fb;
-//     GlFrameBuffer.tex       = texture.tex;
-//     GlFrameBuffer.texId     = texture.texId;
-//     GlFrameBuffer.texIdx    = texture.idx;
-//     GlFrameBuffer.texWidth  = texture.width;
-//     GlFrameBuffer.texHeight = texture.height;
-
-//     let e = gl.checkFramebufferStatus(gl.FRAMEBUFFER, null);
-//     if(e !== gl.FRAMEBUFFER_COMPLETE){
-//         console.log('((((((((((((((((((((((((((((((((((((((((( FremaBuffer: ' + e.toString() );
-//     }
-    
-//     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-//     gl.bindTexture(gl.TEXTURE_2D, null);
-//     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
 
-//     // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-//     return GlFrameBuffer;
-// }
+// Helpers
+function AddUnique(strArr, str){
+    for(let i=0; i<strArr.length; i++){
+        if(strArr[i] === str){
+            return;
+        }
+    }
+    //Else if the string does not exist, add it
+    strArr.push(str);
+}

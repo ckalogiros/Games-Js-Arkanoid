@@ -10,7 +10,7 @@ import { UiInitMods } from './Drawables/Ui/Ui.js';
 import { PowerUpInit } from './Drawables/PowerUp.js';
 
 // Debug-Print
-import { PrintBuffersAll } from '../Graphics/GfxDebug.js';
+import { PrintBuffersAll } from '../Graphics/Debug/GfxDebug.js';
 
 
 
@@ -31,11 +31,16 @@ export function AppInit() {
     AddEventListeners();
     AddCssUiListeners();
 
+
+    AppInitReservedGlBuffers();
+
     // Init all app's meshes
     ScenesCreateAllMeshes();
     // Create Scene
     ScenesCreateScene(SCENE.startMenu);
-    ScenesCreateScene(SCENE.play);
+    ScenesCreateScene(SCENE.startStage);
+    ScenesCreateScene(SCENE.finishStage);
+    ScenesCreateScene(SCENE.stage);
     // TODO: CONTINUE: Create a gfxBuffers for each scene
     ScenesLoadScene(SCENE.startMenu);
     // TODO: CONTINUE: Set the update() in render to update all meshes throug Scene, 
@@ -49,7 +54,6 @@ export function AppInit() {
     PrintBuffersAll();
     // setTimeout(()=>{g_state.game.paused = true}, 723);
 
-    AppInitReservedGlBuffers();
 
     // Render
     Render();

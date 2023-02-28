@@ -33,6 +33,10 @@ export function DarkenColor(color, darkenAmt) {
     return darkerColor;
 }
 
+export function DimColor(col, dimAmt){
+    return [col[0]*dimAmt, col[1]*dimAmt, col[2]*dimAmt, col[3]];
+}
+
 export function GetRandomColor(){
     return COLOR_ARRAY[GetRandomInt(0, COLOR_ARRAY.length)];
 }

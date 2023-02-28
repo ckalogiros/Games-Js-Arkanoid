@@ -1,10 +1,9 @@
 "use strict";
-import { PlayerPowerUpCollision, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
-import { BallOnUpdate } from "../../App/Drawables/Ball.js";
+import { PlayerCreateDimColorAnimation, PlayerPowerUpCollision, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
+import { BallCreateDimColorAnimation, BallCreateSlowSpeedAnimation, BallOnUpdate } from "../../App/Drawables/Ball.js";
 import { PlayerBallCollision } from "../../App/Drawables/Player.js";
 import { BrickBallCollision, BrickOnUpdate } from "../../App/Drawables/Brick.js";
 import { ExplosionsUpdate } from "./Explosions.js";
-// import { ParticlesCreateParticle } from "../ParticlesSystem/Particles.js";
 
 
 /**
@@ -49,16 +48,47 @@ export function OnPlayerMove(mousex, mouseXdir) {
     UpdatePlayerPosX(mousex, mouseXdir);
 }
 
-// export function OnBallMove() {
-// }
 
 export function CheckCollisions() {
-    PlayerBallCollision();
-    BrickBallCollision();
-    PlayerPowerUpCollision();
-    ExplosionsUpdate();
+    if(SCENE.active.idx === SCENE.stage){
+        PlayerBallCollision();
+        BrickBallCollision();
+        PlayerPowerUpCollision();
+        ExplosionsUpdate();
+    }
 }
 export function Update() {
-    BallOnUpdate();
-    BrickOnUpdate();
+    if(SCENE.active.idx === SCENE.stage){
+        BallOnUpdate();
+        BrickOnUpdate();
+    }
 }
+
+export function OnStageCompleted(){
+    g_state.game.stageCompleted = false
+    // Create an animation. 
+    // This will run once and will automaticaly update the animation from Renderer.Render.RunAnimations()
+    BallCreateSlowSpeedAnimation();  
+    PlayerCreateDimColorAnimation();
+    BallCreateDimColorAnimation();
+
+    // const animations = AnimationsGet(); 
+    // animations.Create(FinishStageAnimation, StopFinishStageAnimation);
+
+    // Dim the whole frame's color
+    
+    // // ScenesLoadScene(SCENE.startStage);
+    // ScenesLoadScene(SCENE.finishStage);
+    // StageCreateStage2();
+    // BallResetPos();
+    // // Reset Power Ups
+    // PowerUpReset();
+    // // TODO: Fx reset
+}
+
+// export function FinishStageAnimation(){
+//     return ScenesDimColor(SCENE.active.idx);
+// }
+// export function StopFinishStageAnimation(){
+    
+// }

@@ -11,16 +11,7 @@ const BUTTON_AREA_SHADER_TYPE = SID_DEFAULT;
 
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Button {
-
-    constructor(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
-        this.name = name;
-        this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, Align);
-        this.pad = style.pad;
-        this.style.roundCorner = style.roundCorner;
-        this.style.border = style.border;
-        this.style.feather = style.feather;
-    }
+export class Button{
 
     name = '';
     area = null; // Button's rect area.
@@ -40,6 +31,14 @@ export class Button {
         feather: 0,
     };
 
+    constructor(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
+        this.name = name;
+        this.style.roundCorner = style.roundCorner;
+        this.style.border = style.border;
+        this.style.feather = style.feather;
+        this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, Align);
+        this.area = CreateButtonArea(name + '-area', bkCol, this.text.dim, this.text.pos, this.text.faceWidth, style, this.style.pad);
+    }
 };
 
 class Buttons { btn = []; count = 0; }
@@ -72,16 +71,14 @@ export function CreateButton(scene, name, text, col, bkCol, dim, pos, style, fon
 
     const idx = buttons.count;
     const btn = new Button(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align);
-    btn.area = CreateButtonArea(name + '-area', bkCol, btn.text.dim, btn.text.pos, btn.text.faceWidth, style, btn.style.pad);
-
+    // btn.area = CreateButtonArea(name + '-area', bkCol, btn.text.dim, btn.text.pos, btn.text.faceWidth, style, btn.style.pad);
     btn.area.sid = BUTTON_AREA_SHADER_TYPE;
-
     // Add buttons area to Gl buffers
-    btn.area.gfxInfo = GlAddMesh(btn.area.sid, btn.area.mesh, 1, scene, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+    btn.area.gfxInfo = GlAddMesh(btn.area.sid, btn.area.mesh, 1, scene, 'button', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
 
     // Add text meshes to Gl buffers 
     for (let i = 0; i < btn.text.letters.length; i++) {
-        btn.text.letters[i].gfxInfo = GlAddMesh(btn.text.sid, btn.text.letters[i], 1, scene, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        btn.text.letters[i].gfxInfo = GlAddMesh(btn.text.sid, btn.text.letters[i], 1, scene, name, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     }
     // This is for just have the prog.idx, vb.idx,...etc info in the btn.text structure.
     btn.text.gfxInfo = btn.text.letters[0].gfxInfo;

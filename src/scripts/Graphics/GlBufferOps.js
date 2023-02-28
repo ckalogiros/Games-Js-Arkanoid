@@ -224,6 +224,7 @@ export function GlSetColorAlpha(gfxInfo, val){
 
     vb.needsUpdate = true; // To Update vertex buffer with the changed 
 }
+
 export function GlSetDim(gfxInfo, dim) {
 
     const progs = g_glPrograms;
@@ -361,8 +362,8 @@ export function GlSetWpos(gfxInfo, pos){
 
     while (verts) {
 
-        vb.data[index++] = pos[0]; // Move mesh's x pos by amt
-        vb.data[index++] = pos[1]; // Move mesh's y pos by amt
+        vb.data[index++] = pos[0]; 
+        vb.data[index++] = pos[1]; 
         index++
 
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z

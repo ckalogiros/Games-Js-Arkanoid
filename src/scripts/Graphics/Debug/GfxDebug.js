@@ -177,3 +177,16 @@ export function PrintBuffersAll(){
     }
 }
 
+export function PrintBuffersMeshesNames(){
+    if(!GL_DEBUG_BUFFERS_ALL) return;
+    
+    console.log('-[Gl Print All GL Buffers Meshes Names]-')
+    const progs = g_glPrograms;
+    for(let i=0; i<progs.length; i++){
+        console.log('progIdx:', i, ': ')
+        for(let j=0; j<progs[i].vertexBuffer.length; j++){
+            console.log('      vbIdx:', j, ': ', progs[i].vertexBuffer[j].debug.meshesNames)
+        }
+    }
+}
+

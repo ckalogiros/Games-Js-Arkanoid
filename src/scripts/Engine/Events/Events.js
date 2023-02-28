@@ -7,7 +7,7 @@ import { InterpolateToRange } from "../../Helpers/Math/MathOperations.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
 // import { ParticlesSetUniforms } from "../ParticlesSystem/Particles.js";
 import { BallSetSpeed } from "../../App/Drawables/Ball.js";
-import { PrintVertexBufferAll } from "../../Graphics/GfxDebug.js";
+import { PrintVertexBufferAll, PrintBuffersMeshesNames } from "../../Graphics/Debug/GfxDebug.js";
 import { GlFrameBuffer } from "../../Graphics/I_GlProgram.js";
 
 
@@ -36,6 +36,7 @@ export function HandleEvents(){
             case EVENTS.MOUSE: {
                 // OnButtonHover(events[i].params.btnIdx);
                 evtsIdx--; // Remove handled event
+                break;
             }
         }
     }
@@ -74,7 +75,8 @@ export function AddEventListeners(){
             BallSetSpeed(-step);
         }
         else if (event.key === 'Z' || event.key === 'z') {
-            PrintVertexBufferAll();
+            // PrintVertexBufferAll();
+            PrintBuffersMeshesNames();
         }
     }, false);
 }

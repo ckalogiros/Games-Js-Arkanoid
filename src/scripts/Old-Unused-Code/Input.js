@@ -1,6 +1,6 @@
 "use strict";
 import { ScenesLoadScene } from '../App/Scenes.js'
-import { CreateBrick } from '../Drawables/Brick.js'
+import { BrickCreateBrick } from '../Drawables/Brick.js'
 
 
 
@@ -186,7 +186,7 @@ export function OnMouseClick(event) {
     }
 
     if (!showMenu) // Place new brick when creative menu is not showing
-      CreateBrick(null, activeTexture);
+      BrickCreateBrick(null, activeTexture);
   }
 
 }
@@ -230,8 +230,8 @@ export function keyPressed(event) {
       let sandStone = [15, 16, 25, 26, 28, 27, 35, 36,
         39, 40, 45, 46, 48, 49, 51, 52,
         55, 56, 58, 61, 63, 64, 66, 75];
-      CreateBrick(unbreakable, 3);
-      CreateBrick(sandStone, 1);
+      BrickCreateBrick(unbreakable, 3);
+      BrickCreateBrick(sandStone, 1);
     }
     // 2 = 50
     if (event.keyCode === 50) {
@@ -241,7 +241,7 @@ export function keyPressed(event) {
         bricks[i] = i;
       }
 
-      CreateBrick(bricks, 1);
+      BrickCreateBrick(bricks, 1);
 
     }
 

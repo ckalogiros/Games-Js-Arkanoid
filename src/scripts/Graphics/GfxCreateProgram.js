@@ -4,7 +4,7 @@ import { LoadShaderProgram, GlCreateShaderInfo } from './GlShaders.js'
 import { gfxCtx } from './I_WebGL.js'
 // Debug
 // For Debuging
-import { PrintShaderInfo, PrintAttributes } from './GfxDebug.js'
+import { PrintShaderInfo, PrintAttributes } from './Debug/GfxDebug.js'
 
 
 /*

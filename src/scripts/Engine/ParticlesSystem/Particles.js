@@ -14,7 +14,7 @@ class Particle{
 };
 
 
-class Particles{
+export class Particles{
 
     buffer    = []; // Buffer to store all particles.
     count     = 0;  // Particles count.
@@ -83,7 +83,7 @@ class Particles{
         return this.buffer[idx].timer.t;
     }
 };
-class ParticleSystem{
+export class ParticleSystem{
 
     psBuffer = []; //  A buffer to store all the different particle systems
     count = 0;
@@ -108,7 +108,7 @@ class ParticleSystem{
 
             this.psBuffer[idx].buffer[i] = new Particle;
             this.psBuffer[idx].buffer[i].mesh = new Mesh(meshAttr.col, meshAttr.dim, meshAttr.scale, meshAttr.tex, pos[i], meshAttr.style, meshAttr.time);
-            this.psBuffer[idx].buffer[i].gfxInfo = GlAddMesh(meshAttr.sid, this.psBuffer[idx].buffer[i].mesh, 1, scene, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+            this.psBuffer[idx].buffer[i].gfxInfo = GlAddMesh(meshAttr.sid, this.psBuffer[idx].buffer[i].mesh, 1, scene, 'Particles' + name, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.psBuffer[idx].count++;
         }
         return this.psBuffer[idx];
@@ -117,6 +117,9 @@ class ParticleSystem{
 };
 
 const particleSystem = new ParticleSystem;
+export function ParticleSystemGet(){
+    return particleSystem;
+}
 
 export function ParticlesCreateParticleSystem(meshAttr, timerAttr, num, scene, name){
     return particleSystem.CreateSystem(meshAttr, timerAttr, num, scene, name);

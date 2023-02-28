@@ -61,13 +61,13 @@ function UiCreate(sceneIdx, constTextStr, variTextStr, constTextcol, variTextcol
     for (let i = 0; i < uiText.constText.letters.length; i++) {
         // Update the unchanged text's x pos to fit with the variable one
         // Add to Gl buffers
-        uiText.constText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.constText.letters[i], 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        uiText.constText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.constText.letters[i], 1, sceneIdx, 'Ui', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     }
 
     for (let i = 0; i < uiText.variText.letters.length; i++) {
         // Update the unchanged text's x pos to fit with the variable one
         // uiText.variText.letters[i].pos[0] += uiText.variText.dim[0] + pad;
-        uiText.variText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.variText.letters[i], 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        uiText.variText.letters[i].gfxInfo = GlAddMesh(uiText.constText.sid, uiText.variText.letters[i], 1, sceneIdx,  'Ui', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     }
 
     // Move the uiText val to the right so it does not overlap withe the ui text 'uiText:'
@@ -183,7 +183,7 @@ let MODS_MAX_COUNT = 16;
 export function UiInitMods(){
 
     const sid = SID_DEFAULT_TEXTURE_SDF;
-    const gfxInfo = GlCreateReservedBuffer(sid, SCENE.play, 'ReservedBuffer1');
+    const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'Ui_Mods');
 
 
     const modFontSize = 6;
@@ -195,7 +195,7 @@ export function UiInitMods(){
         mods[i].isEmpty = true;
 
         for (let j = 0; j < mods[i].text.letters.length; j++) {
-            mods[i].text.letters[j].gfxInfo = GlAddMesh(mods[i].text.sid, mods[i].text.letters[j], 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+            mods[i].text.letters[j].gfxInfo = GlAddMesh(mods[i].text.sid, mods[i].text.letters[j], 1, gfxInfo.sceneIdx,  'Ui-Mod', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
         }
     }
     // Connect the font texture with the vertex buffer for text rendering. 
@@ -205,7 +205,7 @@ export function UiInitMods(){
 }
 
 // const UI_MOD_COLOR = ORANGE_230_148_0;
-const UI_MOD_COLOR = WHITE;
+const UI_MOD_COLOR = ORANGE_230_148_0;
 
 export function UiCreateModifierValue(targetPos, modVal) {
     
@@ -223,7 +223,7 @@ export function UiCreateModifierValue(targetPos, modVal) {
                                
                 // Color the mod depending on the some characteristics
                 GlSetColor(mods[i].text.letters[j].gfxInfo, UI_MOD_COLOR);
-                math.SetArr4(mods[i].text.letters[j].col, UI_MOD_COLOR);
+                math.CopyArr4(mods[i].text.letters[j].col, UI_MOD_COLOR);
                 
                 // Set as position the bricks position
                 GlSetWpos(mods[i].text.letters[j].gfxInfo, pos);
@@ -272,7 +272,7 @@ export function UiModRunAnimation(){
             
             if(mods[i].text.letters[0].col[0] <= 0.2){
                 for(let j = 0; j < mods[i].text.letters.length; j++){
-                    math.SetArr4(mods[i].text.letters[j].col, [.0,.0,.0,.0]);
+                    math.CopyArr4(mods[i].text.letters[j].col, [.0,.0,.0,.0]);
                     GlSetColor(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].col);
                 }
                 mods[i].inAnimation = false;

@@ -12,22 +12,22 @@ export function MulArr4Val(arr, val){
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Set Array */
-export function SetArr4(src, dst){
+export function CopyArr4(src, dst){
     src[0] = dst[0];
     src[1] = dst[1];
     src[2] = dst[2];
     src[3] = dst[3];
 }
-export function SetArr3(src, dst){
+export function CopyArr3(src, dst){
     src[0] = dst[0];
     src[1] = dst[1];
     src[2] = dst[2];
 }
-export function SetArr2(src, dst){
+export function CopyArr2(src, dst){
     src[0] = dst[0];
     src[1] = dst[1];
 }
-export function SetArr1(src, dst){
+export function CopyArr1(src, dst){
     src[0] = dst[0];
 }
 export function SetArrElem(src, dst, idx){
@@ -42,6 +42,12 @@ export function Max(val1, val2) {
 }
 export function Min(val1, val2) {
     return val1 < val2 ? val1 : val2;
+}
+export function Max3(val1, val2, val3) {
+    return val1 > val2 ? Max(val1, val3) : Max(val2, val3);
+}
+export function Min3(val1, val2, val3) {
+    return val1 < val2 ? Min(val1, val3) : Min(val2, val3);
 }
 
 export function InterpolateToRange(value, resolution, maxVal) {

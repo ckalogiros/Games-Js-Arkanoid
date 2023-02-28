@@ -7,7 +7,7 @@ import { COMIC_FONT_TEXTURE_PATH }      from '../Engine/Loaders/Font/LoadFont.js
 
 
 // For Debuging
-import * as dbg from './GfxDebug.js'
+import * as dbg from './Debug/GfxDebug.js'
 
 
 

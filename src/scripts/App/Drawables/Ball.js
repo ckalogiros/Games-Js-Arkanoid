@@ -6,43 +6,87 @@ import { PlayerGetPos, PlayerGetDim } from "./Player.js";
 import { UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
 import { MouseGetXdir } from "../../Engine/Events/MouseEvents.js";
 import { PowerUpCreate } from "./PowerUp.js";
-import { GetRandomPos, GetRandomColor } from "../../Helpers/Helpers.js";
+import { GetRandomPos, GetRandomColor, DimColor } from "../../Helpers/Helpers.js";
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { ParticlesCreateParticleSystem } from "../../Engine/ParticlesSystem/Particles.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
+import { AnimationsGet } from "../../Engine/Animations/Animations.js";
+import { Rect } from "../../Engine/Drawables/Rect.js";
 
 
 
-const MAX_BALLS_COUNT = 100;
+const MAX_BALLS_COUNT = 1;
 const BALL_MAX_SPEED = 12;
 const BALL_MIN_SPEED = 1.2;
 
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Ball {
-    constructor(sid, col, dim, scale, tex, pos, style, speed, isFree) {
-        this.sid = sid;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
-        this.speed = speed;
-        this.isFree = isFree;
-    }
+export class Ball extends Rect{
+// export class Ball{
+    
+    // sid = 0;
+    // mesh = null;
+    // gfxInfo = null;
+    // display = false;
 
     speed = 2;
     mouseDist = 0;
     size = 0;
-    sid = 0;
-
+    
     prevPos = [0];
     xdir = 1;
     ydir = 1;
     amtx = 0.6;
     amty = 0.4;
 
-    mesh = null;
-    gfxInfo = null;
-
-    display = false;
     inMove = false;
+    inAnimation = false;
+
+    constructor(sid, col, dim, scale, tex, pos, style, speed, isFree) {
+        
+        super(sid, col, dim, scale, tex, pos, style, null)
+        
+        // this.sid = sid;
+        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
+
+        this.speed = speed;
+        this.isFree = isFree;
+    }
+
+    ResetPos(){
+        this.mesh.pos = [0, Viewport.bottom - 82, 2];
+        GlSetWpos(this.gfxInfo, [0, Viewport.bottom - 82, 2])
+    }
+    SetPos(pos){
+        this.mesh.pos = pos;
+        GlSetWpos(this.gfxInfo, pos)
+    }
+    SetDim(dim){
+        this.mesh.dim = dim;
+        GlSetDim(this.gfxInfo, dim);
+    }
+    SetColor(col){
+        this.mesh.col = col;
+        GlSetColor(this.gfxInfo, col);
+    }
+
+}
+
+class Balls{
+    balls = [];
+    mainBall = null;
+    ballTailFx = null;
+
+    DimColor(){
+        const len = this.balls.length;
+        for(let i=0; i<len; i++){
+            // const col = DimColor(this.balls[i].mesh.col);
+            // GlSetColor(this.balls.gfxInfo, col)
+            // this.balls[i].mesh.col = col;
+            this.balls[i].DimColor(0.2, 0.99);
+        }
+    }
+
 }
 
 let mainBall = null;
@@ -55,7 +99,10 @@ let blr = 0;
 let acceleration = 0;
 
 // Ball's particle system Tail
-let ballTail = null;
+let ballTailFx = null;
+export function BallTailFxGet() {
+    return ballTailFx;
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Getters-Setters */
@@ -66,6 +113,10 @@ export function BallRelease() {
 // Check if the ball is in the starting position
 export function BallIsInStartPos() {
     return ballInStartPos;
+}
+export function BallResetPos(){
+    mainBall.ResetPos();
+    ballInStartPos = true;
 }
 export function BallGetPos(){
     return mainBall.mesh.pos;
@@ -84,12 +135,18 @@ export function BallSetSpeed(val){
         && mainBall.speed + val < BALL_MAX_SPEED
         && mainBall.speed + val > BALL_MIN_SPEED)
         {
-            const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
-            prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
+            // const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
+            // prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
+            BallRedFlame(val)
             mainBall.speed += val*.5;
             console.log('acceleration:', acceleration);
             console.log('BallSpeed:', mainBall.speed)
         }
+}
+
+function BallRedFlame(val){
+    const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
+    prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -98,11 +155,7 @@ export function BallSetSpeed(val){
 export function BallsInit(sceneIdx){
 
     const radius = 15.0;
-    const style = {
-        roundCorner: 0,
-        border: 0.0,
-        feather: 2.0,
-    };
+    const style = { roundCorner: 0, border: 0.0, feather: 2.0, };
 
     style.roundCorner = radius - style.feather;
     const sid = SID_DEFAULT;
@@ -125,7 +178,7 @@ export function BallsInit(sceneIdx){
             isFree,
         );
 
-        balls[i].gfxInfo = GlAddMesh(balls[i].sid, balls[i].mesh, 1, sceneIdx, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+        balls[i].gfxInfo = GlAddMesh(balls[i].sid, balls[i].mesh, 1, sceneIdx, 'ball', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     
         // Store to local compilation unit(mainBall and balls[])
         if(!mainBall){ // Case the main ball is created
@@ -142,6 +195,9 @@ export function BallsInit(sceneIdx){
     }
     blr = balls[0].mesh.dim[0]; // Cache ball radius
 
+    // Initialize ballTail fx
+    ballTailFx = BallFxCreateTail(28, 40, sceneIdx);
+
     return balls;
 }
 
@@ -153,7 +209,7 @@ export function BallCreate(pos) {
                                
             const color = GetRandomColor();
             GlSetColor(balls[i].gfxInfo, color);
-            math.SetArr4(balls[i].mesh.col, color);
+            math.CopyArr4(balls[i].mesh.col, color);
             
             // Set as position the bricks position
             GlSetWpos(balls[i].gfxInfo, pos);
@@ -192,8 +248,8 @@ export function BallOnUpdate(){
 
     const xpos = mainBall.mesh.pos[0];
     const ypos = mainBall.mesh.pos[1];
-    ballTail.Create(xpos, ypos);
-    ballTail.Update();
+    ballTailFx.Create(xpos, ypos);
+    ballTailFx.Update();
 }
 
 export function BallUpdatePos(ball) {
@@ -519,7 +575,7 @@ export function BallCreatePowUpBalls(count){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Particles */
 
-export function BallCreateTail(scene){
+export function BallFxCreateTail(scene){
     const meshAttr = {
         sid: SID_PARTICLES_TAIL,
         col:WHITE,
@@ -533,139 +589,38 @@ export function BallCreateTail(scene){
         step: 0.04,
         duration: 1.0,
     }
-    const numParticles = 28;
-    ballTail = ParticlesCreateParticleSystem(meshAttr, timerAttr, numParticles, scene, 'Ball Tail');
+    const numParticles = 80;
+    ballTailFx = ParticlesCreateParticleSystem(meshAttr, timerAttr, numParticles, scene, 'Ball Tail');
 
-    return ballTail;
+    return ballTailFx;
 }
 
-// export function BallUpdateTail(){
-//     ballTail.Update();
-// }
-
-// SAVES
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    
-// // Bricks Left Side Collision Check
-// if (ballRight >= brLeft && balls[i].mesh.pos[0] < brLeft && balls[i].xdir > 0) {
-
-//     // if(BALL.MODE.powerBall){
-//     //     intersects = true;
-//     // }
-
-//     // else 
-//     if (balls[i].mesh.pos[1] - BALL.RADIUS_TWO_THIRDS > brTop && balls[i].mesh.pos[1] + BALL.RADIUS_TWO_THIRDS < brBottom) {
-//         balls[i].xdir = -BALL.HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.1;
-//     }
-//     else if (ballBottom - BALL.RADIUS_TWO_THIRDS > brTop && ballTop < brTop && balls[i].ydir > 0) {
-//         // Left Up corner collision
-//         // balls[i].amtx *= -2.0;
-//         balls[i].ydir = -BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-//         scoreMod = 0.2;
-//     }
-//     else if (ballTop + BALL.RADIUS_TWO_THIRDS < brBottom && ballBottom > brBottom && balls[i].ydir < 0) {
-//         // Left Bottom corner collision
-//         // balls[i].amtx *= -2.0
-//         balls[i].ydir = BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-//         scoreMod = 0.2;
-//     }
-// }
-// // Bricks Right Side Collision Check
-// else if (ballLeft <= brRight && balls[i].mesh.pos[0] > brRight && balls[i].xdir < 0) {
-
-//     // if(BALL.MODE.powerBall){
-//     //     intersects = true;
-//     // }
-//     // else 
-//     if (balls[i].mesh.pos[1] - BALL.RADIUS_TWO_THIRDS > brTop && balls[i].mesh.pos[1] + BALL.RADIUS_TWO_THIRDS < brBottom) {
-//         // Collision to bricks right side
-//         balls[i].xdir = BALL.HIT_ACCEL;
-//         intersects = true;
-//         scoreMod = 0.1;
-//     }
-//     else if (ballBottom - BALL.RADIUS_TWO_THIRDS > brTop && ballTop < brTop && balls[i].ydir > 0) {
-//         // Right Up corner collision
-//         // balls[i].amtx *= 2.0;
-//         balls[i].ydir = -BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-//     else if (ballTop + BALL.RADIUS_TWO_THIRDS < brBottom && ballBottom > brBottom && balls[i].ydir < 0) {
-//         // Right Bottom corner collision
-//         // balls[i].amtx *= 2.0;
-//         balls[i].ydir = BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-// }
-// // Bricks Bottom Side Collision Check
-// else if (ballTop <= brBottom && balls[i].mesh.pos[1] > brBottom && balls[i].ydir < 0) {
-
-//     // if(BALL.MODE.powerBall){
-//     //     intersects = true;
-//     // }
-//     // else 
-//     if (balls[i].mesh.pos[0] - BALL.RADIUS_TWO_THIRDS > brLeft && balls[i].mesh.pos[0] + BALL.RADIUS_TWO_THIRDS < brRight) {
-//         // Collision to bricks bottom side
-//         balls[i].ydir = BALL.HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.1;
-//     }
-//     else if (ballRight - BALL.RADIUS_TWO_THIRDS > brLeft && ballLeft < brLeft && balls[i].xdir > 0) {
-//         // Bottom Left corner collision
-//         // balls[i].amtx *= -2.0;
-//         balls[i].ydir = BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-//     else if (ballLeft + BALL.RADIUS_TWO_THIRDS < brRight && ballRight > brRight && balls[i].xdir < 0) {
-//         // Bottom Right corner collision
-//         // balls[i].amtx *= 2.0;
-//         balls[i].ydir = BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-// }
-// // Bricks Top Side Collision Check
-// else if (ballBottom >= brTop && balls[i].mesh.pos[1] < brTop && balls[i].ydir > 0) {
-
-//     // if(BALL.MODE.powerBall){
-//     //     intersects = true;
-//     // }
-//     // else 
-//     if (balls[i].mesh.pos[0] - BALL.RADIUS_TWO_THIRDS > brLeft && balls[i].mesh.pos[0] + BALL.RADIUS_TWO_THIRDS < brRight) {
-//         // Collision to bricks Top side
-//         balls[i].ydir = -BALL.HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.1;
-//     }
-//     else if (ballRight + BALL.RADIUS_TWO_THIRDS > brLeft && ballLeft < brLeft && balls[i].xdir > 0) {
-//         // Top Left corner collision
-//         // balls[i].amtx *= -2.0;
-//         balls[i].ydir = -BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-//     else if (ballLeft - BALL.RADIUS_TWO_THIRDS < brRight && ballRight > brRight && balls[i].xdir < 0) {
-//         // Top Right corner collision
-//         // balls[i].amtx *= 2.0;
-//         balls[i].ydir = -BALL.CORNER_HIT_ACCEL;
-//         intersects = true;
-        
-//         scoreMod = 0.2;
-//     }
-// }
-
+/** Slow ball speed animation */
+export function BallCreateSlowSpeedAnimation(){
+    const animations = AnimationsGet();
+    animations.Create(RunBallSlowSpeedAnimation, BallStopSlowSpeedAnimation);
+}
+function BallStopSlowSpeedAnimation(){ 
+    console.log('Stop Ball Animation')
+    // ScenesStageCompleted23RenameMe();
+}
+function RunBallSlowSpeedAnimation(){ // This is the callback to the Animations.clbk at Animations.js
+    const intensity = 0.1;
+    if(mainBall.speed >= 1){
+        BallRedFlame(-intensity*0.9)
+        mainBall.speed -= intensity*0.5;
+        return true; // Ret true if animation is not over
+    }
+    else return false; // Ret false if animation is completed
+}
+/** Dim color animation */
+export function BallCreateDimColorAnimation(){
+    const animations = AnimationsGet(); 
+    animations.Create(RunBallDimColorAnimation, BallStopDimColorAnimation);
+}
+function BallStopDimColorAnimation(){ 
+    console.log('Stop Ball Animation')
+}
+function RunBallDimColorAnimation(){ // This is the callback to the Animations.clbk at Animations.js
+    return mainBall.DimColor(0.03, 0.99)
+}

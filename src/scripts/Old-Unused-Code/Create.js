@@ -143,7 +143,7 @@ function createStage( ) {
       stageBricks[i] = 
                 Math.floor( Math.random( ) *grid.active.length );
 
-    createBrick( stageBricks, 3 );
+    BrickCreateBrick( stageBricks, 3 );
 
   }
     
@@ -230,7 +230,7 @@ function createStage( ) {
   
 // }
 
-// function createBrick( batch, texture ) {
+// function BrickCreateBrick( batch, texture ) {
   
 //   let type = null;
   

@@ -2,7 +2,7 @@
 import { GlDraw } from '../../Graphics/GlDraw.js'
 import { fps } from '../Timer/Timer.js';
 import { HandleEvents } from '../Events/Events.js';
-import { RunAnimations } from '../Animations/Animations.js';
+import { Animations, AnimationsGet, RunAnimations } from '../Animations/Animations.js';
 import { BallGetBall } from '../../App/Drawables/Ball.js';
 import { CheckCollisions, Update } from '../Events/SceneEvents.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js'
@@ -14,6 +14,7 @@ import { TimersUpdateTimers } from '../Timer/Timer.js';
 export function Render() {
     
     fps.Start();
+    const animations = AnimationsGet();
     
     
     if (g_state.game.paused === false) {
@@ -22,11 +23,10 @@ export function Render() {
 
         HandleEvents();
         RunAnimations();
+        animations.Run();
         CheckCollisions();
         Update();
-        
         OnMouseMove();
-        // UpdateFireBall();
 
         GlDraw();
     }

@@ -70,7 +70,7 @@ export function OnMouseMove(event) {
         OnHover(scene, mouse);
     }
 
-    if (scene.sceneIdx === SCENE.play) {
+    if (scene.sceneIdx === SCENE.stage) {
         // Move Player 
         OnPlayerMove(mouse.x, mouse.xdiff);
     }
@@ -96,14 +96,18 @@ export function OnMouseClick(event) {
                 break;
             }
             case 'PlayBtn': {
-                ScenesLoadScene(SCENE.play);
+                ScenesLoadScene(SCENE.startStage);
+                break;
+            }
+            case 'startStageBtn': {
+                ScenesLoadScene(SCENE.stage);
                 break;
             }
         }
     }
 
     // If mouse clicked and ball is not moving(start of a stage), release the ball
-    else if (BallIsInStartPos() && SCENE.active.idx === SCENE.play &&
+    else if (BallIsInStartPos() && SCENE.active.idx === SCENE.stage &&
         mouse.x > Viewport.left && mouse.x < Viewport.right && 
         mouse.y > Viewport.top && mouse.y < Viewport.bottom)
         BallRelease();

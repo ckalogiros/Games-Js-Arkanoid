@@ -26,51 +26,116 @@ const POWUP_TYPES_ARRAY = [];
 
 
 class PowerUp {
+    
+        sid     = 0;
+    
+        mesh    = null;
+        gfxInfo = null;
+    
+        type = 'NULL'; // The type of the power up
+        isActive     = false;
+        inAnimation = false;
 
     constructor(sid, col, dim, scale, tex, pos, style) {
         this.sid = sid;
         this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
     }
 
-    sid     = 0;
-
-    mesh    = null;
-    gfxInfo = null;
-
-    type = 'NULL'; // The type of the power up
-    isEmpty     = false;
-    inAnimation = false;
+    SetPos(pos){
+        this.mesh.pos = pos;
+        GlSetWpos(this.gfxInfo, pos)
+    }
+    SetDim(dim){
+        this.mesh.dim = dim;
+        GlSetDim(this.gfxInfo, dim);
+    }
+    SetColor(col){
+        this.mesh.col = col;
+        GlSetColor(this.gfxInfo, col);
+    }
 };
 
-class PowerUps{
+export class PowerUps{
 
     powUp = [];
     count = 0;
+    size = POWUPS_MAX_COUNT;
+
+    // We dont use the constructor because power ups nedd to be initialized in specific time order
+    Init(){
+        const sid = SID_EXPLOSION2;
+        const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'PowerUp');
+        
+        const style = {
+            roundCorner: 0.0,
+            border: 2.0,
+            feather: 14.0,
+        };
+        for(let i = 0; i < this.size; i++){
+
+            this.powUp[i] = new PowerUp(sid, TRANSPARENT, [28, 14, 0], [1,1], null,  [0,0,3], style);
+            this.powUp[i].isActive = false;
+            this.powUp[i].gfxInfo = GlAddMesh(this.powUp[i].sid, this.powUp[i].mesh, 1, 
+                                        gfxInfo.sceneIdx, 'PowUp', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+        }
+    }
+    Reset(){
+        for(let i=0; i<this.size; i++){
+            this.Destroy(i);
+        }
+    }
+    Destroy(idx){
+        GlSetColorAlpha(this.powUp[idx].gfxInfo, 0.0);
+        this.powUp[idx].isActive = false;
+        this.count--;
+    }
+    GetNextFree(){
+        for (let i = 0; i < this.size; i++) {
+            if(!this.powUp[i].isActive){
+                this.count++;
+                return this.powUp[i];
+            }
+        }
+        return null;
+    }
+    RunAnimation(){
+        const yPosAdvance = 3.0;
+
+        for(let i = 0; i < POWUPS_MAX_COUNT; i++){
+            
+            if(this.powUp[i].inAnimation){
+    
+                this.powUp[i].mesh.pos[1] += yPosAdvance;
+                GlSetWpos(this.powUp[i].gfxInfo, this.powUp[i].mesh.pos);
+                
+                if(this.powUp[i].mesh.pos[1] > Viewport.bottom + 100){
+                    this.powUp[i].inAnimation = false;
+                    this.powUp[i].isActive = false;
+                    this.Destroy(i);
+                }
+            }
+        }
+    }
+    DimColor(){
+        const len = this.powUp.length;
+        for(let i=0; i<len; i++){
+            const col = DimColor(this.powUp[i].mesh.col);
+            GlSetColor(this.powUp.gfxInfo, col)
+            this.powUp[i].mesh.col = col;
+        }
+    }
 }
 
 let powUps = new PowerUps;
+export function PowerUpGet(){
+    return powUps;
+}
 
 
 
 export function PowerUpInit(){
 
-    const sid = SID_EXPLOSION2;
-    const gfxInfo = GlCreateReservedBuffer(sid, SCENE.play, 'ReservedBuffer2');
-    
-    const style = {
-        roundCorner: 0.0,
-        border: 2.0,
-        feather: 14.0,
-    };
-
-    for(let i = 0; i < POWUPS_MAX_COUNT; i++){
-
-        powUps.powUp[i] = new PowerUp(sid, TRANSPARENT, [28, 14, 0], [1,1], null,  [0,0,3], style);
-        powUps.powUp[i].isEmpty = true;
-        // powUps.powUp[i].gfxInfo = GlAddMesh(SID_DEFAULT, powUps.powUp[i].mesh, 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
-        powUps.powUp[i].gfxInfo = GlAddMesh(powUps.powUp[i].sid, powUps.powUp[i].mesh, 1, gfxInfo.sceneIdx, DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
-    }
-    
+    powUps.Init();
 }
 
 export function PowerUpCreate(brickPos) {
@@ -80,30 +145,52 @@ export function PowerUpCreate(brickPos) {
     pos[1] = brickPos[1];
     pos[2] = -5;
 
-    for(let i = 0; i < POWUPS_MAX_COUNT; i++){
+    const powUp = powUps.GetNextFree();
+    const color = GetRandomColor();
+    powUp.type = POWUP_TYPES_ARRAY[GetRandomInt(0, POWUP_TYPES_ARRAY.length)];
+    GlSetColor(powUp.gfxInfo, color);
+    math.CopyArr4(powUp.mesh.col, color);
+    
+    // Set as position the bricks position
+    GlSetWpos(powUp.gfxInfo, pos);
+    powUp.mesh.pos[0] = pos[0];
+    powUp.mesh.pos[1] = pos[1];
+    pos[0] += powUp.mesh.dim[0]*2;
 
-        if(powUps.powUp[i].isEmpty){
+    powUp.isActive    = true;
+    powUp.inAnimation = true;
+
+    // for(let i = 0; i < POWUPS_MAX_COUNT; i++){
+
+    //     if(!powUps.powUp[i].isActive){
                                
-            // TODO: Color powUp by type 
-            const color = GetRandomColor();
-            // powUps.powUp[i].type = POWUP_TYPES.ENLARGE_PLAYER;
-            powUps.powUp[i].type = POWUP_TYPES_ARRAY[GetRandomInt(0, POWUP_TYPES_ARRAY.length)];
-            GlSetColor(powUps.powUp[i].gfxInfo, color);
-            math.SetArr4(powUps.powUp[i].mesh.col, color);
+    //         // TODO: Color powUp by type 
+    //         const color = GetRandomColor();
+    //         // powUps.powUp[i].type = POWUP_TYPES.ENLARGE_PLAYER;
+    //         powUps.powUp[i].type = POWUP_TYPES_ARRAY[GetRandomInt(0, POWUP_TYPES_ARRAY.length)];
+    //         GlSetColor(powUps.powUp[i].gfxInfo, color);
+    //         math.CopyArr4(powUps.powUp[i].mesh.col, color);
             
-            // Set as position the bricks position
-            GlSetWpos(powUps.powUp[i].gfxInfo, pos);
-            powUps.powUp[i].mesh.pos[0] = pos[0];
-            powUps.powUp[i].mesh.pos[1] = pos[1];
-            pos[0] += powUps.powUp[i].mesh.dim[0]*2;
+    //         // Set as position the bricks position
+    //         GlSetWpos(powUps.powUp[i].gfxInfo, pos);
+    //         powUps.powUp[i].mesh.pos[0] = pos[0];
+    //         powUps.powUp[i].mesh.pos[1] = pos[1];
+    //         pos[0] += powUps.powUp[i].mesh.dim[0]*2;
 
-            powUps.powUp[i].isEmpty     = false;
-            powUps.powUp[i].inAnimation = true;
+    //         powUps.powUp[i].isActive    = true;
+    //         powUps.powUp[i].inAnimation = true;
 
-            return;
-        }
-    }
+    //         return;
+    //     }
+    // }
 }
+
+export function PowerUpReset(){
+    // Destroy any active Power Up
+    powUps.Reset();
+}
+
+
 
 export function PowerUpPlayerCollision(plPos, plw, plh) {
 
@@ -114,14 +201,15 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
         const powpos = powUps.powUp[i].mesh.pos;
         const poww = powUps.powUp[i].mesh.dim[0];
         const powh = powUps.powUp[i].mesh.dim[1];
-        if(!powUps.powUp[i].isEmpty){
+        if(powUps.powUp[i].isActive){
             if (
                 plPos[0] + plw >= powpos[0] - poww &&
                 plPos[0] - plw <= powpos[0] + poww &&
                 plPos[1] + plh >= powpos[1] - powh &&
                 plPos[1] - plh <= powpos[1] + powh
                 ){
-                    DestroyPowerUp(i);
+                    // DestroyPowerUp(i);
+                    powUps.Destroy(i);
                     scoreMod  = 0.5;
                     UiCreateModifierValue(powpos, scoreMod);
                     UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
@@ -149,6 +237,8 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
 
 export function PowerUpRunAnimation(){
 
+    // powUps.RunAnimation();
+
     const yPosAdvance = 3.0;
 
     for(let i = 0; i < POWUPS_MAX_COUNT; i++){
@@ -160,15 +250,17 @@ export function PowerUpRunAnimation(){
             
             if(powUps.powUp[i].mesh.pos[1] > Viewport.bottom + 100){
                 powUps.powUp[i].inAnimation = false;
-                powUps.powUp[i].isEmpty = true;
-                DestroyPowerUp(i);
+                powUps.powUp[i].isActive = false;
+                // DestroyPowerUp(i);
+                powUps.Destroy(i);
             }
         }
     }
 }
 
+// TODO: Put this func in class PowerUps as a method
 function DestroyPowerUp(idx){
 
     GlSetColorAlpha(powUps.powUp[idx].gfxInfo, 0.0);
-    powUps.powUp[idx].isEmpty = true;
+    powUps.powUp[idx].isActive = false;
 }

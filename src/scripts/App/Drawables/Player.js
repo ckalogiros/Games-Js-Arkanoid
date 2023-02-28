@@ -1,32 +1,39 @@
 "use strict";
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { Mesh } from '../../Engine/Drawables/Mesh.js'
-import { GlScale, GlSetDim, GlSetWposX } from '../../Graphics/GlBufferOps.js';
+import { GlScale, GlSetColor, GlSetDim, GlSetWposX } from '../../Graphics/GlBufferOps.js';
 import { BallPlayerCollision } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
+import { DimColor } from '../../Helpers/Helpers.js';
+import { Max3 } from '../../Helpers/Math/MathOperations.js';
+import { AnimationsGet } from '../../Engine/Animations/Animations.js';
+import { Rect } from '../../Engine/Drawables/Rect.js';
 
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Player {
-
+export class Player extends Rect{
+// export class Player{
     constructor(sid, col, dim, scale, tex, pos, style, speed) {
-        this.sid = sid;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
+        super(sid, col, dim, scale, tex, pos, style, null);
+        // super();
+        // this.sid = sid;
+        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
         this.speed = speed;
     }
+
+    // sid = 0;
+    // mesh = null;
+    // gfxInfo = null;
+    // display = false;
 
     speed = 0;
     mouseDist = 0;
     size = 0;
-    sid = 0;
     xdir = 0;
-
+    
     prevPos = [0];
+    
 
-    mesh = null;
-    gfxInfo = null;
-
-    display = false;
     timeOutId = null; // To store the timer from setTimeout that is created for the animation 
 
     state = {         // The state in which the player may be. Mainly for animations
@@ -34,6 +41,18 @@ export class Player {
         inUpScale: false,
         inDownScale: false,
     };
+
+    // DimColor(){
+    //     const minCol = 0.2;
+    //     const col = DimColor(this.mesh.col, 0.99); 
+    //     const max = Max3(col[0], col[1], col[2])
+    //     if(max > minCol){
+    //         GlSetColor(this.gfxInfo, col);
+    //         this.mesh.col = col;
+    //         return true;
+    //     }
+    //     return false;
+    // }
 };
 
 let player = null;
@@ -53,14 +72,12 @@ export function CreatePlayer(scene) {
         style, speed
     );
 
-    pl.gfxInfo = GlAddMesh(pl.sid, pl.mesh, 1, scene, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+    pl.gfxInfo = GlAddMesh(pl.sid, pl.mesh, 1, scene, 'player', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     player = pl;
 
     
     return pl;
 }
-
-
 export function UpdatePlayerPosX(posx, mouseXdir) {
 
     player.mesh.pos[0] = posx;
@@ -71,7 +88,6 @@ export function UpdatePlayerPosX(posx, mouseXdir) {
      * is negative etc.*/
     player.xdir = mouseXdir; // Player's direction is always the mouse's direction.
 }
-
 export function PlayerBallCollision() {
     BallPlayerCollision(player.mesh.pos, player.mesh.dim[0], player.mesh.dim[1], player.xdir);
 }
@@ -102,10 +118,17 @@ export function PlayerSetStateAnimation(flag){
 
 export function PlayerRunEnlargeAnimation(scaleFactor){
     player.mesh.dim[0] *= scaleFactor;
-    // player.mesh.dim[1] *= scaleFactor;
-    // player.mesh.scale[0] *= scaleFactor;
-    // player.mesh.scale[1] *= scaleFactor;
-    // GlScale(player.gfxInfo, [scaleFactor, player.mesh.scale[1]]);
     GlSetDim(player.gfxInfo, player.mesh.dim);
-    // GlScale(player.gfxInfo, [scaleFactor, scaleFactor]);
+}
+
+/** Dim color animation */
+export function PlayerCreateDimColorAnimation(){
+    const animations = AnimationsGet(); 
+    animations.Create(RunPlayerDimColorAnimation, PlayerStopDimColorAnimation);
+}
+function PlayerStopDimColorAnimation(){ 
+    console.log('Stop Player Animation')
+}
+function RunPlayerDimColorAnimation(){ // This is the callback to the Animations.clbk at Animations.js
+    return player.DimColor(0.2, 0.99)
 }

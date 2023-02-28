@@ -8,6 +8,63 @@ import { ButtonGetButtons, ButtonRunScaleAnimation, ButtonSetDefaultMeshProps } 
 const PLAYER_ENLARGE_ANIMATION_DURATION = 2000; // 2 seconds
 
 
+export class Animation{
+    
+    animationClbk = null;
+    stopAnimationClbk = null;
+    inAnimation = false;
+    
+    Create(animationClbk, stopAnimationClbk){
+        this.animationClbk = animationClbk;
+        this.stopAnimationClbk = stopAnimationClbk;
+        this.inAnimation = true;
+        // If timer param, set timer        
+    }
+    Start(){
+
+    }
+    Stop(){
+
+    }
+    Run(){
+        this.inAnimation = this.animationClbk();
+    }
+    Stop(){
+        this.stopAnimationClbk();
+    }
+}
+export class Animations{
+    animations = [];
+    count = 0;
+
+    Create(animationClbk, stopAnimationClbk){
+        const idx = this.count;
+        this.animations[idx] = new Animation;
+        this.animations[idx].Create(animationClbk, stopAnimationClbk);
+        this.count++;
+    }
+    Run(){
+        if(this.count){
+            for(let i=0; i<this.count; i++){
+                if(this.animations[i].inAnimation){
+                    this.animations[i].Run();
+                }
+                else{ // Here do stuf if NOT inAnimation
+                    this.animations[i].Stop();
+                    this.count--;
+                }
+            }
+        }
+    }
+}
+
+const animations = new Animations;
+export function AnimationsGet(){
+    return animations;
+}
+
+
+
 
 export function RunAnimations() {
 
@@ -15,6 +72,7 @@ export function RunAnimations() {
     UiModRunAnimation();
     PowerUpRunAnimation();
     PlayerEnlargeAnimation();
+
 }
 
 

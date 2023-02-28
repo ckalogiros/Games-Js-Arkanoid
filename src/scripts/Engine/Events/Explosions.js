@@ -20,7 +20,8 @@ class Explosion{
 
 };
 
-class Explosions{
+// Export only for the class type, to be used with instanceof
+export class Explosions{
 
     buffer = [];
     maxSize = MAX_EXPLOSIONS;
@@ -37,7 +38,6 @@ class Explosions{
         this.buffer[idx].isActive = true; 
         this.curSize++;
         this.count++;
-        // console.log('Storing explosion to buffer index:', idx)
         return this.buffer[idx];
     }
 
@@ -52,7 +52,6 @@ class Explosions{
         // Decrement curren total size only if the explosion is the last one in the buffer
         if(this.curSize === idx){
             this.curSize--;
-            // console.log('curSize = ', curSize)
         }
     }
 
@@ -64,7 +63,7 @@ class Explosions{
             // Reserve  shader
             // Create a dummy explosion to initialize the Gfx buffers
             const ex = RectCreateRect('Explosion' + i, SID_EXPLOSION | SID.EXPLOSION_FS, WHITE, EXPLOSIONS_DIM, [1,1], null, [OUT_OF_VIEW, 0, 5], null, 0);
-            ex.gfxInfo = GlAddMesh(ex.sid, ex.mesh, 1, SCENE.play, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+            ex.gfxInfo = GlAddMesh(ex.sid, ex.mesh, 1, SCENE.stage, 'Explosion', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.buffer[i].gfxInfo = ex.gfxInfo;
         }
     }
@@ -91,7 +90,6 @@ export function ExplosionsInit(){
 export function ExplosionsCreateExplosion(pos){
 
     const explosion = explosions.Create();
-    // const explosion = explosions.GetfirstAvaliable();
 
     const duration = 1.;
     const step = .01;

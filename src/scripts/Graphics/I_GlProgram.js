@@ -1,9 +1,9 @@
 "use strict";
-import { Mat4Orthographic } from '../Helpers/Math/Matrix.js'
+// import { Mat4Orthographic } from '../Helpers/Math/Matrix.js'
+import { Camera } from '../Engine/Renderer/Camera.js'
 
 export class VertexBuffer {
 
-	name = '';
 	sceneIdx = INT_NULL;
 
 	buffer = null;
@@ -29,6 +29,7 @@ export class VertexBuffer {
 	hasChanged = false;
 	hasScissorBox = false;
 
+	debug = {meshesNames:[], sidName:''};
 };
 
 export class IndexBuffer {
@@ -50,7 +51,7 @@ export class IndexBuffer {
 	needsUpdate = false;
 };
 
-export class GlProgram {
+export class GlProgram extends Camera{
 
 	program = null;
 	isActive = false;
@@ -105,15 +106,14 @@ export class GlProgram {
 	indexBuffer = [];
 	indexBufferCount = 0;
 
-	camera = null;
-
-	CameraSet() {
-		this.camera = new Mat4Orthographic(0, Viewport.width, Viewport.height, 0, -100.0, 1000);
-	}
-	CameraUpdate(glContext) {
-		if (!this.camera) alert('Forget to set camera. I_GlProgram.js');
-		glContext.uniformMatrix4fv(this.shaderInfo.uniforms.orthoProj, false, this.camera);
-	}
+	// camera = null;
+	// CameraSet() {
+	// 	this.camera = new Mat4Orthographic(0, Viewport.width, Viewport.height, 0, -100.0, 1000);
+	// }
+	// CameraUpdate(glContext) {
+	// 	if (!this.camera) alert('Forget to set camera. I_GlProgram.js');
+	// 	glContext.uniformMatrix4fv(this.shaderInfo.uniforms.orthoProj, false, this.camera);
+	// }
 
 	/**
 	 * Uniform buffer for miscellaneous-orbitary number of uniforms for a specific gl program 

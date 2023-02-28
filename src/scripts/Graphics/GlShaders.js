@@ -1,7 +1,7 @@
 "use strict";
 import {VertexShaderChoose} 	from './Shaders/VertexShaders.js'
 import {FragmentShaderChoose} 	from './Shaders/FragmentShaders.js'
-import {GetShaderTypeId} 	    from './GfxDebug.js'
+import {GetShaderTypeId} 	    from './Debug/GfxDebug.js'
 
 
 

@@ -7,6 +7,7 @@
 const g_state = {
     game: {
         paused: false,
+        stageCompleted: false,
     },
     hovered: null,
 };
@@ -19,7 +20,7 @@ const ALIGN = {
     TOP: 0x4,
     BOTTOM: 0x8,
     CENTER_HOR: 0x10,
-    CENTER_VERT: 0x11,
+    CENTER_VERT: 0x20,
 };
 
 const MENU_BAR_HEIGHT = 50;
@@ -40,28 +41,17 @@ const GAME_STATE = {
 };
 
 /**
- * Create an object:
-*       SCENE:{
-*           menu:{
-*               Start menu,
-*               Stage menu (This is the in-between stages menu),
-*               Options menu,
-*               ...
-*           },
-*           play:{
-*               Stage 1,
-*               Stage 2,
-*               ...
-*           }
-*       }
+ * This is to create structured indexes for all scenes in the application,
+ * and also store the global state of the current active scene() 
  */
-
+let cnt = 0;
 const SCENE = {
     // none: 0,
-    startMenu: 0,
-    play: 1,
-    active: { idx: -1 },
-    testButtons: 10,
+    startMenu: cnt++,
+    startStage: cnt++,
+    finishStage: cnt++,
+    stage: cnt++,
+    active: { idx: INT_NULL },
 };
 
 /** Ball */
@@ -70,8 +60,6 @@ const BALL = {
     MIN_AMT: -7.2,
     HIT_ACCEL: 1.05, //1.15,
     CORNER_HIT_ACCEL: 1.15, //1.4,
-    // When ball collides with a brick, move ball away from brick by 4 pixels
-    // THROUGH_OUTSIDE: 4,
     RADIUS_TWO_THIRDS: 0,
     MODE: {
         powerBall: false,
