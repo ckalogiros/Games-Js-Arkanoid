@@ -38,19 +38,35 @@ import { BrickCreateBrick, BrickCreateParticleSystem, BrickGetBricksBuffer } fro
 *  *  *  *  *  *  *  *  *  *
 */
 
-
+let stage = 0;
+export function  StageGetNextStage(){
+    switch(stage){
+        case 0: {
+            stage++;
+            return StageCreateStage1();
+            
+        }
+        case 1: {
+            stage++;
+            return StageCreateStage2();
+        }
+        case 2: {
+            stage++;
+            return StageCreateStage3();
+        }
+    }
+}
 
 
 // TODO: Implemetn an Init with the Init of the particlesSystem
 export function StageCreateStage1() {
 
-
    const pad = 10;
    const padStart = 100;
    const dim = [28, 16];
-   let pos = [padStart + dim[0] + pad, 120 + dim[1] + 100, -1];
+   let pos = [padStart + dim[0] + pad, 320 + dim[1] + 100, -1];
 
-   for (let i = 0; i < 1; i++) {
+   for (let i = 0; i < 20; i++) {
        BrickCreateBrick(pos, dim); 
        pos[0] += dim[0] * 2 + pad;
        if (pos[0] + dim[0] * 2 + 50 > Viewport.right) {
@@ -58,12 +74,9 @@ export function StageCreateStage1() {
            pos[0] = dim[0] + pad + padStart;
        }
    }
-
-   return BrickGetBricksBuffer();
 }
 
 export function StageCreateStage2() {
-
 
    const pad = 10;
    const padStart = 100;
@@ -78,6 +91,20 @@ export function StageCreateStage2() {
            pos[0] = dim[0] + pad + padStart;
        }
    }
+}
+export function StageCreateStage3() {
 
-   return BrickGetBricksBuffer(); 
+   const pad = 10;
+   const padStart = 100;
+   const dim = [28, 16];
+   let pos = [padStart + dim[0] + pad, 120 + dim[1] + 100, -1];
+
+   for (let i = 0; i < 20; i++) {
+       BrickCreateBrick(pos, dim);
+       pos[0] += dim[0] * 2 + pad;
+       if (pos[0] + dim[0] * 2 + 50 > Viewport.right) {
+           pos[1] += dim[1] * 2 + pad;
+           pos[0] = dim[0] + pad + padStart;
+       }
+   }
 }

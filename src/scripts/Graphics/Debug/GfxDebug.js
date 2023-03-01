@@ -4,12 +4,13 @@
 /**
  * Enable-Disable Debuging
  */
-const GL_DEBUG_ATTRIBUTES     = true;
+const GL_DEBUG_ATTRIBUTES     = false;
 const GL_DEBUG_PROGRAM        = false;
+const GL_DEBUG_SHADERS        = false;
 const GL_DEBUG_SHADER_INFO    = false;
-const GL_DEBUG_VERTEX_BUFFER  = true;
-const GL_DEBUG_INDEX_BUFFER   = true;
-const GL_DEBUG_BUFFERS_ALL    = true;
+const GL_DEBUG_VERTEX_BUFFER  = false;
+const GL_DEBUG_INDEX_BUFFER   = false;
+const GL_DEBUG_BUFFERS_ALL    = false;
 
 
 

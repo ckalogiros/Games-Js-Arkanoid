@@ -1,9 +1,14 @@
 "use strict";
-import { PlayerCreateDimColorAnimation, PlayerPowerUpCollision, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
-import { BallCreateDimColorAnimation, BallCreateSlowSpeedAnimation, BallOnUpdate } from "../../App/Drawables/Ball.js";
+import { PlayerCreateDimColorAnimation, PlayerPowerUpCollision, PlayerReset, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
+import { BallCreateDimColorAnimation, BallCreateSlowSpeedAnimation, BallOnUpdate, BallReset, BallResetPos } from "../../App/Drawables/Ball.js";
 import { PlayerBallCollision } from "../../App/Drawables/Player.js";
 import { BrickBallCollision, BrickOnUpdate } from "../../App/Drawables/Brick.js";
 import { ExplosionsUpdate } from "./Explosions.js";
+import { ScenesGetMesh, ScenesLoadScene } from "../../App/Scenes.js";
+import { AnimationsGet } from "../Animations/Animations.js";
+import { StageCreateStage2 } from "../../App/Stages.js";
+import { PowerUpReset } from "../../App/Drawables/PowerUp.js";
+import { UiGetScore, UiGetTotalScore, UiSetTotalScore, UiUpdateScore, UiUpdateTotalScore } from "../../App/Drawables/Ui/Ui.js";
 
 
 /**
@@ -65,30 +70,54 @@ export function Update() {
 }
 
 export function OnStageCompleted(){
-    g_state.game.stageCompleted = false
+    g_state.game.stageCompleted = false;
+
     // Create an animation. 
     // This will run once and will automaticaly update the animation from Renderer.Render.RunAnimations()
     BallCreateSlowSpeedAnimation();  
     PlayerCreateDimColorAnimation();
     BallCreateDimColorAnimation();
 
-    // const animations = AnimationsGet(); 
-    // animations.Create(FinishStageAnimation, StopFinishStageAnimation);
+    setTimeout(ShowTotalScoreTemp, 3000);
 
     // Dim the whole frame's color
-    
-    // // ScenesLoadScene(SCENE.startStage);
-    // ScenesLoadScene(SCENE.finishStage);
-    // StageCreateStage2();
-    // BallResetPos();
-    // // Reset Power Ups
-    // PowerUpReset();
-    // // TODO: Fx reset
 }
 
-// export function FinishStageAnimation(){
-//     return ScenesDimColor(SCENE.active.idx);
-// }
-// export function StopFinishStageAnimation(){
+export function OnStageStart(){
+    PlayerReset();
+    BallReset();
+    PowerUpReset();
+}
+
+function ShowTotalScoreTemp(){
+    ScenesLoadScene(SCENE.finishStage);
     
-// }
+    // Animate the score 
+    const animations = AnimationsGet();
+    animations.Create(TempIncrementScore, TempStopIncrementScore);
+
+}
+
+let cnt = 0;
+function TempIncrementScore(){
+    
+    // Get the mesh TextLabel with the total score
+    const scoreLabel = ScenesGetMesh(APP_MESHES_IDX.text.totalScore);
+    const score = UiGetScore();
+    let totalScore = UiGetTotalScore();
+    totalScore++;
+    scoreLabel.ChangeText('Total Score: ' + totalScore);
+    UiSetTotalScore(totalScore);
+
+    // Implement a way to skip or speed up the total score increment
+    if(totalScore < score) return true;
+
+    return false; // Stop the animation
+}
+
+function TempStopIncrementScore(){
+    UiUpdateTotalScore();
+    // Reset stage score
+}
+
+

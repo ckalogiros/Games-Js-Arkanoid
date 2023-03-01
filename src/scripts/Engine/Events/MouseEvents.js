@@ -1,9 +1,10 @@
 "use strict";
 import { GetCanvasSize } from "../../Graphics/GfxInit.js";
 import { ScenesLoadScene } from "../../App/Scenes.js";
-import { OnHover, OnPlayerMove } from "./SceneEvents.js";
+import { OnHover, OnPlayerMove, OnStageStart } from "./SceneEvents.js";
 import { ScenesGetScene } from "../../App/Scenes.js";
-import { BallIsInStartPos, BallRelease } from "../../App/Drawables/Ball.js";
+import { BallIsInStartPos, BallRelease, BallReset } from "../../App/Drawables/Ball.js";
+import { StageGetNextStage } from "../../App/Stages.js";
 
 
 
@@ -101,6 +102,14 @@ export function OnMouseClick(event) {
             }
             case 'startStageBtn': {
                 ScenesLoadScene(SCENE.stage);
+                StageGetNextStage();
+                OnStageStart();
+                break;
+            }
+            case 'ContinueBtn': {
+                ScenesLoadScene(SCENE.stage);
+                StageGetNextStage();
+                OnStageStart();
                 break;
             }
         }

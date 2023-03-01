@@ -22,10 +22,24 @@ ToDo
 
 
 In meshes that consist of an array of meshes, like balls and bricks etc,
-it is best to implement an 'all active' array to hold the indexees of the
+it is best to implement an 'all active' array to hold the indexes of the
 active meshes, insted of looping through all meshes and checking if(mesh.isActive)
 OR having to sort the array by active meshes.
 
-Implement the Rect class as extension to everyy class  that has a rect mesh
+Implement the Rect class as extension to every class  that has a rect mesh
 
 Remove all unecessary functions like: BallGetDim() etc
+
+See if we can set all animations via Animation class
+(Current Animations are implemented as folows: 
+    export function RunAnimations() {
+
+        ButtonCreateScaleAnimation();
+        UiModRunAnimation();
+        PowerUpRunAnimation();
+        PlayerEnlargeAnimation();
+
+    }
+)
+
+Change the vars name 'name' in TextLabel class to 'str' or 'text'

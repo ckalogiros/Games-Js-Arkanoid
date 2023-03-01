@@ -192,16 +192,16 @@ void main(void) {
     
     FragColor = v_Color;
     FragColor = vec4(texture( u_Sampler0, v_TexCoord ).r);
-    // FragColor = texture( u_Sampler0, v_TexCoord);
     float inner = v_Params[0];
     float outer = v_Params[1];
-    vec2 distFieldParams = vec2(inner, outer);
         
     float b = max(texture(u_Sampler0, v_TexCoord).r, max(texture(u_Sampler0, v_TexCoord).g, texture(u_Sampler0, v_TexCoord).b));
-    float pixelDist = 1.0 - b;
-    float alpha = 1.0 - smoothstep(distFieldParams.x, distFieldParams.x + distFieldParams.y, pixelDist);
+    float pixelDist = 1. - b;
+    float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);
+    // FragColor = vec4(v_Color.rgb * vec3(alpha), v_Color.a);
     FragColor = v_Color * vec4(alpha);
-    FragColor.rgb *= vec3(texture( u_Sampler0, v_TexCoord).a);
+    // FragColor = v_Color * vec4(1.-pixelDist);
+    // FragColor.rgb *= vec3(texture( u_Sampler0, v_TexCoord).a);
 }
 `;
 

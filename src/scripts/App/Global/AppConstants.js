@@ -1,6 +1,7 @@
 "use strict";
 
-
+// Counter to increment some member variables(instaed of harcoding incrimental values)
+let cnt = 0;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Application's Constants */
@@ -44,7 +45,7 @@ const GAME_STATE = {
  * This is to create structured indexes for all scenes in the application,
  * and also store the global state of the current active scene() 
  */
-let cnt = 0;
+cnt = 0;
 const SCENE = {
     // none: 0,
     startMenu: cnt++,
@@ -52,6 +53,45 @@ const SCENE = {
     finishStage: cnt++,
     stage: cnt++,
     active: { idx: INT_NULL },
+};
+
+/**
+ * This is used to create structured indexes for all meshes of the application,
+ * so that we do not waste calculations on searching for a mesh by name (or any other id) 
+ */
+cnt = 0;
+const APP_MESHES_IDX = {
+    background: {
+        startMenu: cnt++,
+        startStage: cnt++,
+        stage: cnt++,
+        finishStage: cnt++,
+        stageMenu: cnt++,
+        Menu: cnt++,
+    },
+    buttons: {
+        play: cnt++,
+        options: cnt++,
+        start: cnt++,
+        continue: cnt++,
+        menuStage: cnt++,
+        backStage: cnt++,
+    },
+    text: {
+        totalScore: cnt++,
+    },
+    player: cnt++,
+    balls: cnt++,
+    bricks: cnt++,
+    powUps: cnt++,
+    ui: cnt++,
+    fx: {
+        ballTail: cnt++,
+        explosions: cnt++,
+        particleSystem: cnt++,
+    },
+
+    count: cnt
 };
 
 /** Ball */
@@ -68,12 +108,13 @@ const BALL = {
 };
 
 
+cnt = 0;
 //** These are static indexe for all ui text */
 const UI_TEXT_INDEX = {
-    SCORE: 0,
-    TOTAL_SCORE: 1,
-    SCORE_MOD: 2,
-    LIVES: 3,
+    SCORE: cnt++,
+    TOTAL_SCORE: cnt++,
+    SCORE_MOD: cnt++,
+    LIVES: cnt++,
 };
 
 

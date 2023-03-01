@@ -5,18 +5,60 @@ import { RectCreateRect } from '../Rect.js'
 import { CreateText } from '../Text.js'
 import { GlScale, GlSetScale, GlSetWposX } from '../../../Graphics/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../../Graphics/GlBufferOps.js';
+import { TextLabel } from './TextLabel.js';
 
 
-const BUTTON_AREA_SHADER_TYPE = SID_DEFAULT;
+// // Exporting is only for the class type(to compare with the instanceof operator)
+// export class Button{
 
+//     name = '';
+//     area = null; // Button's rect area.
+//     text = null; // Button's text faces.
+
+//     state = { // The state in which a button may be.
+//         inHover: false,
+//         inAnimation: false,
+//         inUpScale: false,
+//         inDownScale: false,
+//     };
+
+//     style = {
+//         pad: 3, // In pixels
+//         roundCorner: 0,
+//         border: 0,
+//         feather: 0,
+//     };
+
+//     constructor(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
+//         this.name = name;
+//         this.style.roundCorner = style.roundCorner;
+//         this.style.border = style.border;
+//         this.style.feather = style.feather;
+//         this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, Align);
+//         this.area = this.CreateArea(name + '-area', bkCol, this.text.dim, this.text.pos, this.text.faceWidth, style, this.style.pad);
+//     }
+
+//     CreateArea(name, col, dim, pos, charWidth, style, pad){
+//         // Create the buttons area(based on text dimentions and position)
+//         const areaWpos = pos;
+//         areaWpos[0] += dim[0] - charWidth;
+//         areaWpos[2] -= 1; // Draw btn area beneath text
+
+//         // Add padding
+//         dim[0] += pad * 2 + style.border + style.feather;
+//         dim[1] += pad * 2 + style.border + style.feather;
+
+//         const area = RectCreateRect(name, BUTTON_AREA_SHADER_TYPE, col, dim, [1, 1], null, areaWpos, style, null);
+
+//         area.defDim = area.dim; // Keep a duplicate of the first assigned dimintion.
+//         area.defWpos = area.pos; // Keep a duplicate of the first assigned dimintion.
+
+//         return area;
+//     }
+// };
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Button{
-
-    name = '';
-    area = null; // Button's rect area.
-    text = null; // Button's text faces.
-
+export class Button extends TextLabel{
     state = { // The state in which a button may be.
         inHover: false,
         inAnimation: false,
@@ -24,20 +66,8 @@ export class Button{
         inDownScale: false,
     };
 
-    style = {
-        pad: 3, // In pixels
-        roundCorner: 0,
-        border: 0,
-        feather: 0,
-    };
-
-    constructor(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
-        this.name = name;
-        this.style.roundCorner = style.roundCorner;
-        this.style.border = style.border;
-        this.style.feather = style.feather;
-        this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, Align);
-        this.area = CreateButtonArea(name + '-area', bkCol, this.text.dim, this.text.pos, this.text.faceWidth, style, this.style.pad);
+    constructor(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
+        super(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align);
     }
 };
 
@@ -67,21 +97,19 @@ export function GetButtonGfxInfo(btnIdx) {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Initialization Section
  */
-export function CreateButton(scene, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
+export function CreateButton(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
 
     const idx = buttons.count;
-    const btn = new Button(name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align);
-    // btn.area = CreateButtonArea(name + '-area', bkCol, btn.text.dim, btn.text.pos, btn.text.faceWidth, style, btn.style.pad);
-    btn.area.sid = BUTTON_AREA_SHADER_TYPE;
-    // Add buttons area to Gl buffers
-    btn.area.gfxInfo = GlAddMesh(btn.area.sid, btn.area.mesh, 1, scene, 'button', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+    const btn = new Button(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align);
 
-    // Add text meshes to Gl buffers 
-    for (let i = 0; i < btn.text.letters.length; i++) {
-        btn.text.letters[i].gfxInfo = GlAddMesh(btn.text.sid, btn.text.letters[i], 1, scene, name, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
-    }
+    // Add to Gl buffers
+    // btn.area.gfxInfo = GlAddMesh(btn.area.sid, btn.area.mesh, 1, sceneIdx, 'button', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+    // for (let i = 0; i < btn.text.letters.length; i++) {
+    //     btn.text.letters[i].gfxInfo = GlAddMesh(btn.text.sid, btn.text.letters[i], 1, sceneIdx, name, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+    // }
+
     // This is for just have the prog.idx, vb.idx,...etc info in the btn.text structure.
-    btn.text.gfxInfo = btn.text.letters[0].gfxInfo;
+    // btn.text.gfxInfo = btn.text.letters[0].gfxInfo;
 
     // Have all buttons areas in one buffer, for efficiency
     buttonsArea[idx] = btn.area.mesh;
@@ -90,26 +118,6 @@ export function CreateButton(scene, name, text, col, bkCol, dim, pos, style, fon
 
     return btn;
 }
-
-function CreateButtonArea(name, col, dim, pos, charWidth, style, pad) {
-
-    // Create the buttons area(based on text dimentions and position)
-    const areaWpos = pos;
-    areaWpos[0] += dim[0] - charWidth;
-    areaWpos[2] -= 1; // Draw btn area beneath text
-
-    // Add padding
-    dim[0] += pad * 2 + style.border + style.feather;
-    dim[1] += pad * 2 + style.border + style.feather;
-
-    const area = RectCreateRect(name, SID_DEFAULT, col, dim, [1, 1], null, areaWpos, style, null);
-
-    area.defDim = area.dim; // Keep a duplicate of the first assigned dimintion.
-    area.defWpos = area.pos; // Keep a duplicate of the first assigned dimintion.
-
-    return area;
-}
-
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -132,7 +140,6 @@ export function ButtonRunScaleAnimation(idx, scaleFactor) {
     ButtonTextScaleAnimation(idx, scaleFactor,);
 
 }
-
 /**
  * Helper function for button scale animation.
  * It sets the scale for the button's text faces.
@@ -162,16 +169,12 @@ function ButtonTextScaleAnimation(idx, scaleFactor) {
          * starting position  
         */
         const extraWidth = buttons.btn[idx].style.pad * 2 + buttons.btn[idx].style.border + buttons.btn[idx].style.feather;
-        // accumTextWidth += buttons.btn[idx].text.letters[i].dim[0] * (scaleFactor*1.04); 
         accumTextWidth += buttons.btn[idx].text.letters[i].dim[0];
-        // posx = buttonsArea[idx].pos[0] - buttonsArea[idx].dim[0] + (extraWidth * scaleFactor) + accumTextWidth;
         posx = buttonsArea[idx].pos[0] - buttonsArea[idx].dim[0] + extraWidth + accumTextWidth;
         GlSetWposX(buttons.btn[idx].text.letters[i].gfxInfo, posx);
-        // accumTextWidth += buttons.btn[idx].text.letters[i].dim[0] * (scaleFactor*1.04);
         accumTextWidth += buttons.btn[idx].text.letters[i].dim[0];
     }
 }
-
 /**
  * Set the default values for a button
  * after completing an animation for scale.
@@ -204,7 +207,6 @@ export function ButtonSetDefaultMeshProps(idx) {
 
     }
 }
-
 export function ButtonSetRoundCorner(roundnes) {
 
     for (let i = 0; i < buttonsArea.length; i++) {

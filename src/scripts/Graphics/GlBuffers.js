@@ -177,8 +177,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffe
 
             // Must initialize attribute locations of the shader for every newly created program
             GlEnableAttribsLocations(gfxCtx.gl, progs[progIdx]);
-
-            console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:',  progIdx);
+            if(dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:',  progIdx);
 
     }
     else{
@@ -271,7 +270,7 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffe
                 gfxCtx.gl.bindBuffer(gfxCtx.gl.ELEMENT_ARRAY_BUFFER, ib.buffer);
                 ib.data = new Uint16Array(MAX_INDEX_BUFFER_COUNT);
                 ib.vao = vb.vao;
-                console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:',  progIdx)
+                if(dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:',  progIdx)
         }
         else {
                 ib = progs[progIdx].indexBuffer[ibIdx];

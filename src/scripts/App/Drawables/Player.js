@@ -1,7 +1,7 @@
 "use strict";
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { Mesh } from '../../Engine/Drawables/Mesh.js'
-import { GlScale, GlSetColor, GlSetDim, GlSetWposX } from '../../Graphics/GlBufferOps.js';
+import { GlScale, GlSetColor, GlSetDim, GlSetWpos, GlSetWposX } from '../../Graphics/GlBufferOps.js';
 import { BallPlayerCollision } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
 import { DimColor } from '../../Helpers/Helpers.js';
@@ -9,22 +9,15 @@ import { Max3 } from '../../Helpers/Math/MathOperations.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { Rect } from '../../Engine/Drawables/Rect.js';
 
+const PLAYER_DEF_COLOR = BLUE_13_125_217;
 
 // Exporting is only for the class type(to compare with the instanceof operator)
 export class Player extends Rect{
 // export class Player{
     constructor(sid, col, dim, scale, tex, pos, style, speed) {
-        super(sid, col, dim, scale, tex, pos, style, null);
-        // super();
-        // this.sid = sid;
-        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
+        super('player', sid, col, dim, scale, tex, pos, style, null);
         this.speed = speed;
     }
-
-    // sid = 0;
-    // mesh = null;
-    // gfxInfo = null;
-    // display = false;
 
     speed = 0;
     mouseDist = 0;
@@ -42,17 +35,6 @@ export class Player extends Rect{
         inDownScale: false,
     };
 
-    // DimColor(){
-    //     const minCol = 0.2;
-    //     const col = DimColor(this.mesh.col, 0.99); 
-    //     const max = Max3(col[0], col[1], col[2])
-    //     if(max > minCol){
-    //         GlSetColor(this.gfxInfo, col);
-    //         this.mesh.col = col;
-    //         return true;
-    //     }
-    //     return false;
-    // }
 };
 
 let player = null;
@@ -67,7 +49,7 @@ export function CreatePlayer(scene) {
     const speed = 4.0;
     const sid = SID_DEFAULT;
     const pl = new Player(
-        sid, BLUE_13_125_217,
+        sid, PLAYER_DEF_COLOR,
         [80.0, 10.0], [1.0, 1.0], null, [Viewport.width / 2, Viewport.bottom - 60, 4.0],
         style, speed
     );
@@ -93,6 +75,11 @@ export function PlayerBallCollision() {
 }
 export function PlayerPowerUpCollision() {
     PowerUpPlayerCollision(player.mesh.pos, player.mesh.dim[0], player.mesh.dim[1]);
+}
+export function PlayerReset(){
+    player.mesh.pos = player.mesh.defPos;
+    GlSetWpos(player.gfxInfo, player.mesh.defPos);
+    GlSetColor(player.gfxInfo, PLAYER_DEF_COLOR)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -1,7 +1,7 @@
 "use strict";
 import { PlayerGetPlayer, PlayerRunEnlargeAnimation } from "../../App/Drawables/Player.js";
 import { PowerUpRunAnimation } from "../../App/Drawables/PowerUp.js";
-import { UiModRunAnimation } from "../../App/Drawables/Ui/Ui.js";
+// import { UiModRunAnimation } from "../../App/Drawables/Ui/Ui.js";
 import { ButtonGetButtons, ButtonRunScaleAnimation, ButtonSetDefaultMeshProps } from "../Drawables/Widgets/Button.js";
 
 
@@ -69,7 +69,7 @@ export function AnimationsGet(){
 export function RunAnimations() {
 
     ButtonCreateScaleAnimation();
-    UiModRunAnimation();
+    // UiModRunAnimation();
     PowerUpRunAnimation();
     PlayerEnlargeAnimation();
 
@@ -125,7 +125,7 @@ function ButtonCreateScaleAnimation() {
             if(!state.inHover && state.inDownScale && area.scale[0] === minDownScale){
                
                ButtonSetDefaultMeshProps(i);
-               console.log(state.inAnimation)
+            //    console.log(state.inAnimation)
                state.inAnimation = false;
             }
             state.inUpScale   = false;

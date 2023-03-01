@@ -144,7 +144,6 @@ const intervalTimers = {
 };
 
 export function SetTimer(fn, ms, FpsNode){
-
     intervalTimers.t1s = setInterval(fn, ms, FpsNode);
 }
 

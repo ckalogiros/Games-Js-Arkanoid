@@ -2,19 +2,19 @@
 import { GlGetVB } from '../Graphics/GlProgram.js';
 import { Player, CreatePlayer } from './Drawables/Player.js';
 import { Button, CreateButton } from '../Engine/Drawables/Widgets/Button.js';
-import { BallCreate, BallCreateSlowSpeedAnimation, BallResetPos } from './Drawables/Ball.js';
+import { BallCreate, BallResetPos } from './Drawables/Ball.js';
 import { Rect, RectCreateRect } from '../Engine/Drawables/Rect.js';
 import { Text, CalcTextWidth } from '../Engine/Drawables/Text.js';
 import { DarkenColor } from '../Helpers/Helpers.js';
-import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiGet, UiTextVariable } from './Drawables/Ui/Ui.js';
+import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiGet, UiTextVariable, UiCreateTotalScore } from './Drawables/Ui/Ui.js';
 import { GlAddMesh, GfxSetVbShow } from '../Graphics/GlBuffers.js';
 import { BallsInit } from './Drawables/Ball.js';
 import { Explosions, ExplosionsGet } from '../Engine/Events/Explosions.js';
 import { ParticleSystem, ParticleSystemGet } from '../Engine/ParticlesSystem/Particles.js';
 import { PowerUpGet, PowerUpReset, PowerUps } from './Drawables/PowerUp.js';
-import { StageCreateStage1, StageCreateStage2 } from './Stages.js';
-import { BrickCreateParticleSystem, BrickInit } from './Drawables/Brick.js';
-import { GlSetColor } from '../Graphics/GlBufferOps.js';
+import { StageCreateStage2 } from './Stages.js';
+import { BrickInit } from './Drawables/Brick.js';
+import { TextLabel } from '../Engine/Drawables/Widgets/TextLabel.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  LOGIC:
@@ -48,40 +48,7 @@ import { GlSetColor } from '../Graphics/GlBufferOps.js';
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-/**
- * This is used to create structured indexes for all meshes of the application,
- * so that we do not waste calculations on searching for a mesh by name (or any other id) 
- */
-let cnt = 0;
-const APP_MESHES_IDX = {
-    background: {
-        startMenu:  cnt++,
-        startStage: cnt++,
-        stage:      cnt++,
-        finishStage: cnt++,
-        stageMenu:  cnt++,
-        Menu:       cnt++,
-    },
-    buttons: {
-        play: cnt++,
-        options: cnt++,
-        start: cnt++,
-        menuStage: cnt++,
-        backStage: cnt++,
-    },
-    player: cnt++,
-    balls: cnt++,
-    bricks: cnt++,
-    powUps: cnt++,
-    ui: cnt++,
-    fx: {
-        ballTail: cnt++,
-        explosions: cnt++,
-        particleSystem: cnt++,
-    },
 
-    count: cnt
-};
 
 class Scene {
     /**
@@ -124,12 +91,16 @@ class Scene {
             this.StoreGfxBuffer(mesh[0].gfxInfo);
             // this.meshesIdx.push(idx);
         }
-        else if (mesh instanceof Button || mesh instanceof Text) {
+        else if (mesh instanceof Button) {
             this.buttons.push(mesh);
             this.btnCount++;
             this.StoreGfxBuffer(mesh.text.gfxInfo);
             this.StoreGfxBuffer(mesh.area.gfxInfo);
             // this.meshesIdx.push(idx);
+        }
+        else if (mesh instanceof TextLabel || mesh instanceof Text) {
+            this.StoreGfxBuffer(mesh.text.gfxInfo);
+            this.StoreGfxBuffer(mesh.area.gfxInfo);
         }
         else if (mesh instanceof PowerUps) {
             this.StoreGfxBuffer(mesh.powUp[0].gfxInfo);
@@ -175,12 +146,6 @@ class Scene {
             GfxSetVbShow(this.gfxBuffers[i].progIdx, this.gfxBuffers[i].vbIdx, false)
         }
     }
-    // DimColor(){
-    //     const len = this.gfxBuffers.length;
-    //     for(let i=0; i<len; i++){
-
-    //     }
-    // }
 
 };
 
@@ -218,6 +183,11 @@ export function ScenesGetScene(sceneIdx) {
         alert('Scene Index Out Of Bounds!');
 
     return scenes.scene[sceneIdx];
+}
+
+export function ScenesGetMesh(meshIdx){
+    const mesh = scenes.allMeshes[meshIdx];
+    return mesh;
 }
 
 /**
@@ -263,8 +233,6 @@ export function ScenesCreateAllMeshes() {
     stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     // 1, SCENE.stage, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
-
-
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Backgrounds */
 
@@ -311,11 +279,17 @@ export function ScenesCreateAllMeshes() {
 
     // Options (in stage scenes) button
     btnDim[0] = CalcTextWidth('MENU', fontSize);
-    // btnPos[0] *= -1; // Padd for the right must be negative
     btnPos[0] = -20; // Padd fro the right must be negative
     const menuStageBtn = CreateButton(SCENE.stage, 'MenuBtn', 'MENU', WHITE, BLUE_13_125_217,
         btnDim, btnPos, style, fontSize, true, ALIGN.RIGHT | ALIGN.TOP);
     scenes.AddMesh(menuStageBtn, APP_MESHES_IDX.buttons.menuStage);
+
+    // Continue (after completing a stage) button
+    btnDim[0] = CalcTextWidth('CONTINUE', fontSize);
+    btnPos = [0, 100, btnPos[2]]; 
+    const continueBtn = CreateButton(SCENE.finishStage, 'ContinueBtn', 'CONTINUE', WHITE, BLUE_13_125_217,
+        btnDim, btnPos, style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
+    scenes.AddMesh(continueBtn, APP_MESHES_IDX.buttons.continue);
 
     // Connect the font texture of (for button's text) with the vertex buffer for text rendering. 
     // Get the vertexBuffer for the text rendering Gfx program of of any button mesh(assuming all buttons have text)
@@ -323,6 +297,16 @@ export function ScenesCreateAllMeshes() {
     vb.texIdx = Texture.fontConsolasSdf35; // TODO: Temporary binding of the font texture to the text rendering VertexBuffer
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * End Buttons */
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Text-Labels */
+   const score = 'Total Score: XXXXXXXXX';
+    const showTotalScore = new TextLabel(SCENE.finishStage, 'showTotalScore', score, WHITE, TRANSPARENT, [0,0], [0,0,0], style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT); 
+    scenes.AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * End Text-Labels */
+
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Player */
@@ -338,6 +322,7 @@ export function ScenesCreateAllMeshes() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * UI */
     UiCreateScore(SCENE.stage);
+    UiCreateTotalScore(SCENE.stage);
     UiCreateScoreModifier(SCENE.stage);
     UiCreateLives(SCENE.stage);
     const uiTexts = UiGet();
@@ -396,7 +381,7 @@ export function ScenesCreateScene(sceneIdx) {
             scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
             meshIdx = APP_MESHES_IDX.buttons.start;
             scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-            
+
             scenes.scene[idx].sceneIdx = sceneIdx;
             scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
             scenes.scene[idx].SetAllGfxBuffersToHidden(); // Hide scene's meshes
@@ -412,7 +397,9 @@ export function ScenesCreateScene(sceneIdx) {
             // Add here all required meshes, for this specific scene, to the scene's buffer
             let meshIdx = APP_MESHES_IDX.background.finishStage;
             scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-            meshIdx = APP_MESHES_IDX.buttons.start;
+            meshIdx = APP_MESHES_IDX.text.totalScore;
+            scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+            meshIdx = APP_MESHES_IDX.buttons.continue;
             scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
 
             scenes.scene[idx].sceneIdx = sceneIdx;
@@ -455,7 +442,7 @@ export function ScenesCreateScene(sceneIdx) {
             meshIdx = APP_MESHES_IDX.ui;
             scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
 
-            StageCreateStage1();
+            // StageCreateStage1();
 
             scenes.scene[idx].sceneIdx = sceneIdx;
             scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
@@ -510,20 +497,6 @@ export function ScenesLoadScene(sceneIdx) {
 }
 
 
-// export function ScenesStageCompleted() {
-//     g_state.game.stageCompleted = false
-//     // Create an animation. 
-//     // This will run once and will automaticaly update the animation from Renderer.Render.RunAnimations()
-//     BallCreateSlowSpeedAnimation(); 
-    
-//     // // ScenesLoadScene(SCENE.startStage);
-//     // ScenesLoadScene(SCENE.finishStage);
-//     // StageCreateStage2();
-//     // BallResetPos();
-//     // // Reset Power Ups
-//     // PowerUpReset();
-//     // // TODO: Fx reset
-// }
 /**
  * TODO: Put here:
  *      load stage scene

@@ -209,10 +209,12 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
                 plPos[1] - plh <= powpos[1] + powh
                 ){
                     // DestroyPowerUp(i);
-                    powUps.Destroy(i);
                     scoreMod  = 0.5;
-                    UiCreateModifierValue(powpos, scoreMod);
+                    // UiCreateModifierValue(powpos, scoreMod);
+                    console.log('-------1:', powUps.powUp[i].mesh.pos[0])
+                    UiCreateModifierValue(powUps.powUp[i].mesh.pos, scoreMod);
                     UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
+                    powUps.Destroy(i);
 
                     // Set PowerUps
                     if(powUps.powUp[i].type == POWUP_TYPES.BALL){

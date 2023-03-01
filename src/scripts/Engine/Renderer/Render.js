@@ -31,7 +31,8 @@ export function Render() {
         GlDraw();
     }
     
-    requestAnimationFrame(function () { Render(); });
+    // requestAnimationFrame(function () { Render(); });
+    requestAnimationFrame(Render);
     
     fps.Stop();
 }
@@ -68,9 +69,6 @@ function UpdateFireBall(){
     prog.UniformsSetParamsBufferValue(ball.amty, UNIFORM_PARAMS.fireBall.temp2Idx);
     prog.UniformsSetParamsBufferValue(ball.xdir, UNIFORM_PARAMS.fireBall.temp3Idx);
     prog.UniformsSetParamsBufferValue(ball.ydir, UNIFORM_PARAMS.fireBall.temp4Idx);
-    
-
-    
 }
 
 

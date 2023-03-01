@@ -1,7 +1,7 @@
 "use strict";
 import {VertexShaderChoose} 	from './Shaders/VertexShaders.js'
 import {FragmentShaderChoose} 	from './Shaders/FragmentShaders.js'
-import {GetShaderTypeId} 	    from './Debug/GfxDebug.js'
+import * as dbg from './Debug/GfxDebug.js'
 
 
 
@@ -13,7 +13,7 @@ export function LoadShaderProgram(gl, sid) {
 	};
 	const program = LoadShaders(gl, shader);
 	if (program){
-		console.log('Shader Program Created Sucessuly!\nShader Type ID: ', GetShaderTypeId(sid));
+		if(dbg.GL_DEBUG_SHADERS) console.log('Shader Program Created Sucessuly!\nShader Type ID: ', dbg.GetShaderTypeId(sid));
 	} else {
 		alert('Unable to CREATE shader program: ' + gl.getProgramInfoLog(program));
 	}

@@ -3,7 +3,7 @@ import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { Mesh } from "../../Engine/Drawables/Mesh.js";
 import { GlSetWpos, GlSetColor } from "../../Graphics/GlBufferOps.js";
 import { PlayerGetPos, PlayerGetDim } from "./Player.js";
-import { UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
+import { ModCreateAnimation, UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
 import { MouseGetXdir } from "../../Engine/Events/MouseEvents.js";
 import { PowerUpCreate } from "./PowerUp.js";
 import { GetRandomPos, GetRandomColor, DimColor } from "../../Helpers/Helpers.js";
@@ -18,18 +18,14 @@ import { Rect } from "../../Engine/Drawables/Rect.js";
 const MAX_BALLS_COUNT = 1;
 const BALL_MAX_SPEED = 12;
 const BALL_MIN_SPEED = 1.2;
+const BALL_DEF_SPEED = 4;
+// const BALL_DEF_POS = [Viewport.width/2, Viewport.bottom - 82, 2];
 
 
 // Exporting is only for the class type(to compare with the instanceof operator)
 export class Ball extends Rect{
-// export class Ball{
-    
-    // sid = 0;
-    // mesh = null;
-    // gfxInfo = null;
-    // display = false;
 
-    speed = 2;
+    speed = BALL_DEF_SPEED;
     mouseDist = 0;
     size = 0;
     
@@ -44,18 +40,15 @@ export class Ball extends Rect{
 
     constructor(sid, col, dim, scale, tex, pos, style, speed, isFree) {
         
-        super(sid, col, dim, scale, tex, pos, style, null)
-        
-        // this.sid = sid;
-        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
+        super('ball', sid, col, dim, scale, tex, pos, style, null);
 
         this.speed = speed;
         this.isFree = isFree;
     }
 
     ResetPos(){
-        this.mesh.pos = [0, Viewport.bottom - 82, 2];
-        GlSetWpos(this.gfxInfo, [0, Viewport.bottom - 82, 2])
+        this.mesh.pos = [Viewport.width/2, Viewport.bottom - 82, 2];
+        GlSetWpos(this.gfxInfo, [Viewport.width/2, Viewport.bottom - 82, 2])
     }
     SetPos(pos){
         this.mesh.pos = pos;
@@ -114,6 +107,14 @@ export function BallRelease() {
 export function BallIsInStartPos() {
     return ballInStartPos;
 }
+export function BallReset(){
+    mainBall.ResetPos();
+    ballInStartPos = true;
+    mainBall.speed = BALL_DEF_SPEED;
+    mainBall.SetColor(WHITE);
+    BallRedFlame(-acceleration);
+
+}
 export function BallResetPos(){
     mainBall.ResetPos();
     ballInStartPos = true;
@@ -146,7 +147,8 @@ export function BallSetSpeed(val){
 
 function BallRedFlame(val){
     const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
-    prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
+    acceleration+=val;
+    prog.UniformsSetParamsBufferValue(acceleration, UNIFORM_PARAMS.particles.idx0);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -552,6 +554,7 @@ export function BallBrickCollision(brpos, brw, brh) {
 
         if(intersects){
             UiCreateModifierValue(brpos, 1.1);
+            // ModCreateAnimation(brpos, 1.1);
             UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
             PowerUpCreate(brpos);
         }
@@ -602,7 +605,6 @@ export function BallCreateSlowSpeedAnimation(){
 }
 function BallStopSlowSpeedAnimation(){ 
     console.log('Stop Ball Animation')
-    // ScenesStageCompleted23RenameMe();
 }
 function RunBallSlowSpeedAnimation(){ // This is the callback to the Animations.clbk at Animations.js
     const intensity = 0.1;

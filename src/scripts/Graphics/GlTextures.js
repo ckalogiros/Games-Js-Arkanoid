@@ -43,8 +43,8 @@ export function GlCreateTexture(name, gl, url) {
     texture.name            = name;
     texture.texId           = gl.TEXTURE0 + texture.idx; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
     texture.level           = 0;
-	texture.internalFormat  = gl.RGBA;
-	texture.srcFormat       = gl.RGBA;
+	texture.internalFormat  = gl.RGB;
+	texture.srcFormat       = gl.RGB;
 	texture.srcType         = gl.UNSIGNED_BYTE;
 
     gl.activeTexture(texture.texId);
@@ -63,6 +63,7 @@ export function GlCreateTexture(name, gl, url) {
 
 export function LoadTexture(gl, texture) {
     
+
     if(texture.imgSrc){
 
         texture.img.onload = function () {
@@ -79,6 +80,7 @@ export function LoadTexture(gl, texture) {
             texture.width = texture.img.width;
             texture.height = texture.img.height;
         };
+
     }
     else{
 

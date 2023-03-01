@@ -16,7 +16,8 @@ export class Rect {
     // For debuging
     name = '';
 
-    constructor(sid, col, dim, scale, tex, pos, style, time) {
+    constructor(name, sid, col, dim, scale, tex, pos, style, time) {
+        this.name = name;
         this.sid = sid;
         this.display = true;
         this.mesh = new Mesh(col, dim, scale, tex, pos, style, time);
@@ -44,9 +45,5 @@ export class Rect {
 }
 
 export function RectCreateRect(name, sid, col, dim, scale, tex, pos, style, time) {
-
-    const rect = new Rect(sid, col, dim, scale, tex, pos, style, time);
-    rect.name = name;
-
-    return rect;
+    return new Rect(name, sid, col, dim, scale, tex, pos, style, time);
 }

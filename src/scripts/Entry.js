@@ -2,8 +2,14 @@
 import { AppInit } from './App/App.js';
 
 
-(function Entry() {
+window.onload = Entry;
 
+function Entry(){
   AppInit();
+}
 
-})();
+// (function Entry() {
+
+//   AppInit();
+
+// })();

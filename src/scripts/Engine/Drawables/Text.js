@@ -1,23 +1,74 @@
 "use strict";
+import * as math from '../../Helpers/Math/MathOperations.js'
 import { FontGetUvCoords, FontGetFontDimRatio } from '../Loaders/Font/LoadFont.js'
 import { Mesh } from './Mesh.js'
 
 
 
 export class Text {
-	len = 0;
-	name = '';
-	dim = [0, 0]; // Dimentions x,y as an array[2]
-	pos = [0, 0, 0];
+	sid = 0;
+	len = 0; // Number of characters in the text
+	name = ''; // The actual text. TODO: rename to something more apropriate
+	dim = [0, 0]; // The width and height of the whole text
+	pos = [0, 0, 0]; // The position of the whole text
 	display = true;
+	gfxInfo = null; // 
 
-	faceWidth = 0;
+	faceWidth = 0; // Only for monospace fonts
 	faceHeight = 0;
+	textWidth = 0;
 
 	letters = [];
 
-	sid = 0;
-	gfxInfo = null;
+
+	constructor(sid, col, pos, dim, style, txt, fontSize, align){
+		this.sid 	 = sid;
+		this.len 	 = txt.length;
+		this.name 	 = txt;
+		math.CopyArr3(this.pos, pos);
+		this.faceWidth = fontSize;
+		this.faceHeight = fontSize * FontGetFontDimRatio();;
+		this.textWidth = CalcTextWidth(txt, fontSize);
+		this.dim[1] = this.faceHeight; // The x dimention of the whole text is going to be calculated for each char in txt
+
+		this.Align(align);
+		this.CreateLetters(col, pos, txt, style)
+	}
+
+	Align(align){
+		
+		if (align & ALIGN.LEFT) { // TODO: Unecessary. left is 0.
+			this.pos[0] += Viewport.left;
+		}
+		else if (align & ALIGN.RIGHT) {
+			this.pos[0] += Viewport.right - ((this.textWidth * 2) + this.faceWidth);
+		}
+		else if (align & ALIGN.CENTER_HOR) { // Center
+			this.pos[0] += Viewport.width / 2;
+			this.pos[0] -= this.textWidth - this.faceWidth;
+		}
+		if (align & ALIGN.TOP) {
+			this.pos[1] += Viewport.top + (this.faceHeight);
+		}
+		else if (align & ALIGN.BOTTOM) {
+			this.pos[1] += Viewport.top - (this.faceHeight);
+		}
+		else if (align & ALIGN.CENTER_VERT) { // Center
+			this.pos[1] += (Viewport.height / 2) - this.faceWidth;
+		}
+	}
+	CreateLetters(col, pos, txt, style){
+		// Use a dummy pos[0](x coord) to calculate the distance to the next character of the text
+		let posi = [0, 0, 0];
+		math.CopyArr3(posi, this.pos)
+	
+		for (let i = 0; i < this.len; i++) {
+			this.letters[i] = new Mesh(col, [this.faceWidth, this.faceHeight], SCALE_DEFAULT, 
+												FontGetUvCoords(txt[i]), posi, style, null);
+			posi[0] += this.faceWidth * 2;
+			this.dim[0] += this.faceWidth;
+		}
+	}
 }
 
 /**
@@ -30,80 +81,14 @@ export class Text {
  * @param {*} Align : Left/Right/Top/Bottom in relation with the game window.
  * @returns : class Text
  */
-export function CreateText(txt, col, dim, _pos, style, fontSize, useSdfFont, Align) {
+export function CreateText(txt, col, dim, pos, style, fontSize, useSdfFont, align) {
 
-	const text = new Text;
-
-	text.sid 	 = SID_DEFAULT_TEXTURE_SDF;
-	text.len 	 = txt.length;
-	text.name 	 = txt;
-	text.display = true;
-
-
-	// Do a deep copy of param position (to avoid copy by ref (shallow copy))
-	let pos = []
-	pos[0] = _pos[0];
-	pos[1] = _pos[1];
-	pos[2] = _pos[2];
-
-
-	const faceWidth = fontSize;
-	const faceHeight = fontSize * FontGetFontDimRatio();
-	const textWidth = CalcTextWidth(txt, fontSize);
-
-	let alignx = 0; // For calculating text's align in x axis
-	let aligny = 0;
-
-	if (Align & ALIGN.LEFT) { // TODO: Unecessary. left is 0.
-		alignx = Viewport.left;
-		pos[0] += alignx;
-	}
-	else if (Align & ALIGN.RIGHT) {
-		alignx = Viewport.right;
-		pos[0] += alignx - ((textWidth * 2) + faceWidth);
-	}
-	else if (Align & ALIGN.CENTER_HOR) { // Center
-		pos[0] += Viewport.width / 2;
-		pos[0] -= textWidth - faceWidth;
-	}
-	if (Align & ALIGN.TOP) {
-		aligny = Viewport.top;
-		pos[1] += aligny + (faceHeight);
-	}
-	else if (Align & ALIGN.BOTTOM) {
-		aligny = Viewport.bottom;
-		pos[1] += aligny - (faceHeight);
-	}
-	else if (Align & ALIGN.CENTER_VERT) { // Center
-		pos[1] = (Viewport.height / 2) - faceWidth;
-	}
-
-	text.dim[1] = faceHeight;
-	text.pos[0] = pos[0];
-	text.pos[1] = pos[1];
-	text.pos[2] = pos[2];
-	text.faceWidth = faceWidth;
-	text.faceHeight = faceHeight;
-
-	// Create face mesh for each letter of the txt
-	for (let i = 0; i < text.len; i++) {
-
-		text.letters[i] = new Mesh(col, [faceWidth, faceHeight], SCALE_DEFAULT, FontGetUvCoords(txt[i]), pos, style, null);
-		pos[0] += faceWidth * 2;
-		text.dim[0] += faceWidth;
-	}
-
-	text.defWpos = text.pos; // Keep a copy of the starting position
-	// text.defScale = SCALE_DEFAULT; // Keep a copy of the starting scale
-
+	const text = new Text(SID_DEFAULT_TEXTURE_SDF, col, pos, dim, style, txt, fontSize, align);
 	return text;
 }
 
 export function CalcTextWidth(text, fontSize) {
-
-	let textWidth = 0;
-	for (let i = 0; i < text.length; i++)
-		textWidth += fontSize;
-
-	return textWidth;
+	return text.length * fontSize;
 }
+
+
