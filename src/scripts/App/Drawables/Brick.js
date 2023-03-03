@@ -8,8 +8,10 @@ import { ExplosionsCreateExplosion } from '../../Engine/Explosions.js';
 import { ParticlesCreateParticleSystem } from '../../Engine/ParticlesSystem/Particles.js';
 import { OnStageCompleted } from '../../Engine/Events/SceneEvents.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
+import { Rect } from '../../Engine/Drawables/Rect.js';
 
 
+// class Brick extends Rect{
 class Brick {
 
     sid = 0;
@@ -17,7 +19,7 @@ class Brick {
     mesh = null;
     gfxInfo = null;
 
-    active = false;
+    isActive = false;
 
     inAnimation = false;
     animation = {
@@ -28,6 +30,7 @@ class Brick {
     constructor(sid, col, dim, scale, tex, pos, style) {
         this.sid = sid;
         this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
+        // this.mesh = new Rect(col, dim, scale, tex, pos, style, null, null);
     }
 
     SetPos(pos) {
@@ -52,6 +55,11 @@ class Brick {
         this.mesh.col[3] = alpha;
         GlSetColorAlpha(this.gfxInfo, alpha);
     }
+    Destroy(){
+        this.mesh.col[3] = 0.0;
+        GlSetColorAlpha(this.gfxInfo, 0.0);
+        this.isActive = false;
+    }
 };
 
 class Bricks {
@@ -69,14 +77,14 @@ class Bricks {
             this.brick[i] = new Brick(sid, TRANSPARENT, dim, [1.0, 1.0], null, pos, style);
             this.brick[i].gfxInfo = GlAddMesh(this.brick[i].sid, this.brick[i].mesh, 1, sceneIdx, 'Bricks',
                 DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
-            this.brick[i].active = false;
+            this.brick[i].isActive = false;
             this.size++;
         }
     }
     GetNextFree() {
         const len = this.brick.length;
         for (let i = 0; i < len; i++) {
-            if (!this.brick[i].active) {
+            if (!this.brick[i].isActive) {
                 return this.brick[i];
             }
         }
@@ -90,6 +98,16 @@ class Bricks {
             this.brick[i].mesh.col = col;
         }
     }
+    Reset(){
+        for(let i=0; i<this.size; i++){
+            if(this.brick[i].isActive){
+                this.brick[i].Destroy();
+                this.count--;
+                if(this.count < 0) alert('Bricks Reset count is minus')
+            }
+        }
+    }
+
 }
 
 const bricks = new Bricks;
@@ -122,7 +140,7 @@ export function BrickCreateBrick(pos, dim) {
     br.SetPos(pos);
     br.SetDim(dim);
     br.SetColor(ORANGE_230_148_0);
-    br.active = true;
+    br.isActive = true;
     bricks.count++;
 
     // TODO: It might not belong here. Put some place else
@@ -132,23 +150,30 @@ export function BrickCreateBrick(pos, dim) {
 
     return br;
 }
+export function BrickReset(){
+    // Destroy any active bricks
+    bricks.Reset();
+}
+
+
 export function BrickBallCollision() {
 
     for (let i = 0; i < bricks.size; i++) {
 
-        if (bricks.brick[i].active) {
+        if (bricks.brick[i].isActive) {
 
             if (BallBrickCollision(bricks.brick[i].mesh.pos, bricks.brick[i].mesh.dim[0], bricks.brick[i].mesh.dim[1])) {
                 // bricks.brick[i].SetColorAlpha(0.0);
-                // bricks.brick[i].active = false;
                 // bricks.count--;
-
+                
                 // Create brick destroy animation
                 BrickDestroyAnimation(i);
                 // Set active the program that draws the explosions
                 ExplosionsCreateExplosion(bricks.brick[i].mesh.pos);
                 BrickCreateParticles(i);
-
+                
+                bricks.brick[i].isActive = false;
+                
                 // If this is the last breaked brick of the stage,
                 // Set global state  'Stage completed'
                 if (bricks.count <= 0) {
@@ -260,16 +285,13 @@ export function BrickDestroyAnimation(i) {
 function BrickStopDestroyStopAnimation(i) {
     console.log('Stop Brick Animation')
     bricks.brick[i].SetColorAlpha(0.0);
-    bricks.brick[i].active = false;
-    bricks.count--;
-    // BrickCreateParticles(i);
 }
 function BrickDestroyStartAnimation(i) { // This is the callback to the Animations.clbk at Animations.js
     if (bricks.brick[i].mesh.dim[0] > 9) {
         // Scale
         const scalex = bricks.brick[i].mesh.scale[0];
-        if (scalex > 1.5 && bricks.brick[i].animation.inUpScale) {
-            bricks.brick[i].animation.scaleFactor = 0.96;
+        if (scalex > 1.3 && bricks.brick[i].animation.inUpScale) {
+            bricks.brick[i].animation.scaleFactor = 0.9;
             bricks.brick[i].animation.inUpScale = false;
         }
         // if(!bricks.brick[i].animation.inUpScale && bricks.brick[i].animation.scaleFactor > 0.9){

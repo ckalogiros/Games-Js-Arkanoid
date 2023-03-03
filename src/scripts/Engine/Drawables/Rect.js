@@ -1,6 +1,6 @@
 "use strict";
 import * as math from '../../Helpers/Math/MathOperations.js'
-import { GlSetColor } from "../../Graphics/GlBufferOps.js";
+import { GlSetColor, GlSetWpos, GlSetDim, GlSetColorAlpha } from "../../Graphics/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
 import { Max3 } from "../../Helpers/Math/MathOperations.js";
 import { Mesh } from "./Mesh.js";
@@ -41,6 +41,22 @@ export class Rect {
             return true;
         }
         return false;
+    }
+    SetColor(col) {
+        math.CopyArr4(this.mesh.col, col);
+        GlSetColor(this.gfxInfo, col);
+    }
+    SetPos(pos) {
+        math.CopyArr3(this.mesh.pos, pos);
+        GlSetWpos(this.gfxInfo, pos);
+    }
+    SetDim(dim) {
+        math.CopyArr2(this.mesh.dim, dim);
+        GlSetDim(this.gfxInfo, dim);
+    }
+    SetColorAlpha(alpha) {
+        this.mesh.col[3] = alpha;
+        GlSetColorAlpha(this.gfxInfo, alpha);
     }
 }
 

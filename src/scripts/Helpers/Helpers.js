@@ -103,7 +103,7 @@ export function CalculateSdfOuterFromDim(dim){
                         *(SDF_PARAMS_VALS.dimMax-dim)
                         // *(SDF_PARAMS_VALS.outerMin + ((SDF_PARAMS_VALS.dimMax-dim)))
                         // *(SDF_PARAMS_VALS.dimMax-dim)*(SDF_PARAMS_VALS.outerMin + (dim-SDF_PARAMS_VALS.dimMin))
-    console.log(sdfOuter, dim)
+    // console.log(sdfOuter, dim)
     return sdfOuter;
 }
 

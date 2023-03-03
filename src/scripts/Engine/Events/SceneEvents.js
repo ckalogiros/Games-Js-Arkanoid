@@ -2,7 +2,7 @@
 import { PlayerCreateDimColorAnimation, PlayerPowerUpCollision, PlayerReset, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
 import { BallCreateDimColorAnimation, BallCreateSlowSpeedAnimation, BallOnUpdate, BallReset } from "../../App/Drawables/Ball.js";
 import { PlayerBallCollision } from "../../App/Drawables/Player.js";
-import { BrickBallCollision, BrickOnUpdate } from "../../App/Drawables/Brick.js";
+import { BrickBallCollision, BrickOnUpdate, BrickReset } from "../../App/Drawables/Brick.js";
 import { ExplosionsUpdate } from "../Explosions.js";
 import { ScenesGetMesh, ScenesLoadScene } from "../../App/Scenes.js";
 import { AnimationsGet } from "../Animations/Animations.js";
@@ -85,6 +85,7 @@ export function OnStageCompleted(){
 export function OnStageStart(){
     PlayerReset();
     BallReset();
+    BrickReset();
     PowerUpReset();
 }
 
@@ -94,7 +95,6 @@ function ShowTotalScoreTemp(){
     // Animate the score 
     const animations = AnimationsGet();
     animations.Create(TempIncrementScore, TempStopIncrementScore);
-
 }
 
 let cnt = 0;

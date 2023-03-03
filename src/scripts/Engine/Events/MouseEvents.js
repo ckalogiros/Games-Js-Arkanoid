@@ -101,15 +101,15 @@ export function OnMouseClick(event) {
                 break;
             }
             case 'startStageBtn': {
+                OnStageStart();
                 ScenesLoadScene(SCENE.stage);
                 StageGetNextStage();
-                OnStageStart();
                 break;
             }
             case 'ContinueBtn': {
+                OnStageStart();
                 ScenesLoadScene(SCENE.stage);
                 StageGetNextStage();
-                OnStageStart();
                 break;
             }
         }
