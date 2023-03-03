@@ -22,12 +22,12 @@ export class TextLabel {
         feather: 0,
     };
 
-    constructor(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, Align) {
+    constructor(sceneIdx, name, text, col, bkCol, dim, pos, style, fontSize, useSdfFont, sdfInner, Align) {
         this.name = name;
         this.style.roundCorner = style.roundCorner;
         this.style.border = style.border;
         this.style.feather = style.feather;
-        this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, Align);
+        this.text = CreateText(text, col, dim, pos, style, fontSize, useSdfFont, sdfInner, Align);
         this.area = this.CreateArea(name + '-area', bkCol, this.text.dim, this.text.pos, this.text.faceWidth, style, this.style.pad);
         this.area.gfxInfo = GlAddMesh(this.area.sid, this.area.mesh, 1, sceneIdx, 'button', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
         for (let i = 0; i < this.text.letters.length; i++) {

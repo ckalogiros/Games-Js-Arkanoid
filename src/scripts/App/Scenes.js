@@ -9,7 +9,7 @@ import { DarkenColor } from '../Helpers/Helpers.js';
 import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiGet, UiTextVariable, UiCreateTotalScore } from './Drawables/Ui/Ui.js';
 import { GlAddMesh, GfxSetVbShow } from '../Graphics/GlBuffers.js';
 import { BallsInit } from './Drawables/Ball.js';
-import { Explosions, ExplosionsGet } from '../Engine/Events/Explosions.js';
+import { Explosions, ExplosionsGet } from '../Engine/Explosions.js';
 import { ParticleSystem, ParticleSystemGet } from '../Engine/ParticlesSystem/Particles.js';
 import { PowerUpGet, PowerUpReset, PowerUps } from './Drawables/PowerUp.js';
 import { StageCreateStage2 } from './Stages.js';
@@ -222,14 +222,14 @@ export function ScenesCreateAllMeshes() {
     dim = [Viewport.width / 2, MENU_BAR_HEIGHT];
     pos = [Viewport.width / 2, MENU_BAR_HEIGHT, -2];
     style = { pad: 10, roundCorner: 6, border: 1, feather: 10 };
-    const stageBk = RectCreateRect('stageBk', SID_DEFAULT, DarkenColor(MAGENTA_BLUE, 0.1), dim, [1, 1], null, pos, style, null);
+    const stageBk = RectCreateRect('stageBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null);
     stageBk.gfxInfo = GlAddMesh(stageBk.sid, stageBk.mesh, 1, SCENE.stage, 'Background Stage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stage);
 
     // Create stage menu background
     dim = [Viewport.width / 2, Viewport.height / 2 - dim[1]];
     pos = [Viewport.width / 2, Viewport.height / 2 + MENU_BAR_HEIGHT, -2];
-    const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT, DarkenColor(MAGENTA_BLUE, 0.3), dim, [1, 1], null, pos, style, null);
+    const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null);
     stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     // 1, SCENE.stage, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
@@ -244,10 +244,10 @@ export function ScenesCreateAllMeshes() {
     style = { pad: 10, roundCorner: 6, border: 3, feather: 12 };
     let fontSize = 20;
 
-    // Create pay button
+    // Create play button
     const playBtn = CreateButton(SCENE.startMenu, 'PlayBtn', 'Play',
         WHITE, DarkenColor(YELLOW_229_206_0, 0.1), btnDim, btnPos,
-        style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.TOP);
+        style, fontSize, true, 0.5, ALIGN.CENTER_HOR | ALIGN.TOP);
     // Add play button to scenes mesh to buffer
     scenes.AddMesh(playBtn, APP_MESHES_IDX.buttons.play);
 
@@ -255,7 +255,7 @@ export function ScenesCreateAllMeshes() {
     btnPos[1] += playBtn.area.mesh.dim[1] * 2 + style.pad + style.border + style.feather; // Set next button's y pos (just bellow the prev button)
     const optionsBtn = CreateButton(SCENE.startMenu, 'OptionsBtn', 'Options',
         WHITE, DarkenColor(MAGENTA_RED, 0.1), btnDim, btnPos,
-        style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.TOP);
+        style, fontSize, true, 0.5, ALIGN.CENTER_HOR | ALIGN.TOP);
     scenes.AddMesh(optionsBtn, APP_MESHES_IDX.buttons.options);
 
     // Start Stage (in main start stage) button
@@ -263,7 +263,7 @@ export function ScenesCreateAllMeshes() {
     btnPos[1] = 0;
     const startStageBtn = CreateButton(SCENE.startStage, 'startStageBtn', 'Start',
         WHITE, DarkenColor(GREENL1, 0.1), btnDim, btnPos,
-        style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
+        style, fontSize, true, 0.5, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
     scenes.AddMesh(startStageBtn, APP_MESHES_IDX.buttons.start);
 
 
@@ -274,21 +274,21 @@ export function ScenesCreateAllMeshes() {
     btnDim = [0, 0];
     btnDim[0] = CalcTextWidth('Back', fontSize, btnDim, style);
     const backBtn = CreateButton(SCENE.stage, 'ReturnBtn', 'Back', WHITE, BLUE_13_125_217,
-        btnDim, btnPos, style, fontSize, true, ALIGN.LEFT | ALIGN.TOP);
+        btnDim, btnPos, style, fontSize, true, 0.5, ALIGN.LEFT | ALIGN.TOP);
     scenes.AddMesh(backBtn, APP_MESHES_IDX.buttons.backStage);
 
     // Options (in stage scenes) button
     btnDim[0] = CalcTextWidth('MENU', fontSize);
     btnPos[0] = -20; // Padd fro the right must be negative
     const menuStageBtn = CreateButton(SCENE.stage, 'MenuBtn', 'MENU', WHITE, BLUE_13_125_217,
-        btnDim, btnPos, style, fontSize, true, ALIGN.RIGHT | ALIGN.TOP);
+        btnDim, btnPos, style, fontSize, true, 0.5, ALIGN.RIGHT | ALIGN.TOP);
     scenes.AddMesh(menuStageBtn, APP_MESHES_IDX.buttons.menuStage);
 
     // Continue (after completing a stage) button
     btnDim[0] = CalcTextWidth('CONTINUE', fontSize);
     btnPos = [0, 100, btnPos[2]]; 
     const continueBtn = CreateButton(SCENE.finishStage, 'ContinueBtn', 'CONTINUE', WHITE, BLUE_13_125_217,
-        btnDim, btnPos, style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
+        btnDim, btnPos, style, fontSize, true, 0.5, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
     scenes.AddMesh(continueBtn, APP_MESHES_IDX.buttons.continue);
 
     // Connect the font texture of (for button's text) with the vertex buffer for text rendering. 
@@ -302,7 +302,9 @@ export function ScenesCreateAllMeshes() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Text-Labels */
    const score = 'Total Score: XXXXXXXXX';
-    const showTotalScore = new TextLabel(SCENE.finishStage, 'showTotalScore', score, WHITE, TRANSPARENT, [0,0], [0,0,0], style, fontSize, true, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT); 
+    const showTotalScore = new TextLabel(SCENE.finishStage, 'showTotalScore', score, WHITE, 
+                                        TRANSPARENT, [0,0], [0,0,0], style, fontSize, true, 
+                                        0.4, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT); 
     scenes.AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * End Text-Labels */

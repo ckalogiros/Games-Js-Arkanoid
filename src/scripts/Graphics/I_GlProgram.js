@@ -73,6 +73,7 @@ export class GlProgram extends Camera{
 		borderOffset: INT_NULL,	// Border width		
 		featherOffset: INT_NULL,	// Border feather distance	
 		timeOffset: INT_NULL,	// Border feather distance	
+		sdfParamsOffset: INT_NULL,	// The inner and outer variables to render sdf text
 
 		attributes: {
 			colLoc: INT_NULL,
@@ -84,6 +85,7 @@ export class GlProgram extends Camera{
 			borderLoc: INT_NULL,	// Border width		
 			featherLoc: INT_NULL,	// Border feather distance		
 			timeLoc: INT_NULL,
+			sdfParamsLoc: INT_NULL,
 		},
 
 		uniforms: {

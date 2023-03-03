@@ -12,9 +12,11 @@ export class Animation{
     
     animationClbk = null;
     stopAnimationClbk = null;
+    params = null;
     inAnimation = false;
     
-    Create(animationClbk, stopAnimationClbk){
+    Create(animationClbk, stopAnimationClbk, params){
+        this.params = params;
         this.animationClbk = animationClbk;
         this.stopAnimationClbk = stopAnimationClbk;
         this.inAnimation = true;
@@ -27,20 +29,23 @@ export class Animation{
 
     }
     Run(){
-        this.inAnimation = this.animationClbk();
+        this.inAnimation = this.animationClbk(this.params);
     }
     Stop(){
-        this.stopAnimationClbk();
+        this.stopAnimationClbk(this.params);
     }
 }
 export class Animations{
     animations = [];
     count = 0;
 
-    Create(animationClbk, stopAnimationClbk){
+    Create(animationClbk, stopAnimationClbk, params){
         const idx = this.count;
         this.animations[idx] = new Animation;
-        this.animations[idx].Create(animationClbk, stopAnimationClbk);
+        this.animations[idx].Create(animationClbk, stopAnimationClbk, params);
+        // if(params !== undefined)
+        //     this.animations[idx].Create(animationClbk, stopAnimationClbk, params);
+        // else this.animations[idx].Create(animationClbk, stopAnimationClbk);
         this.count++;
     }
     Run(){

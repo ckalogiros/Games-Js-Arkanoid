@@ -1,9 +1,9 @@
 "use strict";
 
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
-import { RectCreateRect } from "../Drawables/Rect.js";
-import { TimersCreateTimer } from "../Timer/Timer.js";
-import { GlSetAttrTime, GlSetColor, GlSetColorAlpha, GlSetWpos } from "../../Graphics/GlBufferOps.js";
+import { GlAddMesh } from "../Graphics/GlBuffers.js";
+import { RectCreateRect } from "./Drawables/Rect.js";
+import { TimersCreateTimer } from "./Timer/Timer.js";
+import { GlSetAttrTime, GlSetColor, GlSetColorAlpha, GlSetWpos } from "../Graphics/GlBufferOps.js";
 
 
 const MAX_EXPLOSIONS = 100;

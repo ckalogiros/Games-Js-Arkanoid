@@ -38,7 +38,7 @@ class PowerUp {
 
     constructor(sid, col, dim, scale, tex, pos, style) {
         this.sid = sid;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null);
+        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
     }
 
     SetPos(pos){

@@ -1,5 +1,4 @@
 {
-    "//": "npm run lite",
     "//": "nodemon ./src/scripts/Entry.js",
     "name": "arkanoid",
     "version": "1.0.0",
@@ -11,8 +10,7 @@
     },
     "dependencies": {
         "fs-extra": "^11.1.0",
-        "lite-server": "^2.2.0",
-        "nodemon": "^2.0.20"
+        "lite-server": "^2.2.0"
     },
     "type": "module",
     "author": "",

@@ -88,7 +88,7 @@ export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
         gfxInfo.vb.buffer        = vb.buffer;
         gfxInfo.vb.start         = start;
         gfxInfo.vb.count         = 0;
-        gfxInfo.sceneIdx          = sceneIdx;
+        gfxInfo.sceneIdx         = sceneIdx;
         gfxInfo.sid              = sid;
 
         progs[progIdx].isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
@@ -204,12 +204,11 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffe
     gfxInfo.vb.buffer        = vb.buffer;
     gfxInfo.vb.start         = start;
     gfxInfo.vb.count         = count;
-    gfxInfo.sceneIdx          = sceneIdx;
+    gfxInfo.sceneIdx         = sceneIdx;
     gfxInfo.sid              = sid;
 
 
     if (sid & SID.ATTR_COL4) { // Add Color, if the program has such an attribute
-
         GlOps.VbSetAttribCol(vb, start+ progs[progIdx].shaderInfo.colOffset, 
             count, attribsPerVertex - V_COL_COUNT, mesh.col);
     }
@@ -229,22 +228,28 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffe
         GlOps.VbSetAttribWpos(vb, start + progs[progIdx].shaderInfo.wposOffset, 
             count, attribsPerVertex - V_WPOS_COUNT, mesh.pos);
     }
-    if (sid & SID.ATTR_ROUND_CORNERS) { // Add World Position, if the program has such an attribute 
+    if (sid & SID.ATTR_SDF_PARAMS) { // The parameters for the rendering of SDF text
+        GlOps.VbSetAttrSdfParams(vb, start + progs[progIdx].shaderInfo.sdfParamsOffset, 
+            count, attribsPerVertex - V_SDF_PARAMS_COUNT, mesh.sdfParams)
+    }
+    if (sid & SID.ATTR_ROUND_CORNERS) { // Mesh round corners
         GlOps.VbSetAttrRoundCorner(vb, start + progs[progIdx].shaderInfo.roundOffset, 
             count, attribsPerVertex - V_ROUND_CORNER_COUNT, mesh.roundCorner)
     }
-    if (sid & SID.ATTR_BORDER_WIDTH) { // Add World Position, if the program has such an attribute 
+    if (sid & SID.ATTR_BORDER_WIDTH) { // Mesh border
         GlOps.VbSetAttrBorderWidth(vb, start + progs[progIdx].shaderInfo.borderOffset, 
             count, attribsPerVertex - V_BORDER_WIDTH_COUNT, mesh.border);
     }
-    if (sid & SID.ATTR_BORDER_FEATHER) { // Add World Position, if the program has such an attribute 
+    if (sid & SID.ATTR_BORDER_FEATHER) { // Mesh border feather 
         GlOps.VbSetAttrBorderFeather(vb, start + progs[progIdx].shaderInfo.featherOffset, 
             count, attribsPerVertex - V_BORDER_FEATHER_COUNT, mesh.feather);
     }
-    if (sid & SID.ATTR_TIME) { // Add World Position, if the program has such an attribute 
+    if (sid & SID.ATTR_TIME) { // Timer for qnimations  
         GlOps.VbSetAttrTime(vb, start + progs[progIdx].shaderInfo.timeOffset, 
             count, attribsPerVertex - V_TIME_COUNT, mesh.time);
     }
+
+
 
     vb.needsUpdate = true; // Make sure that we update GL bufferData after adding a mesh.
     progs[progIdx].isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
@@ -453,6 +458,12 @@ function GlEnableAttribsLocations(gl, prog) {
         gl.vertexAttribPointer(prog.shaderInfo.attributes.timeLoc,
             V_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.timeOffset * FLOAT);
     }
+    if (prog.shaderInfo.attributes.sdfParamsLoc >= 0) {
+        gl.enableVertexAttribArray(prog.shaderInfo.attributes.sdfParamsLoc);
+        gl.vertexAttribPointer(prog.shaderInfo.attributes.sdfParamsLoc,
+            V_SDF_PARAMS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.sdfParamsOffset * FLOAT);
+    }
+
 
 }
 

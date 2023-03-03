@@ -107,7 +107,7 @@ export class ParticleSystem{
             pos[i][2] = meshAttr.pos[2];
 
             this.psBuffer[idx].buffer[i] = new Particle;
-            this.psBuffer[idx].buffer[i].mesh = new Mesh(meshAttr.col, meshAttr.dim, meshAttr.scale, meshAttr.tex, pos[i], meshAttr.style, meshAttr.time);
+            this.psBuffer[idx].buffer[i].mesh = new Mesh(meshAttr.col, meshAttr.dim, meshAttr.scale, meshAttr.tex, pos[i], meshAttr.style, meshAttr.time, null);
             this.psBuffer[idx].buffer[i].gfxInfo = GlAddMesh(meshAttr.sid, this.psBuffer[idx].buffer[i].mesh, 1, scene, 'Particles' + name, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.psBuffer[idx].count++;
         }

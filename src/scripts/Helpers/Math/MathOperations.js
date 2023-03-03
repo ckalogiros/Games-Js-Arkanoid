@@ -12,6 +12,7 @@ export function MulArr4Val(arr, val){
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Set Array */
+// TODO: src and dst are logicaly opposite, swap them
 export function CopyArr4(src, dst){
     src[0] = dst[0];
     src[1] = dst[1];

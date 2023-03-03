@@ -20,7 +20,7 @@ export class Rect {
         this.name = name;
         this.sid = sid;
         this.display = true;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time);
+        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time, null);
         math.CopyArr2(this.defScale, scale);
     }
 

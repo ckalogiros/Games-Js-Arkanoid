@@ -97,18 +97,17 @@ layout (location = 1) in vec2 a_Pos;
 layout (location = 2) in vec2 a_Scale;
 layout (location = 3) in vec2 a_Tex;
 layout (location = 4) in vec3 a_Wpos;
+layout (location = 5) in vec2 a_Sdf;
 
-// In
+// Uniforms
 uniform mat4 u_OrthoProj;
 uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
 out mediump vec4 v_Color; 
-out mediump vec2 v_Pos;
-out mediump vec2 v_Wpos;
 out mediump vec2 v_TexCoord;
-out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];
+out mediump vec2 v_SdfParams;
 
 void main(void) 
 {
@@ -117,10 +116,8 @@ void main(void)
     gl_Position = u_OrthoProj * vec4(scaled.x + a_Wpos.x, scaled.y + a_Wpos.y, a_Wpos.z, 1.0);
 
     v_Color = a_Col;
-    v_Pos = a_Pos;
-    v_Wpos = vec2(a_Wpos.x, a_Wpos.y);
     v_TexCoord = a_Tex;
-    v_Params = u_Params;
+    v_SdfParams = a_Sdf;
 }
 `;
 
@@ -232,7 +229,7 @@ void main(void)
  */
 export function VertexShaderChoose(sid){
 
-    if(sid & SID.ATTR_TEX2){
+    if(sid & SID.ATTR_TEX2 && sid & SID.ATTR_SDF_PARAMS){
         return VS_DEFAULT_TEXTURE_SDF;
     }
     else if(sid & SID.ATTR_TEX2){

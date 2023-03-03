@@ -5,7 +5,7 @@ import { GlAddMesh, GlCreateReservedBuffer } from "../../../Graphics/GlBuffers.j
 import { FontGetUvCoords } from "../../../Engine/Loaders/Font/LoadFont.js";
 import { GlGetVB } from "../../../Graphics/GlProgram.js";
 import * as math from "../../../Helpers/Math/MathOperations.js"
-import { DarkenColor } from "../../../Helpers/Helpers.js";
+import { CalculateSdfOuterFromDim, DarkenColor } from "../../../Helpers/Helpers.js";
 import { AnimationsGet } from "../../../Engine/Animations/Animations.js";
 
 /**
@@ -16,6 +16,8 @@ import { AnimationsGet } from "../../../Engine/Animations/Animations.js";
 const SCORE_FOR = {
     brick: 10,
 };
+
+const UI_SDF_INNER_PARAMS = 0.4;
 
 // Exporting is only for the class type(to compare with the instanceof operator)
 export class UiTextVariable {
@@ -64,11 +66,11 @@ function UiCreate(sceneIdx, constTextStr, variTextStr, constTextcol, variTextcol
     const uiText = new UiTextVariable(style);
 
     // Create the unchanged text
-    uiText.constText = CreateText(constTextStr, constTextcol, [], pos, uiText.style, fontSize, true, Align);
+    uiText.constText = CreateText(constTextStr, constTextcol, [], pos, uiText.style, fontSize, true, UI_SDF_INNER_PARAMS, Align);
 
     // Create the changed text (it is numerical value in most cases)
     pos[0] += uiText.constText.dim[0];
-    uiText.variText = CreateText(uiText.val.toFixed(1), variTextcol, [], pos, uiText.style, fontSize, true, Align);
+    uiText.variText = CreateText(uiText.val.toFixed(1), variTextcol, [], pos, uiText.style, fontSize, true, UI_SDF_INNER_PARAMS, Align);
 
     const pad = 20;
     // Add constText meshes to Gl buffers 
@@ -208,7 +210,7 @@ class Mod {
 
     constructor(sid, text, color, dim, pos, style, fontSize, useSdfFont, Align) {
         this.fontSize = fontSize;
-        this.text = CreateText(text, color, dim, pos, style, fontSize, useSdfFont, Align);
+        this.text = CreateText(text, color, dim, pos, style, fontSize, useSdfFont, UI_SDF_INNER_PARAMS, Align);
     }
 
     text = null;
@@ -228,7 +230,7 @@ export function UiInitMods() {
 
     const sid = SID_DEFAULT_TEXTURE_SDF;
     const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'Ui_Mods');
-    const modFontSize = 6;
+    const modFontSize = 5;
 
     for (let i = 0; i < MODS_MAX_COUNT; i++) {
 
@@ -377,7 +379,7 @@ function ModAnimation() {
                 // Scale
                 const scalex = mods[i].text.letters[j].scale[0];
                 let scaleFactor = 1.01;
-                if(scalex > 2 && mods[i].animation.inUpScale){
+                if (scalex > 2 && mods[i].animation.inUpScale) {
                     mods[i].animation.scaleFactor = 0.99;
                     mods[i].animation.inUpScale = false;
                 }
@@ -389,7 +391,7 @@ function ModAnimation() {
 
 
                 // const a = mods[i].text.letters[j].dim[0];
-                const a = 0;
+                // const a = 0;
                 // accumTextWidth += mods[i].text.letters[j].dim[0]/2; // Accum half width
                 // const posx = mods[i].text.letters[j].pos[0] - (mods[i].text.letters[j].dim[0]/2) + accumTextWidth - a;
                 // const posx = mods[i].text.letters[j].pos[0] - (mods[i].text.letters[j].dim[0]/2) + accumTextWidth;

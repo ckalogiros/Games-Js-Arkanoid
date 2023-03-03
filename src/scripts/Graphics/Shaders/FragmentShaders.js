@@ -177,13 +177,12 @@ void main(void) {
 
 const FS_DEFAULT_TEXTURE_SDF = `#version 300 es
     
-#define MAX_NUM_PARAMS_BUFFER 5
 precision mediump float;
 
 in mediump vec4 v_Color;
 in mediump vec2 v_TexCoord;
+in mediump vec2 v_SdfParams;       // [0]:SdfInner, [1]:SdfOuter
 
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];       // [0]:SdfInner, [1]:SdfOuter
 uniform sampler2D u_Sampler0;
 
 out vec4 FragColor;
@@ -192,16 +191,14 @@ void main(void) {
     
     FragColor = v_Color;
     FragColor = vec4(texture( u_Sampler0, v_TexCoord ).r);
-    float inner = v_Params[0];
-    float outer = v_Params[1];
+    float inner = v_SdfParams.x;
+    float outer = v_SdfParams.y;
         
     float b = max(texture(u_Sampler0, v_TexCoord).r, max(texture(u_Sampler0, v_TexCoord).g, texture(u_Sampler0, v_TexCoord).b));
     float pixelDist = 1. - b;
     float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);
-    // FragColor = vec4(v_Color.rgb * vec3(alpha), v_Color.a);
     FragColor = v_Color * vec4(alpha);
-    // FragColor = v_Color * vec4(1.-pixelDist);
-    // FragColor.rgb *= vec3(texture( u_Sampler0, v_TexCoord).a);
+    // FragColor = v_Color;
 }
 `;
 
@@ -639,7 +636,7 @@ void main(void)
 export function FragmentShaderChoose(sid) {
 
     if (sid & SID.ATTR_TEX2) {
-        if (sid & SID.TEXT_SDF) {
+        if (sid & SID.TEXT_SDF && sid & SID.ATTR_SDF_PARAMS) {
             return FS_DEFAULT_TEXTURE_SDF;
         }
         else {

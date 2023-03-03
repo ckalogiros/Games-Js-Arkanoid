@@ -121,8 +121,22 @@ export function VbSetAttrDecorationAll3(vb, start, count, stride, radius, border
 
         index += stride-2;
         vb.count += V_ROUND_CORNER_COUNT;
-        vb.count += V_ROUND_CORNER_COUNT;
-        vb.count += V_ROUND_CORNER_COUNT;
+        vb.count += V_BORDER_WIDTH_COUNT;
+        vb.count += V_BORDER_FEATHER_COUNT;
+    }
+}
+export function VbSetAttrSdfParams(vb, start, count, stride, sdfParams) {
+
+    let index = start;
+    const end = start + count;
+
+    while (index < end) {
+
+        vb.data[index++] = sdfParams[0];
+        vb.data[index++] = sdfParams[1];
+
+        index += stride;
+        vb.count += V_SDF_PARAMS_COUNT;
     }
 }
 export function VbSetAttrRoundCorner(vb, start, count, stride, radius) {
@@ -468,6 +482,46 @@ export function GlSetAttrTime(gfxInfo, val) {
 
     while (verts) {
 
+        vb.data[index++] = val;
+
+        index += stride; // Go to next vertice's borderWidth attrib.
+        verts--;
+    }
+
+    vb.needsUpdate = true;
+}
+export function GlSetAttrSdfParams(gfxInfo, val) {
+
+    const progs = g_glPrograms;
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
+
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfParamsOffset;
+    let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+    let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
+
+    while (verts) {
+
+        vb.data[index++] = val[0];
+        vb.data[index++] = val[1];
+
+        index += stride; // Go to next vertice's borderWidth attrib.
+        verts--;
+    }
+
+    vb.needsUpdate = true;
+}
+export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
+
+    const progs = g_glPrograms;
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
+
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfParamsOffset;
+    let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+    let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
+
+    while (verts) {
+
+        index++; // Skip sdf-inner param 
         vb.data[index++] = val;
 
         index += stride; // Go to next vertice's borderWidth attrib.

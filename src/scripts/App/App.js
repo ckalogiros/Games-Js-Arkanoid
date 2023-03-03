@@ -9,6 +9,8 @@ import { fps } from '../Engine/Timer/Timer.js';
 import { ModCreateAnimation, UiInitMods } from './Drawables/Ui/Ui.js';
 import { PowerUpInit } from './Drawables/PowerUp.js';
 import { GlGetProgram } from '../Graphics/GlProgram.js';
+import { ButtonSetRoundCorner , ButtonSetBorderWidth, ButtonSetBorderFeather } from '../Engine/Drawables/Widgets/Button.js';
+import { BrickSetRoundCorner, BrickSetBorderWidth, BrickSetBorderFeather } from './Drawables/Brick.js';
 
 // Debug-Print
 import { PrintBuffersAll } from '../Graphics/Debug/GfxDebug.js';

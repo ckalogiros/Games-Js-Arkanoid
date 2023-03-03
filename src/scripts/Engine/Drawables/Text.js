@@ -1,4 +1,5 @@
 "use strict";
+import { CalculateSdfOuterFromDim } from '../../Helpers/Helpers.js';
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { FontGetUvCoords, FontGetFontDimRatio } from '../Loaders/Font/LoadFont.js'
 import { Mesh } from './Mesh.js'
@@ -21,7 +22,7 @@ export class Text {
 	letters = [];
 
 
-	constructor(sid, col, pos, dim, style, txt, fontSize, align){
+	constructor(sid, col, pos, dim, style, txt, fontSize, sdfInner, align){
 		this.sid 	 = sid;
 		this.len 	 = txt.length;
 		this.name 	 = txt;
@@ -32,7 +33,7 @@ export class Text {
 		this.dim[1] = this.faceHeight; // The x dimention of the whole text is going to be calculated for each char in txt
 
 		this.Align(align);
-		this.CreateLetters(col, pos, txt, style)
+		this.CreateLetters(col, sdfInner)
 	}
 
 	Align(align){
@@ -57,14 +58,17 @@ export class Text {
 			this.pos[1] += (Viewport.height / 2) - this.faceWidth;
 		}
 	}
-	CreateLetters(col, pos, txt, style){
+	CreateLetters(col, sdfInner){
 		// Use a dummy pos[0](x coord) to calculate the distance to the next character of the text
 		let posi = [0, 0, 0];
 		math.CopyArr3(posi, this.pos)
 	
+		if(this.name === 'Play')
+			console.log()
+		const sdfOuter = [sdfInner, CalculateSdfOuterFromDim(this.faceHeight)];
 		for (let i = 0; i < this.len; i++) {
 			this.letters[i] = new Mesh(col, [this.faceWidth, this.faceHeight], SCALE_DEFAULT, 
-												FontGetUvCoords(txt[i]), posi, style, null);
+												FontGetUvCoords(this.name[i]), posi, this.style, null, sdfOuter);
 			posi[0] += this.faceWidth * 2;
 			this.dim[0] += this.faceWidth;
 		}
@@ -81,9 +85,9 @@ export class Text {
  * @param {*} Align : Left/Right/Top/Bottom in relation with the game window.
  * @returns : class Text
  */
-export function CreateText(txt, col, dim, pos, style, fontSize, useSdfFont, align) {
+export function CreateText(txt, col, dim, pos, style, fontSize, useSdfFont, sdfInner, align) {
 
-	const text = new Text(SID_DEFAULT_TEXTURE_SDF, col, pos, dim, style, txt, fontSize, align);
+	const text = new Text(SID_DEFAULT_TEXTURE_SDF, col, pos, dim, style, txt, fontSize, sdfInner, align);
 	return text;
 }
 

@@ -17,20 +17,21 @@ const SID = {
 	ATTR_WPOS3:                 0x10,
 	ATTR_ROUND_CORNERS:         0x20,
 	ATTR_BORDER_WIDTH:          0x40,
-	ATTR_BORDER_FEATHER:  0x80,
+	ATTR_BORDER_FEATHER:        0x80,
 	ATTR_TIME:                  0x100,
+	ATTR_SDF_PARAMS:            0x200,
 
-    UNIF_SAMPLER:               0x200,
-	UNIF_PROJECTION:            0x400,
     
-	INDEXED:                    0x1000,
-	TEXT_SDF:                   0x2000,
-	PARTICLES:                  0x4000,
+    UNIF_SAMPLER:               0x1000,
+	UNIF_PROJECTION:            0x2000,
+	INDEXED:                    0x4000,
+	TEXT_SDF:                   0x8000,
+	PARTICLES:                  0x10000,
 
     // Post processing shaders
-    FIRE_FS:                    0x10000,
-    EXPLOSION_FS:               0x20000,
-    EXPLOSION2_FS:              0x40000,
+    FIRE_FS:                    0x100000,
+    EXPLOSION_FS:               0x200000,
+    EXPLOSION2_FS:              0x400000,
 	
 };
 /**
@@ -43,7 +44,8 @@ const SID_DEFAULT =
 const SID_DEFAULT_TEXTURE = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2);
 const SID_DEFAULT_TEXTURE_SDF = 
-    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2 | SID.TEXT_SDF);
+    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2 | SID.TEXT_SDF | SID.ATTR_SDF_PARAMS);
+    // (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2 | SID.TEXT_SDF);
 const SID_EXPLOSION = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TIME);
 const SID_EXPLOSION2 = 
@@ -68,15 +70,16 @@ const INDICES_PER_RECT 			= 6
 const VERTS_PER_RECT 			= 6
 const VERTS_PER_RECT_INDEXED 	= 4
 
-const V_COL_COUNT 		     = 4 // Number of floats for vertex buffer's color attribute
-const V_POS_COUNT 		     = 2 // Number of floats for vertex buffer's position attribute
-const V_SCALE_COUNT 	     = 2 // Number of floats for vertex buffer's scale attribute
-const V_TEX_COUNT 		     = 2 // Number of floats for vertex buffer's texture attribute
-const V_WPOS_COUNT 		     = 3 // Number of floats for vertex buffer's world pos attribute
-const V_ROUND_CORNER_COUNT	 = 1 // Number of floats for vertex buffer's radius attribute
-const V_BORDER_WIDTH_COUNT	 = 1 // Number of floats for vertex buffer's radius attribute
-const V_BORDER_FEATHER_COUNT = 1 // Number of floats for vertex buffer's radius attribute
-const V_TIME_COUNT           = 1 // Number of floats for vertex buffer's time attribute
+const V_COL_COUNT 		     = 4 // Number of floats for vertex buffer's attribute
+const V_POS_COUNT 		     = 2 
+const V_SCALE_COUNT 	     = 2 
+const V_TEX_COUNT 		     = 2 
+const V_WPOS_COUNT 		     = 3 
+const V_SDF_PARAMS_COUNT     = 2 
+const V_ROUND_CORNER_COUNT	 = 1 
+const V_BORDER_WIDTH_COUNT	 = 1 
+const V_BORDER_FEATHER_COUNT = 1 
+const V_TIME_COUNT           = 1 
 
 // 
 const CREATE_NEW_GL_BUFFER      = true;

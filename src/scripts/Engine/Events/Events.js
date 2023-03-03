@@ -1,7 +1,7 @@
 "use strict";
 import { OnMouseMove, OnMouseClick } from "./MouseEvents.js";
 import { BallSetSpeed } from "../../App/Drawables/Ball.js";
-import { PrintBuffersMeshesNames } from "../../Graphics/Debug/GfxDebug.js";
+import { PrintBuffersMeshesNames, PrintVertexBufferAll } from "../../Graphics/Debug/GfxDebug.js";
 import { GlFrameBuffer } from "../../Graphics/I_GlProgram.js";
 
 
@@ -68,8 +68,10 @@ export function AddEventListeners(){
             BallSetSpeed(-step);
         }
         else if (event.key === 'Z' || event.key === 'z') {
-            // PrintVertexBufferAll();
             PrintBuffersMeshesNames();
+        }
+        else if (event.key === 'X' || event.key === 'x') {
+            PrintVertexBufferAll();
         }
     }, false);
 }
