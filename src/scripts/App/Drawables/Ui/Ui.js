@@ -125,7 +125,7 @@ export function UiUpdate(uiTextIndex, val) {
 export function UiCreateScore(sceneIdx) {
 
     const pos = [30, GAME_AREA_TOP + 20, 4];
-    const fontSize = 7;
+    const fontSize = UI_TEXT.FONT_SIZE;
     const style = {
         pad: 10,
         roundCorner: 6,
@@ -152,7 +152,7 @@ export function UiUpdateScore() {
 export function UiCreateTotalScore(sceneIdx) {
 
     const pos = [-70, GAME_AREA_TOP + 20, 4];
-    const fontSize = 7;
+    const fontSize = UI_TEXT.FONT_SIZE;
     const style = {
         pad: 10,
         roundCorner: 6,
@@ -178,7 +178,7 @@ export function UiUpdateTotalScore(totalScore) {
 export function UiCreateScoreModifier(sceneIdx) {
 
     const pos = [-70, Viewport.bottom - 20, 6];
-    const fontSize = 7;
+    const fontSize = UI_TEXT.FONT_SIZE;
     const style = {
         pad: 10,
         roundCorner: 6,
@@ -191,7 +191,7 @@ export function UiCreateScoreModifier(sceneIdx) {
 export function UiCreateLives(sceneIdx) {
 
     const pos = [30, Viewport.bottom - 20, 2];
-    const fontSize = 7;
+    const fontSize = UI_TEXT.FONT_SIZE;
     const style = {
         pad: 10,
         roundCorner: 6,
@@ -205,52 +205,82 @@ export function UiCreateLives(sceneIdx) {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  * Create animated score modifier text for every score mod earning */
-
+const MODS_MAX_COUNT = 32;
 class Mod {
-
-    constructor(sid, text, color, dim, pos, style, fontSize, useSdfFont, Align) {
-        this.fontSize = fontSize;
-        this.text = CreateText(text, color, dim, pos, style, fontSize, useSdfFont, UI_SDF_INNER_PARAMS, Align);
-    }
-
     text = null;
-    isEmpty = true;
+    isActive = false;
     inAnimation = false;
     fontSize = 0;
     animation = {
         scaleFactor: 1,
         inUpScale: false,
     };
+
+    constructor(sid, txt, col, dim, pos, style, fontSize, useSdfFont, align) {
+        this.fontSize = fontSize;
+        this.text = CreateText(txt, col, dim, pos, style, fontSize, useSdfFont, UI_SDF_INNER_PARAMS, align);
+    }
 };
 
-const mods = [];
-let MODS_MAX_COUNT = 16;
+class Mods{
+
+    mod = [];
+    count = 0;
+    size = MODS_MAX_COUNT;
+
+    constructor(){
+        
+    }
+
+    Init(sid, fontSize, sceneIdx, vbIdx){
+        for (let i = 0; i < MODS_MAX_COUNT; i++) {
+    
+            const text = '9999';
+            this.mod[i] = new Mod(sid, text, TRANSPARENT, [0, 0, 0], [0, 0, 2], null, fontSize, true, ALIGN.NONE);
+            for (let j = 0; j < this.mod[i].text.letters.length; j++) {
+                this.mod[i].text.letters[j].gfxInfo = GlAddMesh(this.mod[i].text.sid, this.mod[i].text.letters[j], 1, sceneIdx, 'Ui-Mod', DONT_CREATE_NEW_GL_BUFFER, vbIdx);
+            }
+        }
+    }
+    Create(){
+
+    }
+    GetNextFree(){
+        for(let i=0; i<this.size; i++){
+            if(!this.mod[i].isActive)
+                return {mod:this.mod[i], idx:i};
+        }
+        return null;
+    }
+}
+
+const mods = new Mods;
+
 
 export function UiInitMods() {
 
     const sid = SID_DEFAULT_TEXTURE_SDF;
     const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'Ui_Mods');
-    const modFontSize = 5;
+    const fontSize = UI_TEXT.FONT_SIZE/2;
 
-    for (let i = 0; i < MODS_MAX_COUNT; i++) {
+    mods.Init(sid, fontSize, gfxInfo.sceneIdx, gfxInfo.vb.idx);
 
-        const text = '9999';
-        mods[i] = new Mod(sid, text, TRANSPARENT, [0, 0, 0], [0, 0, 2], null, modFontSize, true, ALIGN.NONE);
-        mods[i].isEmpty = true;
-
-        for (let j = 0; j < mods[i].text.letters.length; j++) {
-            mods[i].text.letters[j].gfxInfo = GlAddMesh(mods[i].text.sid, mods[i].text.letters[j], 1, gfxInfo.sceneIdx, 'Ui-Mod', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
-            console.log('mods: ', mods[i].isEmpty)
-        }
-    }
     // Connect the font texture with the vertex buffer for text rendering. 
     const vb = GlGetVB(gfxInfo.prog.idx, gfxInfo.vb.idx);
     vb.texIdx = Texture.fontConsolasSdf35;
 
 }
 
-// const UI_MOD_COLOR = ORANGE_230_148_0;
+
 const UI_MOD_COLOR = ORANGE_230_148_0;
+
+
+
+export function ModCreateAnimation(idx) {
+    const animation = AnimationsGet();
+    animation.Create(ModAnimation, ModStopAnimation, idx);
+}
+
 
 export function UiCreateModifierValue(targetPos, modVal) {
 
@@ -259,57 +289,206 @@ export function UiCreateModifierValue(targetPos, modVal) {
     pos[1] = targetPos[1];
     pos[2] = -5;
 
-    for (let i = 0; i < MODS_MAX_COUNT; i++) {
-        if (mods[i].isEmpty) {
-            const text = '+' + modVal.toFixed(1);
-            const textHalfWidth = text.length * mods[i].fontSize;
-            pos[0] = pos[0] - textHalfWidth;
-            for (let j = 0; j < text.length; j++) {
+    const obj = mods.GetNextFree();
+    if(obj){
+        const mod = obj.mod;
+        console.log(obj.idx)
+        GlSetColor(mod.text.letters[0].gfxInfo, WHITE);
+        const text = '+' + modVal.toFixed(1);
+        const textHalfWidth = text.length * (mod.fontSize);
+        pos[0] = pos[0] - textHalfWidth;
 
-                const face = mods[i].text.letters[j];
+        // Init attributes for each mod's text character
+        for (let j = 0; j < text.length; j++) {
+            // Set default scale
+            math.CopyArr2(mod.text.letters[j].dim, mod.text.letters[j].defDim);
 
-                // Set default scale
-                math.CopyArr2(mods[i].text.letters[j].dim, mods[i].text.letters[j].defDim);
-                // console.log(face.defDim)
-                // face.dim[1] = defScale;
-                mods[i].text.letters[j].scale[0] = 1;
-                mods[i].text.letters[j].scale[1] = 1;
-                GlSetScale(mods[i].text.letters[j].gfxInfo, [1, 1])
+            mod.text.letters[j].scale[0] = 1;
+            mod.text.letters[j].scale[1] = 1;
+            GlSetScale(mod.text.letters[j].gfxInfo, [1, 1])
 
-                // Color the mod depending on the some characteristics
-                GlSetColor(mods[i].text.letters[j].gfxInfo, UI_MOD_COLOR);
-                math.CopyArr4(mods[i].text.letters[j].col, UI_MOD_COLOR);
+            // Color the mod depending on the some characteristics
+            math.CopyArr4(mod.text.letters[j].col, UI_MOD_COLOR);
+            GlSetColor(mod.text.letters[j].gfxInfo, UI_MOD_COLOR);
 
-                // Set as position the bricks position
-                mods[i].text.letters[j].pos[0] = pos[0];
-                mods[i].text.letters[j].pos[1] = pos[1];
-                GlSetWpos(mods[i].text.letters[j].gfxInfo, pos);
-                // pos[0] += mods[i].text.letters[j].dim[0];
-                pos[0] += mods[i].text.letters[j].dim[0] * 2;
-                // GlSetWpos(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].pos);
+            // Set as position the bricks position
+            mod.text.letters[j].pos[0] = pos[0];
+            mod.text.letters[j].pos[1] = pos[1];
+            GlSetWpos(mod.text.letters[j].gfxInfo, pos);
+            pos[0] += mod.text.letters[j].dim[0] * 2;
 
-                // Set texture coordinates
-                const uvs = FontGetUvCoords(text[j]);
-                GlSetTex(mods[i].text.letters[j].gfxInfo, uvs);
-                mods[i].text.letters[j].tex = uvs;
-            }
-
-            mods[i].isEmpty = false;
-            mods[i].inAnimation = true;
-            mods[i].animation.inUpScale = true;
-            mods[i].animation.scaleFactor = 1.03;
-            uiTexts[UI_TEXT_INDEX.SCORE_MOD].val += modVal;
-
-            // Update the score adding the hit value * the mod value
-            UiUpdateScore(uiTexts[UI_TEXT_INDEX.SCORE_MOD].val);
-            if (targetPos[1] > 680) {
-                console.log('@@@ 2: i: ', i, ' : ', mods[i].text.letters[0].pos[0])
-
-            }
-            return;
+            // Set texture coordinates
+            const uvs = FontGetUvCoords(text[j]);
+            GlSetTex(mod.text.letters[j].gfxInfo, uvs);
+            mod.text.letters[j].tex = uvs;
         }
+
+        mod.isActive = true;
+        mod.inAnimation = true;
+        mod.animation.inUpScale = true;
+        // mod.animation.scaleFactor = 1.03;
+        mod.animation.scaleFactor = 1.07;
+        uiTexts[UI_TEXT_INDEX.SCORE_MOD].val += modVal;
+
+        // Update the score adding the hit value * the mod value
+        UiUpdateScore(uiTexts[UI_TEXT_INDEX.SCORE_MOD].val);
+        ModCreateAnimation(obj.idx)
+        return;
     }
+
+    // for (let i = 0; i < MODS_MAX_COUNT; i++) {
+    //     if (mods.mod[i].isActive) {
+    //         const text = '+' + modVal.toFixed(1);
+    //         const textHalfWidth = text.length * mods.mod[i].fontSize;
+    //         pos[0] = pos[0] - textHalfWidth;
+
+    //         for (let j = 0; j < text.length; j++) {
+    //             // Set default scale
+    //             math.CopyArr2(mods.mod[i].text.letters[j].dim, mods.mod[i].text.letters[j].defDim);
+
+    //             mods.mod[i].text.letters[j].scale[0] = 1;
+    //             mods.mod[i].text.letters[j].scale[1] = 1;
+    //             GlSetScale(mods.mod[i].text.letters[j].gfxInfo, [1, 1])
+
+    //             // Color the mod depending on the some characteristics
+    //             math.CopyArr4(mods.mod[i].text.letters[j].col, UI_MOD_COLOR);
+    //             GlSetColor(mods.mod[i].text.letters[j].gfxInfo, UI_MOD_COLOR);
+
+    //             // Set as position the bricks position
+    //             mods.mod[i].text.letters[j].pos[0] = pos[0];
+    //             mods.mod[i].text.letters[j].pos[1] = pos[1];
+    //             GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, pos);
+    //             pos[0] += mods.mod[i].text.letters[j].dim[0] * 2;
+
+    //             // Set texture coordinates
+    //             const uvs = FontGetUvCoords(text[j]);
+    //             GlSetTex(mods.mod[i].text.letters[j].gfxInfo, uvs);
+    //             mods.mod[i].text.letters[j].tex = uvs;
+    //         }
+
+    //         mods.mod[i].isActive = false;
+    //         mods.mod[i].inAnimation = true;
+    //         mods.mod[i].animation.inUpScale = true;
+    //         // mods.mod[i].animation.scaleFactor = 1.03;
+    //         mods.mod[i].animation.scaleFactor = 1.07;
+    //         uiTexts[UI_TEXT_INDEX.SCORE_MOD].val += modVal;
+
+    //         // Update the score adding the hit value * the mod value
+    //         UiUpdateScore(uiTexts[UI_TEXT_INDEX.SCORE_MOD].val);
+    //         ModCreateAnimation(i)
+    //         return;
+    //     }
+    // }
 }
+function ModAnimation(i) {
+
+    if(!mods.mod.length) return false;
+
+    const colorFactor = 0.97;
+    const yPosAdvance = 0.3;
+    let nextCharWidth = 0;
+
+    if (mods.mod[i].isActive) {
+
+        // TODO: mods.mod[i].text.letters.length  = 4 but the text may be 2 chars. 
+        // So we set unused data. FIX IT
+        for (let j = 0; j < mods.mod[i].text.letters.length; j++) {
+            // Set dim color
+            math.MulArr4Val(mods.mod[i].text.letters[j].col, colorFactor);
+            GlSetColor(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].col);
+
+            // Scale
+            const scalex = mods.mod[i].text.letters[j].scale[0];
+            if (scalex > 2 && mods.mod[i].animation.inUpScale) {
+                mods.mod[i].animation.scaleFactor = 0.99;
+                mods.mod[i].animation.inUpScale = false;
+            }
+            mods.mod[i].text.letters[j].dim[0]   *= mods.mod[i].animation.scaleFactor;
+            mods.mod[i].text.letters[j].dim[1]   *= mods.mod[i].animation.scaleFactor;
+            mods.mod[i].text.letters[j].scale[0] *= mods.mod[i].animation.scaleFactor;
+            mods.mod[i].text.letters[j].scale[1] *= mods.mod[i].animation.scaleFactor;
+            GlScale(mods.mod[i].text.letters[j].gfxInfo, [mods.mod[i].animation.scaleFactor, mods.mod[i].animation.scaleFactor])
+
+
+            // Translate
+            const posx = (mods.mod[i].text.letters[j].pos[0] - (mods.mod[i].text.letters[j].dim[0]/2) + nextCharWidth);
+            mods.mod[i].text.letters[j].pos[1] -= yPosAdvance;
+            GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, [posx, mods.mod[i].text.letters[j].pos[1]]);
+            // nextCharWidth += mods.mod[i].text.letters[j].dim[0]/2; // Accum half width
+            nextCharWidth += mods.mod[i].text.letters[j].dim[0]; // Accum half width
+            // nextCharWidth += mods.mod[i].text.letters[j].dim[0]/2;
+        }
+
+        if (mods.mod[i].text.letters[0].col[0] <= 0.01) {
+            mods.mod[i].inAnimation = false;
+            mods.mod[i].isActive = false;
+            return false;
+        }
+        return true;
+    }
+    // return false;
+}
+function ModStopAnimation() {
+
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Old Code
+// export function UiCreateModifierValue(targetPos, modVal) {
+
+//     let pos = [];
+//     pos[0] = targetPos[0];
+//     pos[1] = targetPos[1];
+//     pos[2] = -5;
+
+//     for (let i = 0; i < MODS_MAX_COUNT; i++) {
+//         if (mods.mod[i].isActive) {
+//             const text = '+' + modVal.toFixed(1);
+//             const textHalfWidth = text.length * mods.mod[i].fontSize;
+//             pos[0] = pos[0] - textHalfWidth;
+
+//             for (let j = 0; j < text.length; j++) {
+//                 // Set default scale
+//                 math.CopyArr2(mods.mod[i].text.letters[j].dim, mods.mod[i].text.letters[j].defDim);
+
+//                 mods.mod[i].text.letters[j].scale[0] = 1;
+//                 mods.mod[i].text.letters[j].scale[1] = 1;
+//                 GlSetScale(mods.mod[i].text.letters[j].gfxInfo, [1, 1])
+
+//                 // Color the mod depending on the some characteristics
+//                 math.CopyArr4(mods.mod[i].text.letters[j].col, UI_MOD_COLOR);
+//                 GlSetColor(mods.mod[i].text.letters[j].gfxInfo, UI_MOD_COLOR);
+
+//                 // Set as position the bricks position
+//                 mods.mod[i].text.letters[j].pos[0] = pos[0];
+//                 mods.mod[i].text.letters[j].pos[1] = pos[1];
+//                 GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, pos);
+//                 // pos[0] += mods.mod[i].text.letters[j].dim[0];
+//                 pos[0] += mods.mod[i].text.letters[j].dim[0] * 2;
+//                 // GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].pos);
+
+//                 // Set texture coordinates
+//                 const uvs = FontGetUvCoords(text[j]);
+//                 GlSetTex(mods.mod[i].text.letters[j].gfxInfo, uvs);
+//                 mods.mod[i].text.letters[j].tex = uvs;
+//             }
+
+//             mods.mod[i].isActive = false;
+//             mods.mod[i].inAnimation = true;
+//             mods.mod[i].animation.inUpScale = true;
+//             // mods.mod[i].animation.scaleFactor = 1.03;
+//             mods.mod[i].animation.scaleFactor = 1.01;
+//             uiTexts[UI_TEXT_INDEX.SCORE_MOD].val += modVal;
+
+//             // Update the score adding the hit value * the mod value
+//             UiUpdateScore(uiTexts[UI_TEXT_INDEX.SCORE_MOD].val);
+//             ModCreateAnimation()
+//             return;
+//         }
+//     }
+// }
 
 
 // export function UiModRunAnimation(){
@@ -320,102 +499,84 @@ export function UiCreateModifierValue(targetPos, modVal) {
 
 //     for(let i = 0; i < MODS_MAX_COUNT; i++){
 
-//         if(mods[i].inAnimation){
-//             // TODO: mods[i].text.letters.length  = 4 but the text may be 2 chars. 
+//         if(mods.mod[i].inAnimation){
+//             // TODO: mods.mod[i].text.letters.length  = 4 but the text may be 2 chars. 
 //             // So we set unused data. FIX IT
-//             for(let j = 0; j < mods[i].text.letters.length; j++){
+//             for(let j = 0; j < mods.mod[i].text.letters.length; j++){
 
-//                 math.MulArr4Val(mods[i].text.letters[j].col, colorFactor);
-//                 GlSetColor(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].col);
+//                 math.MulArr4Val(mods.mod[i].text.letters[j].col, colorFactor);
+//                 GlSetColor(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].col);
 
-//                 mods[i].text.letters[j].pos[1] += yPosAdvance;
-//                 GlSetWpos(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].pos);
+//                 mods.mod[i].text.letters[j].pos[1] += yPosAdvance;
+//                 GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].pos);
 //             }
 
-//             if(mods[i].text.letters[0].col[0] <= 0.2){
-//                 for(let j = 0; j < mods[i].text.letters.length; j++){
-//                     math.CopyArr4(mods[i].text.letters[j].col, [.0,.0,.0,.0]);
-//                     GlSetColor(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].col);
+//             if(mods.mod[i].text.letters[0].col[0] <= 0.2){
+//                 for(let j = 0; j < mods.mod[i].text.letters.length; j++){
+//                     math.CopyArr4(mods.mod[i].text.letters[j].col, [.0,.0,.0,.0]);
+//                     GlSetColor(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].col);
 //                 }
-//                 mods[i].inAnimation = false;
-//                 mods[i].isEmpty = true;
+//                 mods.mod[i].inAnimation = false;
+//                 mods.mod[i].isActive = true;
 //             }
 //         }
 //     }
 // }
+// function ModAnimation() {
+
+//     // if(!mods.length) return false;
+
+//     const colorFactor = 0.995;
+//     const yPosAdvance = 0.1;
+//     let nextCharWidth = 0;
+
+//     for (let i = 0; i < MODS_MAX_COUNT; i++) {
+//         // if(mods.mod[i].inAnimation){
+//         if (!mods.mod[i].isActive) {
+
+//             // TODO: mods.mod[i].text.letters.length  = 4 but the text may be 2 chars. 
+//             // So we set unused data. FIX IT
+//             for (let j = 0; j < mods.mod[i].text.letters.length; j++) {
+
+//                 // Cash
+//                 const face = mods.mod[i].text.letters[j];
+
+//                 // Set dim color
+//                 // math.MulArr4Val(mods.mod[i].text.letters[j].col, colorFactor);
+//                 // GlSetColor(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].col);
+
+//                 // Translate
+//                 mods.mod[i].text.letters[j].pos[1] -= yPosAdvance;
+//                 // console.log(mods.mod[i].text.letters[j].pos[1])
+//                 GlSetWpos(mods.mod[i].text.letters[j].gfxInfo, mods.mod[i].text.letters[j].pos);
+
+//                 // Scale
+//                 const scalex = mods.mod[i].text.letters[j].scale[0];
+//                 if (scalex > 2 && mods.mod[i].animation.inUpScale) {
+//                     mods.mod[i].animation.scaleFactor = 0.997;
+//                     mods.mod[i].animation.inUpScale = false;
+//                 }
+//                 // mods.mod[i].text.letters[j].dim[0]   *= mods.mod[i].animation.scaleFactor;
+//                 // mods.mod[i].text.letters[j].dim[1]   *= mods.mod[i].animation.scaleFactor;
+//                 // mods.mod[i].text.letters[j].scale[0] *= mods.mod[i].animation.scaleFactor;
+//                 // mods.mod[i].text.letters[j].scale[1] *= mods.mod[i].animation.scaleFactor;
+//                 // GlScale(mods.mod[i].text.letters[j].gfxInfo, [mods.mod[i].animation.scaleFactor, mods.mod[i].animation.scaleFactor])
 
 
-export function ModCreateAnimation() {
-    const animation = AnimationsGet();
-    animation.Create(ModAnimation, ModStopAnimation);
-}
-function ModAnimation() {
+//                 // const a = mods.mod[i].text.letters[j].dim[0];
+//                 // nextCharWidth += mods.mod[i].text.letters[j].dim[0]/2; // Accum half width
+//                 // const posx = mods.mod[i].text.letters[j].pos[0] - (mods.mod[i].text.letters[j].dim[0]/2) + nextCharWidth;
+//                 // GlSetWposX(mods.mod[i].text.letters[j].gfxInfo, posx);
+//                 // nextCharWidth += mods.mod[i].text.letters[j].dim[0]; // Accum half width
+//                 // nextCharWidth += mods.mod[i].text.letters[j].dim[0]/2;
+//             }
 
-    // if(!mods.length) return false;
+//             if (mods.mod[i].text.letters[0].col[0] <= 0.2) {
+//                 mods.mod[i].inAnimation = false;
+//                 mods.mod[i].isActive = true;
+//             }
+//         }
+//     }
 
-    const colorFactor = 0.985;
-    const yPosAdvance = -0.7;
-    let accumTextWidth = 0;
-
-    for (let i = 0; i < MODS_MAX_COUNT; i++) {
-        // if(mods[i].inAnimation){
-        if (!mods[i].isEmpty) {
-
-            // TODO: mods[i].text.letters.length  = 4 but the text may be 2 chars. 
-            // So we set unused data. FIX IT
-            for (let j = 0; j < mods[i].text.letters.length; j++) {
-
-                // Cash
-                const face = mods[i].text.letters[j];
-
-                // Set dim color
-                math.MulArr4Val(mods[i].text.letters[j].col, colorFactor);
-                GlSetColor(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].col);
-
-                // Translate
-                mods[i].text.letters[j].pos[1] += yPosAdvance;
-                GlSetWpos(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].pos);
-
-                // Scale
-                const scalex = mods[i].text.letters[j].scale[0];
-                let scaleFactor = 1.01;
-                if (scalex > 2 && mods[i].animation.inUpScale) {
-                    mods[i].animation.scaleFactor = 0.99;
-                    mods[i].animation.inUpScale = false;
-                }
-                mods[i].text.letters[j].dim[0] *= mods[i].animation.scaleFactor;
-                mods[i].text.letters[j].dim[1] *= mods[i].animation.scaleFactor;
-                mods[i].text.letters[j].scale[0] *= mods[i].animation.scaleFactor;
-                mods[i].text.letters[j].scale[1] *= mods[i].animation.scaleFactor;
-                GlScale(mods[i].text.letters[j].gfxInfo, [mods[i].animation.scaleFactor, mods[i].animation.scaleFactor])
-
-
-                // const a = mods[i].text.letters[j].dim[0];
-                // const a = 0;
-                // accumTextWidth += mods[i].text.letters[j].dim[0]/2; // Accum half width
-                // const posx = mods[i].text.letters[j].pos[0] - (mods[i].text.letters[j].dim[0]/2) + accumTextWidth - a;
-                // const posx = mods[i].text.letters[j].pos[0] - (mods[i].text.letters[j].dim[0]/2) + accumTextWidth;
-                // GlSetWposX(mods[i].text.letters[j].gfxInfo, posx);
-                // accumTextWidth += mods[i].text.letters[j].dim[0]; // Accum half width
-                // accumTextWidth += mods[i].text.letters[j].dim[0]/2;
-            }
-
-            if (mods[i].text.letters[0].col[0] <= 0.2) {
-                // for(let j = 0; j < mods[i].text.letters.length; j++){
-                //     math.CopyArr4(mods[i].text.letters[j].col, [.0,.0,.0,.0]);
-                //     GlSetColor(mods[i].text.letters[j].gfxInfo, mods[i].text.letters[j].col);
-                // }
-                // console.log('3: i: ', i, ' : ', mods[i].text.letters[0].pos[0])
-                // if (i == 1)
-                //     console.log()
-                mods[i].inAnimation = false;
-                mods[i].isEmpty = true;
-            }
-        }
-    }
-
-    return true;
-}
-function ModStopAnimation() {
-
-}
+//     return true;
+// }

@@ -1,5 +1,4 @@
 "use strict";
-import { GetCanvasSize } from "../../Graphics/GfxInit.js";
 import { ScenesLoadScene } from "../../App/Scenes.js";
 import { OnHover, OnPlayerMove, OnStageStart } from "./SceneEvents.js";
 import { ScenesGetScene } from "../../App/Scenes.js";
@@ -8,16 +7,9 @@ import { StageGetNextStage } from "../../App/Stages.js";
 
 
 
-const canvaDim = GetCanvasSize();
-// Store the canvase's left margin (to the window's left)
-const canvasLeftMargin = (window.innerWidth - canvaDim.width) / 2;
-// Store the canvase's Top margin (to the window's top)
-const canvasTopMargin = (window.innerHeight - canvaDim.height) / 2
-
-
 const mouse = {
-    x: canvaDim.width/2,
-    y: canvaDim.height/2,
+    x: 0,
+    y: 0,
     xprev: 0, // Mouse previous x pos
     yprev: 0, // Mouse previous y pos
     xdiff: 0, // Mouse X difference in pixels(from previous mesurment)
@@ -59,8 +51,8 @@ export function OnMouseMove(event) {
     mouse.xprev = mouse.x;
     mouse.yprev = mouse.y;
 
-    mouse.x = event.clientX - canvasLeftMargin; // left of canvas = 0px
-    mouse.y = event.clientY - canvasTopMargin; // Top of canvas = 0px
+    mouse.x = event.clientX - Viewport.leftMargin; 
+    mouse.y = event.clientY + Viewport.topMargin;  
 
     mouse.xdiff = mouse.x - mouse.xprev;
     mouse.ydiff = -(mouse.y - mouse.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
@@ -83,8 +75,6 @@ export function OnMouseMove(event) {
 export function OnMouseClick(event) {
 
     { // For Debuging
-        mouse.x = event.clientX - canvasLeftMargin;
-        mouse.y = event.clientY - canvasTopMargin;
         console.log('x:', mouse.x, 'y:', mouse.y);
     }
 

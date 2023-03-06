@@ -11,9 +11,9 @@ import { Rect } from '../../Engine/Drawables/Rect.js';
 
 const PLAYER_DEF_COLOR = BLUE_13_125_217;
 
+
 // Exporting is only for the class type(to compare with the instanceof operator)
 export class Player extends Rect{
-// export class Player{
     constructor(sid, col, dim, scale, tex, pos, style, speed) {
         super('player', sid, col, dim, scale, tex, pos, style, null);
         this.speed = speed;
@@ -30,9 +30,11 @@ export class Player extends Rect{
     timeOutId = null; // To store the timer from setTimeout that is created for the animation 
 
     state = {         // The state in which the player may be. Mainly for animations
-        inAnimation: false,
+        inScaleAnimation: false,
+        inDimAnimation: false,
         inUpScale: false,
         inDownScale: false,
+        inMove: false,
     };
 
 };
@@ -46,11 +48,14 @@ export function CreatePlayer(scene) {
         border: 1.0,
         feather: 4.0,
     };
+    PLAYER.YPOS =  Viewport.bottom - 100;
+    PLAYER.WIDTH =  80.0;
+    PLAYER.HEIGHT =  10.0;
     const speed = 4.0;
     const sid = SID_DEFAULT;
     const pl = new Player(
         sid, PLAYER_DEF_COLOR,
-        [80.0, 10.0], [1.0, 1.0], null, [Viewport.width / 2, Viewport.bottom - 60, 4.0],
+        [PLAYER.WIDTH, PLAYER.HEIGHT], [1.0, 1.0], null, [Viewport.width / 2,  PLAYER.YPOS, 4.0],
         style, speed
     );
 
@@ -69,6 +74,9 @@ export function UpdatePlayerPosX(posx, mouseXdir) {
      * But also caunts as a direction. If the mouse is going left, then mouseXdir
      * is negative etc.*/
     player.xdir = mouseXdir; // Player's direction is always the mouse's direction.
+    PLAYER.XDIR = player.xdir; // Store globally
+    // player.state.inMove = true;
+    // console.log(player.xdir)
 }
 export function PlayerBallCollision() {
     BallPlayerCollision(player.mesh.pos, player.mesh.dim[0], player.mesh.dim[1], player.xdir);
@@ -94,8 +102,8 @@ export function PlayerGetDim() {
 export function PlayerGetPlayer(){
     return player;
 }
-export function PlayerSetStateAnimation(flag){
-    player.state.inAnimation = flag;
+export function PlayerSetStateScaleAnimation(flag){
+    player.state.inScaleAnimation = flag;
     player.state.inUpScale = flag;
     if(player.timeOutId){
         clearTimeout(player.timeOutId)
@@ -110,12 +118,18 @@ export function PlayerRunEnlargeAnimation(scaleFactor){
 
 /** Dim color animation */
 export function PlayerCreateDimColorAnimation(){
-    const animations = AnimationsGet(); 
-    animations.Create(RunPlayerDimColorAnimation, PlayerStopDimColorAnimation);
+    // const animations = AnimationsGet(); 
+    // animations.Create(PlayerDimColorStartAnimation, PlayerDimColorStopAnimation);
+    // player.state.inDimAnimation = true;
 }
-function PlayerStopDimColorAnimation(){ 
-    console.log('Stop Player Animation')
+function PlayerDimColorStopAnimation(){ 
+    console.log('Stop Player Animation');
+    player.state.inDimAnimation = false;
 }
-function RunPlayerDimColorAnimation(){ // This is the callback to the Animations.clbk at Animations.js
-    return player.DimColor(0.2, 0.99)
+function PlayerDimColorStartAnimation(){ // This is the callback to the Animations.clbk at Animations.js
+    if(player.state.inDimAnimation && player.mesh.col[3] > 0.2){
+        player.DimColor(0.2, 0.99)
+        return true;
+    }
+    return false;
 }

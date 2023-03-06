@@ -63,8 +63,8 @@ export class Text {
 		let posi = [0, 0, 0];
 		math.CopyArr3(posi, this.pos)
 	
-		if(this.name === 'Play')
-			console.log()
+		// if(this.name === 'Play')
+		// 	console.log()
 		const sdfOuter = [sdfInner, CalculateSdfOuterFromDim(this.faceHeight)];
 		for (let i = 0; i < this.len; i++) {
 			this.letters[i] = new Mesh(col, [this.faceWidth, this.faceHeight], SCALE_DEFAULT, 

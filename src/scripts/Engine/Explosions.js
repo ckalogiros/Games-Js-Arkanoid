@@ -62,7 +62,7 @@ export class Explosions{
 
             // Reserve  shader
             // Create a dummy explosion to initialize the Gfx buffers
-            const ex = RectCreateRect('Explosion' + i, SID_EXPLOSION | SID.EXPLOSION_FS, WHITE, EXPLOSIONS_DIM, [1,1], null, [OUT_OF_VIEW, 0, 5], null, 0);
+            const ex = RectCreateRect('Explosion' + i, SID_EXPLOSION | SID.EXPLOSION, WHITE, EXPLOSIONS_DIM, [1,1], null, [OUT_OF_VIEW, 0, 5], null, 0);
             ex.gfxInfo = GlAddMesh(ex.sid, ex.mesh, 1, SCENE.stage, 'Explosion', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.buffer[i].gfxInfo = ex.gfxInfo;
         }

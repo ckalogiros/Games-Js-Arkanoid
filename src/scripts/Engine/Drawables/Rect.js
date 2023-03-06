@@ -1,6 +1,6 @@
 "use strict";
 import * as math from '../../Helpers/Math/MathOperations.js'
-import { GlSetColor, GlSetWpos, GlSetDim, GlSetColorAlpha } from "../../Graphics/GlBufferOps.js";
+import { GlSetColor, GlSetWpos, GlSetDim, GlSetColorAlpha, GlSetScale, GlScale } from "../../Graphics/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
 import { Max3 } from "../../Helpers/Math/MathOperations.js";
 import { Mesh } from "./Mesh.js";
@@ -20,7 +20,7 @@ export class Rect {
         this.name = name;
         this.sid = sid;
         this.display = true;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time, null);
+        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time, null, null);
         math.CopyArr2(this.defScale, scale);
     }
 
@@ -57,6 +57,27 @@ export class Rect {
     SetColorAlpha(alpha) {
         this.mesh.col[3] = alpha;
         GlSetColorAlpha(this.gfxInfo, alpha);
+    }
+    SetScale(scale){
+        // math.CopyArr2(this.mesh.scale, scale);
+        // GlSetScale(this.gfxInfo, this.mesh.scale);
+        // // Also set dim to mirror the scale
+        // this.mesh.dim[0] *= scale[0];    
+        // this.mesh.dim[0] *= scale[1];
+    }
+    ScaleFromVal(val){
+        this.mesh.scale[0] *= val;
+        this.mesh.scale[1] *= val;
+        // GlScale(this.gfxInfo, val);
+        GlSetScale(this.gfxInfo, this.mesh.scale);
+        // Also set dim to mirror the scale
+        this.mesh.dim[0] *= val;    
+        this.mesh.dim[1] *= val;
+    }
+    SetScaleFromVal(val){
+        this.mesh.scale[0] = val;
+        this.mesh.scale[1] = val;
+        GlSetScale(this.gfxInfo, this.mesh.scale);
     }
 }
 

@@ -30,8 +30,8 @@ const SID = {
 
     // Post processing shaders
     FIRE_FS:                    0x100000,
-    EXPLOSION_FS:               0x200000,
-    EXPLOSION2_FS:              0x400000,
+    EXPLOSION:                  0x200000,
+    NOISE:                   0x400000,
 	
 };
 /**
@@ -45,11 +45,10 @@ const SID_DEFAULT_TEXTURE =
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2);
 const SID_DEFAULT_TEXTURE_SDF = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2 | SID.TEXT_SDF | SID.ATTR_SDF_PARAMS);
-    // (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2 | SID.TEXT_SDF);
 const SID_EXPLOSION = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TIME);
-const SID_EXPLOSION2 = 
-    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TIME | SID.EXPLOSION2_FS);
+const SID_NOISE = 
+    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TIME | SID.NOISE);
 const SID_PARTICLES_TAIL = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TIME | SID.PARTICLES);
 
@@ -96,6 +95,7 @@ let cnt1 = 0;
 let cnt2 = 0;
 let cnt3 = 0;
 let cnt4 = 0;
+let cntPart = 0;
 const UNIFORM_PARAMS = {
     defaultVertex: { // Uniform buffer indexes to pass default vertex shader params
         widthIdx:       cnt1++,
@@ -134,15 +134,17 @@ const UNIFORM_PARAMS = {
         count: cnt4,
         progIdx: INT_NULL,  // Refference to the program
     },
+    NOISE:{
+        widthIdx:  0,
+        heightIdx: 1,
+        count: 2,
+        progIdx: INT_NULL,  // Refference to the program
+    },
     particles: { // Uniform buffer indexes to pass default vertex shader params
-        idx0:  0,
-        idx1:  1,
-        idx2:  2,
-        idx3:  3,
-        idx4:  4,
-        idx5:  5,
-        idx6:  6,
-        count: 7,
+        widthIdx:   cntPart++,
+        heightIdx:  cntPart++,
+        speedIdx:   cntPart++,
+        count: cntPart,
         progIdx: INT_NULL,  // Refference to the program
     },
     

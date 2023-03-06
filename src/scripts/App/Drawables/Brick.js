@@ -2,7 +2,7 @@
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { Mesh } from '../../Engine/Drawables/Mesh.js'
 import { BallBrickCollision } from './Ball.js';
-import { GlScale, GlSetColor, GlSetColorAlpha, GlSetDim, GlSetWpos } from '../../Graphics/GlBufferOps.js';
+import { GlSetColor, GlSetColorAlpha} from '../../Graphics/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../Graphics/GlBufferOps.js';
 import { ExplosionsCreateExplosion } from '../../Engine/Explosions.js';
 import { ParticlesCreateParticleSystem } from '../../Engine/ParticlesSystem/Particles.js';
@@ -11,14 +11,11 @@ import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { Rect } from '../../Engine/Drawables/Rect.js';
 
 
-// class Brick extends Rect{
-class Brick {
-
+class Brick extends Rect{
+    // mesh = null;
+    // gfxInfo = null;
+    
     sid = 0;
-
-    mesh = null;
-    gfxInfo = null;
-
     isActive = false;
 
     inAnimation = false;
@@ -28,38 +25,17 @@ class Brick {
     };
 
     constructor(sid, col, dim, scale, tex, pos, style) {
+        super('Brick', sid, col, dim, scale, tex, pos, style, null);
         this.sid = sid;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
-        // this.mesh = new Rect(col, dim, scale, tex, pos, style, null, null);
+        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
     }
 
-    SetPos(pos) {
-        this.mesh.pos[0] = pos[0]; // Must assign each value explicitly so js does not create a ref to pos
-        this.mesh.pos[1] = pos[1]; // Must assign each value explicitly so js does not create a ref to pos
-        this.mesh.pos[2] = pos[2]; // Must assign each value explicitly so js does not create a ref to pos
-        GlSetWpos(this.gfxInfo, pos);
-    }
-    SetDim(dim) {
-        this.mesh.dim[0] = dim[0];
-        this.mesh.dim[1] = dim[1];
-        GlSetDim(this.gfxInfo, dim);
-    }
-    SetColor(col) {
-        this.mesh.col[0] = col[0];
-        this.mesh.col[1] = col[1];
-        this.mesh.col[2] = col[2];
-        this.mesh.col[3] = col[3];
-        GlSetColor(this.gfxInfo, col);
-    }
-    SetColorAlpha(alpha) {
-        this.mesh.col[3] = alpha;
-        GlSetColorAlpha(this.gfxInfo, alpha);
-    }
     Destroy(){
         this.mesh.col[3] = 0.0;
         GlSetColorAlpha(this.gfxInfo, 0.0);
         this.isActive = false;
     }
+
 };
 
 class Bricks {
@@ -71,19 +47,18 @@ class Bricks {
     Init(sceneIdx, count) {
         const pos = [0, 0, 0];
         const dim = [28, 16];
-        const style = { roundCorner: 8.0, border: 2.8, feather: 1.4, };
+        const style = { roundCorner: BRICK.ROUNDNENSS, border: BRICK.BORDER, feather: BRICK.FEATHER, };
         const sid = SID_DEFAULT;
         for (let i = 0; i < count; i++) {
             this.brick[i] = new Brick(sid, TRANSPARENT, dim, [1.0, 1.0], null, pos, style);
             this.brick[i].gfxInfo = GlAddMesh(this.brick[i].sid, this.brick[i].mesh, 1, sceneIdx, 'Bricks',
-                DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
+                                                DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
             this.brick[i].isActive = false;
             this.size++;
         }
     }
     GetNextFree() {
-        const len = this.brick.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < this.size; i++) {
             if (!this.brick[i].isActive) {
                 return this.brick[i];
             }
@@ -98,7 +73,7 @@ class Bricks {
             this.brick[i].mesh.col = col;
         }
     }
-    Reset(){
+    Destroy(){
         for(let i=0; i<this.size; i++){
             if(this.brick[i].isActive){
                 this.brick[i].Destroy();
@@ -107,30 +82,26 @@ class Bricks {
             }
         }
     }
-
 }
 
 const bricks = new Bricks;
 let destructionParticles = null;
 
-
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Getters
+ */
 export function BrickGetBricksBuffer() {
     return bricks.brick;
 }
-export function BrickOnUpdate() {
-    BrickUpdateParticles();
 
-    // Stage completed
-    if (g_state.game.stageCompleted) {
-        // ScenesStageCompleted();
-        OnStageCompleted();
-    }
-}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Init
+ */
 export function BrickInit(sceneIdx, count) {
-
-    // Initialize Bricks buffer
+    // Initialize Bricks array
     bricks.Init(sceneIdx, count);
-    // Initialize Particles
+    // Initialize destruction Particles
     BrickCreateParticleSystem(sceneIdx);
 
     return bricks.brick;
@@ -140,6 +111,7 @@ export function BrickCreateBrick(pos, dim) {
     br.SetPos(pos);
     br.SetDim(dim);
     br.SetColor(ORANGE_230_148_0);
+    br.SetScaleFromVal(1);
     br.isActive = true;
     bricks.count++;
 
@@ -152,10 +124,20 @@ export function BrickCreateBrick(pos, dim) {
 }
 export function BrickReset(){
     // Destroy any active bricks
-    bricks.Reset();
+    bricks.Destroy();
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Update
+ */
+export function BrickOnUpdate() {
+    BrickUpdateParticles();
 
+    // Call StageCompleted() if global state: stageCompleted is set
+    if (g_state.game.stageCompleted) {
+        OnStageCompleted();
+    }
+}
 export function BrickBallCollision() {
 
     for (let i = 0; i < bricks.size; i++) {
@@ -163,9 +145,6 @@ export function BrickBallCollision() {
         if (bricks.brick[i].isActive) {
 
             if (BallBrickCollision(bricks.brick[i].mesh.pos, bricks.brick[i].mesh.dim[0], bricks.brick[i].mesh.dim[1])) {
-                // bricks.brick[i].SetColorAlpha(0.0);
-                // bricks.count--;
-                
                 // Create brick destroy animation
                 BrickDestroyAnimation(i);
                 // Set active the program that draws the explosions
@@ -173,11 +152,12 @@ export function BrickBallCollision() {
                 BrickCreateParticles(i);
                 
                 bricks.brick[i].isActive = false;
+                // bricks.brick[i].SetColorAlpha(0.0);
+                bricks.count--;
                 
                 // If this is the last breaked brick of the stage,
                 // Set global state  'Stage completed'
                 if (bricks.count <= 0) {
-                    // ScenesStageCompleted();
                     g_state.game.stageCompleted = true;
                 }
             }
@@ -185,34 +165,14 @@ export function BrickBallCollision() {
     }
 
 }
-export function BrickSetRoundCorner(roundnes) {
 
-    for (let i = 0; i < bricks.brick.length; i++) {
-
-        GlSetAttrRoundCorner(bricks.brick[i].gfxInfo, roundnes);
-    }
-}
-export function BrickSetBorderWidth(width) {
-
-    for (let i = 0; i < bricks.brick.length; i++) {
-
-        GlSetAttrBorderWidth(bricks.brick[i].gfxInfo, width);
-    }
-}
-export function BrickSetBorderFeather(feather) {
-
-    for (let i = 0; i < bricks.brick.length; i++) {
-
-        GlSetAttrBorderFeather(bricks.brick[i].gfxInfo, feather);
-    }
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Brick's particles
+ * Particles
  */
 export function BrickCreateParticleSystem(sceneIdx) {
     const meshAttr = {
-        sid: SID_EXPLOSION2,
+        sid: SID_NOISE,
         col: GREEN,
         // pos: [Viewport.bottom+100,0,5],
         pos: [10000, 0, 5],
@@ -229,7 +189,6 @@ export function BrickCreateParticleSystem(sceneIdx) {
     destructionParticles = ParticlesCreateParticleSystem(meshAttr, timerAttr, numParticles, sceneIdx, 'Brick Destruction');
     return destructionParticles;
 }
-
 export function BrickCreateParticles(idx) {
     let step = 10;
     const pos = [
@@ -272,22 +231,21 @@ function BrickUpdateParticles() {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Brick's Animations
+ * Animations
  */
-/** Slow Brick speed animation */
 export function BrickDestroyAnimation(i) {
     const animations = AnimationsGet();
     animations.Create(BrickDestroyStartAnimation, BrickStopDestroyStopAnimation, i);
     bricks.brick[i].inAnimation = true;
     bricks.brick[i].animation.inUpScale = true;
-    bricks.brick[i].animation.scaleFactor = 1.03;
+    bricks.brick[i].animation.scaleFactor = 1.015;
 }
 function BrickStopDestroyStopAnimation(i) {
     console.log('Stop Brick Animation')
     bricks.brick[i].SetColorAlpha(0.0);
 }
 function BrickDestroyStartAnimation(i) { // This is the callback to the Animations.clbk at Animations.js
-    if (bricks.brick[i].mesh.dim[0] > 9) {
+    if (bricks.brick[i].mesh.scale[0] > 0.15) {
         // Scale
         const scalex = bricks.brick[i].mesh.scale[0];
         if (scalex > 1.3 && bricks.brick[i].animation.inUpScale) {
@@ -297,15 +255,39 @@ function BrickDestroyStartAnimation(i) { // This is the callback to the Animatio
         // if(!bricks.brick[i].animation.inUpScale && bricks.brick[i].animation.scaleFactor > 0.9){
         //     bricks.brick[i].animation.scaleFactor *= 0.994
         // }
-        bricks.brick[i].mesh.dim[0]   *= bricks.brick[i].animation.scaleFactor;
-        bricks.brick[i].mesh.dim[1]   *= bricks.brick[i].animation.scaleFactor;
-        bricks.brick[i].mesh.scale[0] *= bricks.brick[i].animation.scaleFactor;
-        bricks.brick[i].mesh.scale[1] *= bricks.brick[i].animation.scaleFactor;
-        GlScale(bricks.brick[i].gfxInfo, [bricks.brick[i].animation.scaleFactor, bricks.brick[i].animation.scaleFactor])
+
+        bricks.brick[i].ScaleFromVal(bricks.brick[i].animation.scaleFactor);
 
         return true; // Ret true if animation is not over
     }
     else return false; // Ret false if animation is completed
+}
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Setters
+ */
+export function BrickSetRoundCorner(roundnes) {
+
+    for (let i = 0; i < bricks.brick.length; i++) {
+
+        GlSetAttrRoundCorner(bricks.brick[i].gfxInfo, roundnes);
+    }
+}
+export function BrickSetBorderWidth(width) {
+
+    for (let i = 0; i < bricks.brick.length; i++) {
+
+        GlSetAttrBorderWidth(bricks.brick[i].gfxInfo, width);
+    }
+}
+export function BrickSetBorderFeather(feather) {
+
+    for (let i = 0; i < bricks.brick.length; i++) {
+
+        GlSetAttrBorderFeather(bricks.brick[i].gfxInfo, feather);
+    }
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

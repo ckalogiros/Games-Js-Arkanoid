@@ -391,14 +391,15 @@ void main(void)
     float d = 1.-smoothstep(.0, .13, length(vec2((uv.x-pos.x)*.8, uv.y-(pos.y+t*.3))))*1.6-(t*4.);
     vec4 c = v_Color;
     FragColor = vec4(d) + vec4(col*(1.0-t*2.2)) * c;
+    // FragColor = vec4(1.,0.,0.,1.);
     
 }
 `;
 
-const FS_EXPLOSION2 = `#version 300 es
+const NOISE = `#version 300 es
     
 #define BLACK vec4(.0,.0,.0,1.)
-#define MAX_NUM_PARAMS_BUFFER 1
+#define MAX_NUM_PARAMS_BUFFER 2
 #define MAX_SPEED 20.
 precision highp float;
 
@@ -446,11 +447,11 @@ void main(void)
 {
     float time  = v_Time;
     float revT  = 1.-time; // Reverse time to be from 1 to 0
-    float speed = v_ParamsParticlesShader[0];
-    // speed = min(speed, MAX_SPEED/2.);
-    speed = 10.;
+    // float speed = v_ParamsParticlesShader[0];
+    vec2 res = vec2(v_ParamsParticlesShader[0], v_ParamsParticlesShader[1]);
+    float speed = 10.;
     
-    vec2 res    = vec2(700., 800.);
+    // vec2 res    = vec2(700., 800.);
     vec2 dim = v_Dim/res;
     float ratio = res.x/res.y;
     res.x /= ratio;
@@ -468,17 +469,13 @@ void main(void)
     // float shape = fbm(complexity * uv * vec2(2., 2.));
     float shape = fbm(complexity * uv * d);
     
-    // d *= min(2.9, speed*.5);
     d *= min(1.0, speed*.5);
 
-    // if(speed*.5>1.4 && complexity < 1.6) complexity *= speed;
-    // d *= revT*(MAX_SPEED-speed)*.1;
-    // complexity *= length(uv-pos)*10.; 
+    if(speed*.5>1.4 && complexity < 1.6) complexity *= speed;
+    d *= revT*(MAX_SPEED-speed)*.1;
+    complexity *= length(uv-pos)*10.; 
 
     float c1 = noise*d+1.;
-    // float c1 = shape*d+.5;
-    // float c1 = noise;
-    // vec3 col = vec3(c1, c1*c1*c1, c1*c1*c1*c1*c1*c1*c1) *.3;
     vec3 col = v_Col.rgb*c1*c1*c1;
     col *= pow(shape, 3.); // Longer tail = smaller float
     
@@ -491,10 +488,98 @@ void main(void)
 }
 `;
 
+// const FS_PARTICLES = `#version 300 es
+
+// #define BLACK vec4(.0,.0,.0,1.)
+// #define MAX_NUM_PARAMS_BUFFER 1
+// #define MAX_SPEED 20.
+// precision highp float;
+
+// // procedural noise from IQ
+// vec2 hash(vec2 p)
+// {
+//     p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
+//     return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+// }
+
+// float noise(in vec2 p)
+// {
+//     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
+//     const float K2 = 0.211324861; // (3-sqrt(3))/6;
+    
+//     vec2 i = floor( p + (p.x+p.y)*K1 );
+//     vec2 a = p - i + (i.x+i.y)*K2;
+//     vec2 o = (a.x>a.y) ? vec2(1.0,0.0) : vec2(0.0,1.0);
+//     vec2 b = a - o + K2;
+//     vec2 c = a - 1.0 + 2.0*K2;
+    
+//     vec3 h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
+    
+//     vec3 n = h*h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
+//     return dot( n, vec3(100.0) );
+// }
+
+// float fbm(vec2 uv)
+// {
+//     float f; float n = 1.4; float a = 0.1;
+//     mat2 m = mat2( n, -n, n,  n );
+//     f  = 0.5000 * noise(uv); uv = m*uv; f += 0.2500 * noise(uv); uv = m*uv; f += 0.1250 * noise(uv); uv = m*uv; f += 0.0625 * noise(uv); uv = m*uv; f = 0.55 + 0.5*f; 
+//     return f;
+// }
+
+// in mediump vec4  v_Col;
+// in mediump vec2  v_Wpos;
+// in mediump float v_Time;
+// in mediump vec2  v_Dim;
+// in mediump float v_ParamsParticlesShader[MAX_NUM_PARAMS_BUFFER]; 
+
+// out vec4 FragColor;
+
+// void main(void)
+// {
+//     float time  = v_Time;
+//     float revT  = 1.-time; // Reverse time to be from 1 to 0
+//     float speed = v_ParamsParticlesShader[0];
+//     // speed = min(speed, MAX_SPEED/2.);
+    
+//     vec2 res    = vec2(700., 800.);
+//     vec2 dim = v_Dim/res;
+//     float ratio = res.x/res.y;
+//     res.x /= ratio;
+//     vec2 uv  = vec2(gl_FragCoord.x / res.x, gl_FragCoord.y / (res.y));
+//     vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+    
+//     float d  = 1.- smoothstep(.0, .3, (length(uv-pos)*10.));
+//     // float d  = 1.- smoothstep(.0, dim.x*10., (length(uv-pos)*10.));
+//     // float d  = 1.- smoothstep(9.*dim.x*revT, 9.1*dim.x*revT, (length(uv-pos)*10.));
+
+//     d *= min(2.9, speed*.5);
+
+
+//     float complexity = 1.;
+//     if(speed*.5>1.4 && complexity < 1.6) complexity *= speed;
+//     d*=revT*(MAX_SPEED-speed)*.1;
+//     // complexity *= length(uv-pos)*10.; 
+//     float noise = fbm(complexity * uv * vec2(4.5, 4.5));
+//     float shape = fbm(complexity * uv * vec2(2., 2.));
+
+
+
+//     float c1 = shape*d+1.;
+//     vec3 col = vec3(c1, c1*c1*c1, c1*c1*c1*c1*c1*c1*c1) *.3;
+//     // vec3 col = v_Col.rgb*c1;
+//     col *= pow(noise, 3.); // Longer tail = smaller float
+    
+//     // FragColor = vec4(col*d*revT , d*1.-c1);    
+//     if(speed > 1.)   
+//         FragColor = vec4(col, 1.); 
+
+// }
+// `;
 const FS_PARTICLES = `#version 300 es
 
 #define BLACK vec4(.0,.0,.0,1.)
-#define MAX_NUM_PARAMS_BUFFER 1
+#define MAX_NUM_PARAMS_BUFFER 3
 #define MAX_SPEED 20.
 precision highp float;
 
@@ -542,11 +627,9 @@ void main(void)
 {
     float time  = v_Time;
     float revT  = 1.-time; // Reverse time to be from 1 to 0
-    float speed = v_ParamsParticlesShader[0];
-    speed = min(speed, MAX_SPEED/2.);
-    // speed = 10.;
+    vec2 res = vec2(v_ParamsParticlesShader[0], v_ParamsParticlesShader[1]);
+    float speed = v_ParamsParticlesShader[2];
     
-    vec2 res    = vec2(700., 800.);
     vec2 dim = v_Dim/res;
     float ratio = res.x/res.y;
     res.x /= ratio;
@@ -554,11 +637,8 @@ void main(void)
     vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
     
     float d  = 1.- smoothstep(.0, .3, (length(uv-pos)*10.));
-    // float d  = 1.- smoothstep(.0, dim.x*10., (length(uv-pos)*10.));
-    // float d  = 1.- smoothstep(9.*dim.x*revT, 9.1*dim.x*revT, (length(uv-pos)*10.));
 
     d *= min(2.9, speed*.5);
-
 
     float complexity = 1.;
     if(speed*.5>1.4 && complexity < 1.6) complexity *= speed;
@@ -567,15 +647,11 @@ void main(void)
     float noise = fbm(complexity * uv * vec2(4.5, 4.5));
     float shape = fbm(complexity * uv * vec2(2., 2.));
 
-
-
     float c1 = shape*d+1.;
     vec3 col = vec3(c1, c1*c1*c1, c1*c1*c1*c1*c1*c1*c1) *.3;
-    // vec3 col = v_Col.rgb*c1;
     col *= pow(noise, 3.); // Longer tail = smaller float
     
     FragColor = vec4(col*d*revT , d*1.-c1);    
-
 }
 `;
 
@@ -649,11 +725,11 @@ export function FragmentShaderChoose(sid) {
     else if (sid & SID.PARTICLES) {
         return FS_PARTICLES;
     }
-    else if(sid & SID.EXPLOSION_FS){
+    else if(sid & SID.EXPLOSION){
         return FS_EXPLOSION;
     }
-    else if(sid & SID.EXPLOSION2_FS){
-        return FS_EXPLOSION2;
+    else if(sid & SID.NOISE){
+        return NOISE;
     }
     else {
         return FS_DEFAULT;

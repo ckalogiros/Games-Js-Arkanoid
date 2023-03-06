@@ -973,7 +973,7 @@ void mainImage( out vec4 o, vec2 fragCoord )
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // NICE round buttons
 
-const FS_EXPLOSION2 = `#version 300 es
+const NOISE = `#version 300 es
     
 #define BLACK vec4(.0,.0,.0,1.)
 #define MAX_NUM_PARAMS_BUFFER 1

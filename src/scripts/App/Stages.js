@@ -61,10 +61,10 @@ export function  StageGetNextStage(){
 // TODO: Implemetn an Init with the Init of the particlesSystem
 export function StageCreateStage1() {
 
-   const pad = 10;
+   const pad = BRICK.PAD;
    const padStart = 100;
-   const dim = [28, 16];
-   let pos = [padStart + dim[0] + pad, 320 + dim[1] + 100, -1];
+   const dim = [BRICK.WIDTH, BRICK.HEIGHT];
+   let pos = [padStart + dim[0] + pad, 220 + dim[1] + 100, -1];
 
    for (let i = 0; i < 20; i++) {
        BrickCreateBrick(pos, dim); 
@@ -78,9 +78,9 @@ export function StageCreateStage1() {
 
 export function StageCreateStage2() {
 
-   const pad = 10;
+   const pad = BRICK.PAD;
    const padStart = 100;
-   const dim = [28, 16];
+   const dim = [BRICK.WIDTH, BRICK.HEIGHT];
    let pos = [padStart + dim[0] + pad, 120 + dim[1] + 100, -1];
 
    for (let i = 0; i < 10; i++) {
@@ -94,9 +94,9 @@ export function StageCreateStage2() {
 }
 export function StageCreateStage3() {
 
-   const pad = 10;
+   const pad = BRICK.PAD;
    const padStart = 100;
-   const dim = [28, 16];
+   const dim = [BRICK.WIDTH, BRICK.HEIGHT];
    let pos = [padStart + dim[0] + pad, 120 + dim[1] + 100, -1];
 
    for (let i = 0; i < 20; i++) {

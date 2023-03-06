@@ -72,7 +72,7 @@ const MAGENTA_BLUE_DARK3 = [ 0.1, 0.1, 0.26, 1.0 ];
 const citf = 1/255;
 function InterpolateRgb(red, green, blue){
     return [
-        citf * red,
+      citf * red,
 		citf * green,
 		citf * blue,
 		1.0,

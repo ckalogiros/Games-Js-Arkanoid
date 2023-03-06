@@ -6,7 +6,7 @@ import { ButtonGetButtons, ButtonRunScaleAnimation, ButtonSetDefaultMeshProps } 
 
 
 const PLAYER_ENLARGE_ANIMATION_DURATION = 2000; // 2 seconds
-
+const MAX_ANIMATIONS_SIZE = 256;
 
 export class Animation{
     
@@ -14,49 +14,65 @@ export class Animation{
     stopAnimationClbk = null;
     params = null;
     inAnimation = false;
+    isActive = false;
     
     Create(animationClbk, stopAnimationClbk, params){
         this.params = params;
         this.animationClbk = animationClbk;
         this.stopAnimationClbk = stopAnimationClbk;
-        this.inAnimation = true;
-        // If timer param, set timer        
-    }
-    Start(){
-
-    }
-    Stop(){
-
     }
     Run(){
         this.inAnimation = this.animationClbk(this.params);
     }
     Stop(){
         this.stopAnimationClbk(this.params);
+        this.isActive = false;
     }
 }
 export class Animations{
     animations = [];
     count = 0;
+    size = MAX_ANIMATIONS_SIZE;
 
+    constructor(){
+        this.Init();
+    }
+
+    Init(){
+        for(let i=0; i<this.size; i++){
+            this.animations[i] = new Animation;
+            this.animations[i].Create(null, null, null);
+        }
+    }
+    GetNextFree() {
+        for (let i = 0; i < this.size; i++) {
+            if (!this.animations[i].isActive) {
+                return this.animations[i];
+            }
+        }
+        return null;
+    }
     Create(animationClbk, stopAnimationClbk, params){
-        const idx = this.count;
-        this.animations[idx] = new Animation;
-        this.animations[idx].Create(animationClbk, stopAnimationClbk, params);
-        // if(params !== undefined)
-        //     this.animations[idx].Create(animationClbk, stopAnimationClbk, params);
-        // else this.animations[idx].Create(animationClbk, stopAnimationClbk);
-        this.count++;
+        const freeAnim = this.GetNextFree();
+        if(freeAnim){
+            freeAnim.Create(animationClbk, stopAnimationClbk, params);
+            freeAnim.inAnimation = true; 
+            freeAnim.isActive = true; 
+            this.count++;
+        }
+        else{alert('Not enough space for new Animation. At Animations.js:Animations.Create()')}
     }
     Run(){
         if(this.count){
-            for(let i=0; i<this.count; i++){
-                if(this.animations[i].inAnimation){
-                    this.animations[i].Run();
-                }
-                else{ // Here do stuf if NOT inAnimation
-                    this.animations[i].Stop();
-                    this.count--;
+            for(let i=0; i<this.size; i++){
+                if(this.animations[i].isActive){
+                    if(this.animations[i].inAnimation){
+                        this.animations[i].Run();
+                    }
+                    else{ // Here do stuf if NOT inAnimation
+                        this.animations[i].Stop();
+                        this.count--;
+                    }
                 }
             }
         }

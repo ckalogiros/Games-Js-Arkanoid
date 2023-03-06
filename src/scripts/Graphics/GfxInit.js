@@ -1,8 +1,8 @@
 "use strict";
-import { gfxCtx }                       from './I_WebGL.js'
-import { GfxCreatePrograms }            from './GfxCreateProgram.js';
-import { GlCreateTexture }              from './GlTextures.js'
-import { COMIC_FONT_TEXTURE_PATH }      from '../Engine/Loaders/Font/LoadFont.js'
+import { gfxCtx } from './I_WebGL.js'
+import { GfxCreatePrograms } from './GfxCreateProgram.js';
+import { GlCreateTexture } from './GlTextures.js'
+import { COMIC_FONT_TEXTURE_PATH } from '../Engine/Loaders/Font/LoadFont.js'
 // import { GlUniformsSet } from './GlUniforms.js';
 
 
@@ -12,27 +12,46 @@ import * as dbg from './Debug/GfxDebug.js'
 
 
 const canvas = document.getElementById("glCanvas");
-export function GetCanvasSize(){
-    return {
-        width: canvas.clientWidth,
-        height: canvas.clientHeight,
-    };
+
+function DeviceSetUp(){
+    Device.width  = window.innerWidth;
+    Device.height = window.innerHeight;
+    console.log('Device width: ', Device.width, ' height: ',  Device.height)
+
+    if(Device.width > 500){
+        canvas.width  = 500;
+        canvas.height = Device.height;
+    }
+    else{
+        canvas.width  = Device.width;
+        canvas.height = Device.height;
+    }
+    // Update (global) Viewport object
+    Viewport.width    = canvas.width;
+    Viewport.height   = canvas.height;
+
+    Viewport.left     = 0;
+    Viewport.right    = canvas.width;
+    Viewport.top      = 0;
+    Viewport.bottom   = canvas.height;
+    Viewport.centerX  = Viewport.left + (Viewport.width/2);
+    Viewport.centerY  = Viewport.top + (Viewport.height/2);
+    
+    Viewport.ratio    = canvas.width / canvas.height;
+    Viewport.leftMargin =  (window.innerWidth - Viewport.width) / 2;
+    Viewport.topMargin  = (window.innerHeight - Viewport.height) / 2
 }
 
-const canvasDim = {
-    width: canvas.clientWidth,
-    height: canvas.clientHeight,
-};
-
-
 export function GfxInitGraphics() {
+
+    DeviceSetUp();
 
     console.log('Initializing Graphics.')
 
     /** Create Graphics Context */
-    gfxCtx.gl = canvas.getContext("webgl2", { 
-        premultipliedAlpha: false, 
-        antialias: true, 
+    gfxCtx.gl = canvas.getContext("webgl2", {
+        premultipliedAlpha: false,
+        antialias: true,
         // colorSpace: 'srgb',
         // alpha: true,
         preserveDrawingBuffer: true,
@@ -46,7 +65,6 @@ export function GfxInitGraphics() {
     // gfxCtx.ext = gfxCtx.gl.getSupportedExtensions();
     // gfxCtx.gl.getExtension('OES_standard_derivatives');
     // gfxCtx.gl.getExtension('EXT_shader_texture_lod');
-
 
     gfxCtx.gl.enable(gfxCtx.gl.DEPTH_TEST);
     /* * * * * GlDepthFunc Constant Parameters
@@ -82,22 +100,10 @@ export function GfxInitGraphics() {
     gfxCtx.gl.blendFunc(gfxCtx.gl.DST_ALPHA, gfxCtx.gl.ONE_MINUS_SRC_ALPHA);
     // gfxCtx.gl.depthMask(false);
 
-
-    // Update (global) Viewport object
-    Viewport.width  = canvasDim.width;
-    Viewport.height = canvasDim.height;
-    Viewport.left   = 0;
-    Viewport.right  = canvasDim.width;
-    Viewport.top    = 0;
-    Viewport.bottom = canvasDim.height;
-    Viewport.ratio  = canvasDim.width / canvasDim.height;
-    
     const progs = GfxCreatePrograms(gfxCtx.gl);
     dbg.PrintAttributes(gfxCtx.gl);
     const texture = GlCreateTexture('FontConsolasSdf35', gfxCtx.gl, COMIC_FONT_TEXTURE_PATH);
 
-
-    
 }
 
 

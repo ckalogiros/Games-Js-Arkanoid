@@ -1,6 +1,6 @@
 "use strict";
 import { GlGetVB } from '../Graphics/GlProgram.js';
-import { Player, CreatePlayer } from './Drawables/Player.js';
+import { Player, CreatePlayer, PlayerGetPos } from './Drawables/Player.js';
 import { Button, CreateButton } from '../Engine/Drawables/Widgets/Button.js';
 import { BallCreate, BallResetPos } from './Drawables/Ball.js';
 import { Rect, RectCreateRect } from '../Engine/Drawables/Rect.js';
@@ -205,12 +205,12 @@ export function ScenesCreateAllMeshes() {
     let dim = [Viewport.width / 2, Viewport.height / 2];
     let pos = [Viewport.width / 2, Viewport.height / 2, -1];
     let style = { pad: 10, roundCorner: 6, border: 0, feather: 30 };
-    const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT, DarkenColor(MAGENTA_RED, 0.3), dim, [1, 1], null, pos, style);
+    const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style);
     startMenuBk.gfxInfo = GlAddMesh(startMenuBk.sid, startMenuBk.mesh, 1, SCENE.startMenu, 'Background StartMenu', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     scenes.AddMesh(startMenuBk, APP_MESHES_IDX.background.startMenu);
 
     // Create 'start stage' background
-    const startStageBk = RectCreateRect('startStageBk', SID_DEFAULT, DarkenColor(ORANGE_230_148_0, 0.3), dim, [1, 1], null, pos, style);
+    const startStageBk = RectCreateRect('startStageBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style);
     startStageBk.gfxInfo = GlAddMesh(startStageBk.sid, startStageBk.mesh, 1, SCENE.startStage, 'Background StartStage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
     scenes.AddMesh(startStageBk, APP_MESHES_IDX.background.startStage);
     // Create 'finish stage' background
@@ -240,7 +240,7 @@ export function ScenesCreateAllMeshes() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Buttons */
     let btnDim = [100, 20];
-    let btnPos = [0, 150, 0];
+    let btnPos = [0, 100, 0];
     style = { pad: 10, roundCorner: 6, border: 3, feather: 12 };
     let fontSize = 20;
 
@@ -318,7 +318,7 @@ export function ScenesCreateAllMeshes() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Ball */
     const balls = BallsInit(SCENE.stage); // Initialize Ball's buffer
-    BallCreate(SCENE.stage, [Viewport.width / 2, Viewport.bottom - 82]);
+    BallCreate(SCENE.stage, [Viewport.width / 2, PLAYER.YPOS-100]);
     scenes.AddMesh(balls, APP_MESHES_IDX.balls);
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

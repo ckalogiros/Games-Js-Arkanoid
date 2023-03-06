@@ -34,12 +34,16 @@ See if we can set all animations via Animation class
 (Current Animations are implemented as folows: 
     export function RunAnimations() {
 
-        ButtonCreateScaleAnimation();
-        UiModRunAnimation();
-        PowerUpRunAnimation();
-        PlayerEnlargeAnimation();
+      ButtonCreateScaleAnimation();
+      UiModRunAnimation();
+      PowerUpRunAnimation();
+      PlayerEnlargeAnimation();
 
     }
 )
 
 Change the vars name 'name' in TextLabel class to 'str' or 'text'
+
+*** Make PlayerOnUpdate() or correct existing OnPlayerMove() function
+    to run on every frame so we can update the player's state.inMove, 
+    so that we can include the players χδιρ momentum to balls speed

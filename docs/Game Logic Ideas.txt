@@ -1,0 +1,7 @@
+Convert to Android App
+https://stackoverflow.com/questions/59389573/how-can-i-convert-my-javascript-web-application-into-android-application
+
+Player update:
+   create a player with it's sidesclose to a triangle angle like _\ 
+   and implement to the player-ball collission so that the player can
+   cattch and hit the ball at it's minimum y position

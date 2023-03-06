@@ -33,7 +33,7 @@ export function AppInit() {
     GfxInitGraphics(); // Creation of some commonly used gl programs(like simple rect rendering and texture rendering)
 
     AddEventListeners();
-    AddCssUiListeners();
+    // AddCssUiListeners();
 
 
     AppInitReservedGlBuffers();
@@ -50,7 +50,7 @@ export function AppInit() {
     // TODO: CONTINUE: Set the update() in render to update all meshes throug Scene, 
     // so it can check only for events of meshes that exist in the current scene
 
-    ModCreateAnimation();
+    // ModCreateAnimation();
 
     // * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * * 
     // Display Frames per second

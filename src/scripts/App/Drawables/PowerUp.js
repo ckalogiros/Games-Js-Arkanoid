@@ -6,7 +6,10 @@ import { GlAddMesh, GlCreateReservedBuffer } from "../../Graphics/GlBuffers.js";
 import { GetRandomColor, GetRandomInt } from "../../Helpers/Helpers.js";
 import { UiCreateModifierValue, UiUpdate } from "./Ui/Ui.js";
 import { BallCreatePowUpBalls } from "./Ball.js";
-import { PlayerSetStateAnimation } from "./Player.js";
+import { PlayerSetStateScaleAnimation } from "./Player.js";
+import { Rect } from "../../Engine/Drawables/Rect.js";
+
+
 
 const POWUPS_MAX_COUNT = 32;
 const POWUP_TYPES = {
@@ -25,20 +28,21 @@ const POWUP_TYPES_ARRAY = [];
 // const POWUP_TYPES_ARRAY = [POWUP_TYPES.ENLARGE_PLAYER, POWUP_TYPES.BALL];
 
 
-class PowerUp {
+class PowerUp extends Rect{
     
-        sid     = 0;
+        // sid     = 0;
     
-        mesh    = null;
-        gfxInfo = null;
+        // mesh    = null;
+        // gfxInfo = null;
     
         type = 'NULL'; // The type of the power up
         isActive     = false;
         inAnimation = false;
 
     constructor(sid, col, dim, scale, tex, pos, style) {
-        this.sid = sid;
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
+        // this.sid = sid;
+        // this.mesh = new Mesh(col, dim, scale, tex, pos, style, null, null);
+        super('PowUp', sid, col, dim, scale, tex, pos, style, null);
     }
 
     SetPos(pos){
@@ -63,20 +67,18 @@ export class PowerUps{
 
     // We dont use the constructor because power ups nedd to be initialized in specific time order
     Init(){
-        const sid = SID_EXPLOSION2;
-        const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'PowerUp');
+        const sid = SID_NOISE;
+        // const gfxInfo = GlCreateReservedBuffer(sid, SCENE.stage, 'PowerUp');
+        // this.powUp[i].gfxInfo = GlAddMesh(this.powUp[i].sid, this.powUp[i].mesh, 1, 
+        //                             gfxInfo.sceneIdx, 'PowUp', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
         
-        const style = {
-            roundCorner: 0.0,
-            border: 2.0,
-            feather: 14.0,
-        };
+        const style = POW_UP.STYLE;
         for(let i = 0; i < this.size; i++){
 
             this.powUp[i] = new PowerUp(sid, TRANSPARENT, [28, 14, 0], [1,1], null,  [0,0,3], style);
             this.powUp[i].isActive = false;
             this.powUp[i].gfxInfo = GlAddMesh(this.powUp[i].sid, this.powUp[i].mesh, 1, 
-                                        gfxInfo.sceneIdx, 'PowUp', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
+                                        SCENE.stage, 'PowUp', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
         }
     }
     Reset(){
@@ -206,8 +208,7 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
                 plPos[0] + plw >= powpos[0] - poww &&
                 plPos[0] - plw <= powpos[0] + poww &&
                 plPos[1] + plh >= powpos[1] - powh &&
-                plPos[1] - plh <= powpos[1] + powh
-                ){
+                plPos[1] - plh <= powpos[1] + powh      ){
                     // DestroyPowerUp(i);
                     scoreMod  = 0.5;
                     // UiCreateModifierValue(powpos, scoreMod);
@@ -223,7 +224,7 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
                     else if(powUps.powUp[i].type == POWUP_TYPES.GUN){
                     }
                     else if(powUps.powUp[i].type == POWUP_TYPES.ENLARGE_PLAYER){
-                        PlayerSetStateAnimation(true)
+                        PlayerSetStateScaleAnimation(true)
                     }
                     else if(powUps.powUp[i].type == POWUP_TYPES.POWER_BALL){
                         

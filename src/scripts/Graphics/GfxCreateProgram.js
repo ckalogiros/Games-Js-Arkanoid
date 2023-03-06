@@ -89,7 +89,7 @@ export function GlCreateProgram(sid) {
         prog.shaderInfo.uniforms.paramsBuffer = new Float32Array(UNIFORM_PARAMS.fireBall.count);
     }
     
-    if (sid & SID.EXPLOSION_FS) {
+    if (sid & SID.EXPLOSION) {
 
         // Initialize Camera
         prog.CameraSet();
@@ -115,15 +115,21 @@ export function GlCreateProgram(sid) {
         UNIFORM_PARAMS.particles.progIdx = progIdx;
         // Create the uniforms buffer 
         prog.shaderInfo.uniforms.paramsBuffer = new Float32Array(UNIFORM_PARAMS.particles.count);
+        prog.UniformsSetParamsBufferValue(Viewport.width,  UNIFORM_PARAMS.particles.widthIdx);
+        prog.UniformsSetParamsBufferValue(Viewport.height, UNIFORM_PARAMS.particles.heightIdx);
+        prog.UniformsSetParamsBufferValue(0, UNIFORM_PARAMS.particles.speedIdx);
     }
-    if (sid & SID.EXPLOSION2_FS) {
-
+    if (sid & SID.NOISE) {
+        
         // Initialize Camera
         prog.CameraSet();
         // Store globally the fire shader program index
-        // UNIFORM_PARAMS.particles.progIdx = progIdx;
+        UNIFORM_PARAMS.NOISE.progIdx = progIdx;
         // Create the uniforms buffer 
-        // prog.shaderInfo.uniforms.paramsBuffer = new Float32Array(UNIFORM_PARAMS.particles.count);
+        prog.shaderInfo.uniforms.paramsBuffer = new Float32Array(UNIFORM_PARAMS.NOISE.count);
+        // prog.UniformsSetParamsBufferValue(Viewport.width,  UNIFORM_PARAMS.NOISE.widthIdx);
+        prog.UniformsSetParamsBufferValue(Viewport.width,  UNIFORM_PARAMS.NOISE.widthIdx);
+        prog.UniformsSetParamsBufferValue(Viewport.height, UNIFORM_PARAMS.NOISE.heightIdx);
     }
     
     PrintAttributes(gfxCtx.gl);

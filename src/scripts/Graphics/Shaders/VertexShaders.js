@@ -1,5 +1,62 @@
 "use strict";
 
+/**
+ * Raymarching Implementation
+ *      https://www.youtube.com/watch?v=PGtv-dBi2wE
+ *      https://www.shadertoy.com/view/XlGBW3
+ * 
+    float GetDist(vec3 p)
+    {
+        vec4 sphere = vac4(0,1,6,1); // [x,y,z,radius]
+        // distance to the sphere
+        float ds = length(p - sphere.xyz) - sphere.w;  // -.w is the radius
+        float dp = p.y; // distance to the plane(the ground plane is the camera.y)
+        float d = min(ds, dp); // Take the closest distance(either the plane or the sphere)
+        return d;
+    }
+
+    // Calculate the normal of a surface by drawing a line between to (very close to each other) points
+    // on the surface, calculating the slope (the perpendicular to the line)
+    vec3 GetNormal(vec3 p) // p is a point on the surface
+    {
+        vec2 e = vec2(0.01, 0.0)
+        float d = GetDist(p);
+        vec3 normal = vec3(
+            d - GetDist(p - e.xyy),
+            d - GetDist(p - e.yxy),
+            d - GetDist(p - e.yyx)
+        ); 
+
+        return normalize(normal);
+    }
+
+    // ro: ray origin. 
+    // rd: ray direction
+    float RayMarch(vec3 ro, vec3 rd)
+    {
+        float do = 0; // do: distance origin(The origin changes in each step of the loop) 
+        for(int i=0; i<MAX_STEPS; i++)
+        {
+            // Set the ray origin to be the prev ray origin + the ray distance 
+            // to the prev closest point of the surface
+            vec3 p = ro + (do*rd);
+            
+            // Calculate the new distance(from the current ray origin to the new closest to the surface point)
+            ds = GetDist(p);
+
+            // Store the current distance as the next origin
+            do += ds;
+            
+            // If we come across a min distance that we declare as a contant
+            // OR we pass a max distance, we stop the ray marching
+            if(ds < SOME_MINIMUM_SURFACE_DISTANCE || do > SOME_MAX_DISTANCE)
+        }
+        return do;
+    }
+
+ * 
+ */
+
 //===================== Orthographic Matrix =====================
 // | left-right | 0				| 0							| 0 |
 // | 0			| top - bottom	|							| 0 |
@@ -121,7 +178,6 @@ void main(void)
 }
 `;
 
-
 const VS_FIRE = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 9
@@ -197,7 +253,7 @@ void main(void) {
 
 const VS_PARTICLES = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 1
+#define MAX_NUM_PARAMS_BUFFER 3
 
 layout (location = 0) in mediump vec4  a_Col;
 layout (location = 1) in mediump vec2  a_Pos;
@@ -211,7 +267,36 @@ out mediump vec4  v_Col;
 out mediump vec2  v_Wpos; 
 out mediump vec2  v_Dim; 
 out mediump float v_Time; 
-out mediump float  v_ParamsParticlesShader[MAX_NUM_PARAMS_BUFFER];                   
+out mediump float v_ParamsParticlesShader[MAX_NUM_PARAMS_BUFFER];                   
+
+void main(void) 
+{
+    gl_Position = u_OrthoProj * vec4(a_Pos.x + a_Wpos.x, a_Pos.y + a_Wpos.y, a_Wpos.z, 1.0);
+    
+    v_Col  = a_Col;
+    v_Wpos = a_Wpos.xy;
+    v_Dim  = abs(a_Pos);
+    v_Time = a_Time;
+    v_ParamsParticlesShader = u_Params;
+}`;
+
+const VS_NOISE = `#version 300 es
+
+#define MAX_NUM_PARAMS_BUFFER 2
+
+layout (location = 0) in mediump vec4  a_Col;
+layout (location = 1) in mediump vec2  a_Pos;
+layout (location = 2) in mediump vec3  a_Wpos;
+layout (location = 3) in mediump float a_Time;
+
+uniform mat4  u_OrthoProj;
+uniform float u_Params[MAX_NUM_PARAMS_BUFFER];                 
+
+out mediump vec4  v_Col; 
+out mediump vec2  v_Wpos; 
+out mediump vec2  v_Dim; 
+out mediump float v_Time; 
+out mediump float v_ParamsParticlesShader[MAX_NUM_PARAMS_BUFFER];                   
 
 void main(void) 
 {
@@ -241,10 +326,10 @@ export function VertexShaderChoose(sid){
     else if(sid & SID.PARTICLES){
         return VS_PARTICLES;
     }
-    else if(sid & SID.EXPLOSION2_FS){
-        return VS_PARTICLES;
+    else if(sid & SID.NOISE){
+        return VS_NOISE;
     }
-    else if(sid & SID.EXPLOSION_FS){
+    else if(sid & SID.EXPLOSION){
         return VS_EXPLOSION;
     }
     else if(

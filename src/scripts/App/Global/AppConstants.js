@@ -27,6 +27,10 @@ const ALIGN = {
 const MENU_BAR_HEIGHT = 50;
 const GAME_AREA_TOP = MENU_BAR_HEIGHT * 2;
 
+const Device = {
+    width: 0,
+    height:0,
+}
 const Viewport = {
     width: 0,
     height: 0,
@@ -35,6 +39,8 @@ const Viewport = {
     top: 0,
     bottom: 0,
     ratio: 0,
+    leftMargin:0,
+    topMargin:0,
 };
 
 const GAME_STATE = {
@@ -96,9 +102,11 @@ const APP_MESHES_IDX = {
 
 /** Ball */
 const BALL = {
+    RADIUS: 12,
     MAX_AMT: 7.2,
     MIN_AMT: -7.2,
     HIT_ACCEL: 1.05, //1.15,
+    YX_SPEED_RATIO: 1.3,
     CORNER_HIT_ACCEL: 1.15, //1.4,
     RADIUS_TWO_THIRDS: 0,
     MODE: {
@@ -106,6 +114,39 @@ const BALL = {
     },
     DIR:{X:1, Y:1},
 };
+
+/** Player */
+const PLAYER = {
+    YPOS: 0,
+    WIDTH: 0,
+    HEIGHT: 0,
+};
+/** Brick */
+const BRICK = {
+    // WIDTH: 28,
+    // HEIGHT: 16,
+    WIDTH: 24,
+    HEIGHT: 13,
+    PAD: 6,
+
+    ROUNDNENSS:4,
+    BORDER:1.6,
+    FEATHER:0.8,
+};
+
+const POW_UP = {
+    
+    STYLE: {
+        ROUNDNENSS:8,
+        BORDER:0,
+        FEATHER:2.8,
+    }
+}
+
+const UI_TEXT = {
+    FONT_SIZE: 6,
+}
+
 
 
 cnt = 0;

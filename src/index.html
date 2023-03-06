@@ -5,6 +5,8 @@
 	<meta charset="UTF-8">
 	<title>WebGL_Basic</title>
 	<link rel="stylesheet" type="text/css" href="style/style.css">
+	<!-- This is to get the device dimentions -->
+	<meta name="viewport" content="height=device-height, initial-scale=1">
 </head>
 
 <body>
@@ -14,7 +16,7 @@
     	<div id="fps"></div>
     	<div id="TimeMesure"></div>
     	<!-- Ui Helpers -->
-    	<div class="ui reset">
+    	<!-- <div class="ui reset">
     		<div class="flex">
     			<div class="container">
     				<p>Text Inner Value: <span id="sdf-param1-val"></span></p>
@@ -57,9 +59,9 @@
     				<input class="slider" type="range" min="0" max="100" value="0" id="brick-border-feather">
     			</div>
     		</div>
-    	</div>
+    	</div> -->
         
-    	<canvas id="glCanvas" width="700" height="800"></canvas>
+    	<canvas id="glCanvas" width="0" height="0"></canvas>
     </center-frame>
 
 	<script>

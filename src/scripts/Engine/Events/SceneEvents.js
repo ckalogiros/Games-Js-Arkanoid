@@ -48,7 +48,6 @@ export function OnHover(scene, mouse) {
  * @param {*} mousex : Mouse x position
  */
 export function OnPlayerMove(mousex, mouseXdir) {
-
     UpdatePlayerPosX(mousex, mouseXdir);
 }
 

@@ -73,7 +73,8 @@ export class Particles{
                 return i;
             }
         }
-        alert('Not enough Particles for:' + this.name)
+        console.log('Not enough Particles for:' + this.name)
+        // alert('Not enough Particles for:' + this.name)
         return null;
     }
 

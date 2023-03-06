@@ -1,9 +1,8 @@
 "use strict";
 import { GlAddMesh } from "../../Graphics/GlBuffers.js";
-import { Mesh } from "../../Engine/Drawables/Mesh.js";
 import { GlSetWpos, GlSetColor } from "../../Graphics/GlBufferOps.js";
 import { PlayerGetPos, PlayerGetDim } from "./Player.js";
-import { ModCreateAnimation, UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
+import { UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
 import { MouseGetXdir } from "../../Engine/Events/MouseEvents.js";
 import { PowerUpCreate } from "./PowerUp.js";
 import { GetRandomPos, GetRandomColor, DimColor } from "../../Helpers/Helpers.js";
@@ -37,6 +36,7 @@ export class Ball extends Rect{
 
     inMove = false;
     inAnimation = false;
+    inLock = false;
 
     constructor(sid, col, dim, scale, tex, pos, style, speed, isFree) {
         
@@ -47,8 +47,8 @@ export class Ball extends Rect{
     }
 
     ResetPos(){
-        this.mesh.pos = [Viewport.width/2, Viewport.bottom - 82, 2];
-        GlSetWpos(this.gfxInfo, [Viewport.width/2, Viewport.bottom - 82, 2])
+        this.mesh.pos = [Viewport.width/2, PLAYER.YPOS - (this.mesh.dim[1] + PLAYER.HEIGHT), 2];
+        GlSetWpos(this.gfxInfo, [this.mesh.pos[0], this.mesh.pos[1], 2])
     }
     SetPos(pos){
         this.mesh.pos = pos;
@@ -132,23 +132,24 @@ export function BallGetDir(){
     };
 }
 export function BallSetSpeed(val){
-    if(mainBall.speed + val > 0 
-        && mainBall.speed + val < BALL_MAX_SPEED
-        && mainBall.speed + val > BALL_MIN_SPEED)
-        {
-            // const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
-            // prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
-            BallRedFlame(val)
-            mainBall.speed += val*.5;
-            console.log('acceleration:', acceleration);
-            console.log('BallSpeed:', mainBall.speed)
-        }
+    // if(mainBall.speed + val > 0 
+    //     && mainBall.speed + val < BALL_MAX_SPEED
+    //     && mainBall.speed + val > BALL_MIN_SPEED)
+    //     {
+    //         // const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
+    //         // prog.UniformsSetParamsBufferValue(acceleration+=val, UNIFORM_PARAMS.particles.idx0);
+    //         BallRedFlame(val)
+    //         mainBall.speed += val*.5;
+    //         console.log('acceleration:', acceleration);
+    //         console.log('BallSpeed:', mainBall.speed)
+    //     }
+    allRedFlame(val)
 }
 
 function BallRedFlame(val){
     const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
-    acceleration+=val;
-    prog.UniformsSetParamsBufferValue(acceleration, UNIFORM_PARAMS.particles.idx0);
+    // acceleration+=val;
+    prog.UniformsSetParamsBufferValue(val, UNIFORM_PARAMS.particles.speedIdx);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -156,14 +157,14 @@ function BallRedFlame(val){
 
 export function BallsInit(sceneIdx){
 
-    const radius = 15.0;
+    const radius = BALL.RADIUS;
     const style = { roundCorner: 0, border: 0.0, feather: 2.0, };
 
     style.roundCorner = radius - style.feather;
     const sid = SID_DEFAULT;
     let color = [1,1,1,1.0];
     // let pos   = [Viewport.width / 2, Viewport.bottom - 82, 2];
-    let pos   = [OUT_OF_VIEW, Viewport.bottom - 82, 2];// Set the pos of every un-rendered ball out of view
+    let pos   = [OUT_OF_VIEW, PLAYER.YPOS - 30, 2];// Set the pos of every un-rendered ball out of view
     let isFree = false;
     
     for(let i = 0; i < MAX_BALLS_COUNT; i++){
@@ -218,7 +219,7 @@ export function BallCreate(pos) {
             balls[i].mesh.pos[0] = pos[0];
             balls[i].mesh.pos[1] = pos[1];
 
-            balls[i].isFree     = false;
+            balls[i].isFree = false;
 
             return balls[i];
         }
@@ -226,7 +227,6 @@ export function BallCreate(pos) {
 }
 
 export function BallOnUpdate(){
-
     // Case no powerUp 'BALL' is active(deal with only one mainBall)
     if(isOnlyMainBall){
 
@@ -234,11 +234,8 @@ export function BallOnUpdate(){
         BallUpdatePos(mainBall);
     }
     else{ // Update all balls from the array
-
         for(let i = 0; i < MAX_BALLS_COUNT; i++){
-    
             if(!balls[i].isFree){
-                
                 BallBoundariesCollision(balls[i]);
                 BallUpdatePos(balls[i]);
             }
@@ -260,16 +257,18 @@ export function BallUpdatePos(ball) {
 
     if (!ballInStartPos) {
 
-        // Normalize balls ballSpeed over time
-        if (!(ball.amty <= 1.0)) ball.amty *= 0.99995;
-        //   else if (ball.amty < 1.0) ball.amty *= 1.002;
-        if (!(ball.amtx <= 1.0)) ball.amtx *= 0.9992;
-        //   else if (ball.amtx < 0.8) ball.amtx *= 1.002;
-
         ball.mesh.pos[0] += ball.xdir * ball.amtx * ball.speed; // * delta;
         ball.mesh.pos[1] += ball.ydir * ball.amty * ball.speed; // * delta;
         GlSetWpos(ball.gfxInfo, ball.mesh.pos);
         ball.inMove = true;
+
+        /**
+         * Un-lock ball's property, to check collision with the player
+         * In simple terms, prevent ball to collide more than once,
+         * before it gets away from the player
+         */
+        if(ball.mesh.pos[1] < PLAYER.YPOS - 40)
+            ball.inLock = false;
     }
     else { // If the state of the game is at the start of a stage, keep the ball at the start position until user releases it.
         
@@ -277,6 +276,7 @@ export function BallUpdatePos(ball) {
         const playerDim = PlayerGetDim();
         const mouseDir  = MouseGetXdir();
         let inMove = false;
+        ball.inLock = false;
         
         // Make the ball not leave the players's width area
         if (ball.mesh.pos[0] < playerPos[0] - playerDim[0] && mouseDir > 0){
@@ -290,7 +290,6 @@ export function BallUpdatePos(ball) {
         if(inMove){
             GlSetWpos(ball.gfxInfo, ball.mesh.pos);
             ball.inMove = true;
-            // OnBallMove();
         }
     }
 
@@ -323,6 +322,82 @@ export function BallBoundariesCollision(ball) {
     }
 }
 
+// export function BallPlayerCollision(plpos, plw, plh, plXdir) {
+
+//     if (!mainBall) return;
+        
+//     let count = MAX_BALLS_COUNT;
+//     if(isOnlyMainBall)
+//         count = 1; // If no powerUp 'Ball' is active, dont loop through all elements in the ball's buffer
+
+
+    
+//     for(let i = 0; i < count; i++){
+    
+//         if ( !balls[i].isFree && // curr elem has a ball mesh
+//             balls[i].mesh.pos[0] + blr >= plpos[0] - plw &&
+//             balls[i].mesh.pos[0] - blr <= plpos[0] + plw &&
+//             balls[i].mesh.pos[1] + blr >= plpos[1] - plh &&
+//             balls[i].mesh.pos[1] - blr <= plpos[1] + plh
+//         ) {
+//             // Bounce ball in y dir
+//             balls[i].ydir = -1;
+    
+//             /**
+//             * collPos is how much away from the player's center the ball had collided.
+//             * We use it to create different responce of the ball x and y direction
+//             * vector. The more the collision happens in the middle of the player, the
+//             * 'straighter' the ball is going to bounce off. If the collPos is large(ball
+//             * collided at the sides) the ball will bounce with a greater angle.
+//             */
+//             let collPos = (balls[i].mesh.pos[0] - plpos[0]) / 5;
+    
+//             // Clamp very high and very low values
+//             if (collPos < BALL.MIN_AMT) collPos = -BALL.MIN_AMT;
+//             else if (collPos > BALL.MAX_AMT) collPos = BALL.MAX_AMT;
+    
+//             /* If balls is comming from the left and collides
+//              * to the left half of the player AND player
+//              * comes from the right (oposite X directions for ball-player),
+//              * then balls goes to the oposite direction. */
+//             if ((collPos > 0 && balls[i].xdir < 0 && plXdir > 0) ||
+//                 (collPos < 0 && balls[i].xdir > 0 && plXdir < 0)) {
+//                 balls[i].xdir *= -1;
+//             }
+    
+//             // Normalize collPos to have only positive values
+//             if (collPos < 0) collPos *= -1;
+    
+//             // Change ballSpeed for x and y separately
+//             balls[i].amty = (12 - collPos) * 0.185;
+//             // balls[i].amty = (12 - collPos) * 0.285;
+    
+//             // // Clamp y ballSpeed
+//             // if (balls[i].amty > BALL.MAX_AMT) balls[i].amty = BALL.MAX_AMT;
+//             // if (balls[i].amty > 2.5) balls[i].amty = 2.5;
+    
+//             /* Regulate balls speed for individual x and y direction.
+//              * This is the actual calculation resulting in ball's speed y
+//              * to be more when colliding in the middle of the player (straighter bounce)
+//              * or the speed x to be more when colliding in the sides
+//              * of the player (bounce with an angle)
+//              */
+//             if (collPos < (plw / 3) * 2.62) {
+//                 balls[i].amtx = collPos * 0.2;
+//             }
+//             else if (collPos < plw / 2) {
+//                 balls[i].amty = collPos * 1.12;
+//             }
+//             else {
+//                 balls[i].amtx = collPos * 0.3;
+//                 balls[i].amty = (12 - collPos) * 0.07;
+//             }
+    
+//             // Clamp y ballSpeed
+//             if (balls[i].amty > BALL.MAX_AMT) balls[i].amty = BALL.MAX_AMT;
+//         }
+//     }
+// }
 export function BallPlayerCollision(plpos, plw, plh, plXdir) {
 
     if (!mainBall) return;
@@ -335,7 +410,7 @@ export function BallPlayerCollision(plpos, plw, plh, plXdir) {
     
     for(let i = 0; i < count; i++){
     
-        if ( !balls[i].isFree && // curr elem has a ball mesh
+        if (!balls[i].isFree && !balls[i].inLock &&
             balls[i].mesh.pos[0] + blr >= plpos[0] - plw &&
             balls[i].mesh.pos[0] - blr <= plpos[0] + plw &&
             balls[i].mesh.pos[1] + blr >= plpos[1] - plh &&
@@ -343,61 +418,49 @@ export function BallPlayerCollision(plpos, plw, plh, plXdir) {
         ) {
             // Bounce ball in y dir
             balls[i].ydir = -1;
+            balls[i].inLock = true; // Set a lock so we do not check for collision until a certain y pos threshold has passed
     
             /**
-            * collPos is how much away from the player's center the ball had collided.
-            * We use it to create different responce of the ball x and y direction
-            * vector. The more the collision happens in the middle of the player, the
-            * straighter the ball is going to bounce off. If the collPos is large(ball
-            * collided at the sides) the ball will bounce with a greater angle.
-            */
-            let collPos = (balls[i].mesh.pos[0] - plpos[0]) / 5;
-    
-            // Clamp very high and very low values
-            if (collPos < BALL.MIN_AMT) collPos = -BALL.MIN_AMT;
-            else if (collPos > BALL.MAX_AMT) collPos = BALL.MAX_AMT;
-    
-            /* If balls is comming from the left and collides
-             * to the left half of the player AND player
-             * comes from the right (oposite X directions for ball-player),
-             * then balls goes to the oposite direction. */
-            if ((collPos > 0 && balls[i].xdir < 0 && plXdir > 0) ||
-                (collPos < 0 && balls[i].xdir > 0 && plXdir < 0)) {
-                balls[i].xdir *= -1;
-            }
-    
-            // Normalize collPos to have only positive values
-            if (collPos < 0) collPos *= -1;
-    
-            // Change ballSpeed for x and y separately
-            balls[i].amty = (12 - collPos) * 0.185;
-    
-            // // Clamp y ballSpeed
-            // if (balls[i].amty > BALL.MAX_AMT) balls[i].amty = BALL.MAX_AMT;
-            // if (balls[i].amty > 2.5) balls[i].amty = 2.5;
-    
-            /* Regulate balls speed for individual x and y direction.
-             * This is the actual calculation resulting in ball's speed y
-             * to be more when colliding in the middle of the player (straighter bounce)
-             * or the speed x to be more when colliding in the sides
-             * of the player (bounce with an angle)
+             * dif: It is the ball's position difference to the sides of the player
+             *      If ball is located at the center of the player,
+             *          then dif = 0
+             *      If ball is located at the sides of the player,
+             *          then dif = player (+,-)width
+             * amt: Is the dif converted to a value ranging: [1, 0, 1],
+             *      that is: [far left, center, far right]
+             * 'amt*amt' conscept manages to increase x ammount at the siades
+             *      and decreas it more near the ceneter.
+             *      In simple terms, 'amt*amt' is exaggerating the x component configuration
              */
-            if (collPos < (plw / 3) * 2.62) {
-                balls[i].amtx = collPos * 0.2;
-            }
-            else if (collPos < plw / 2) {
-                balls[i].amty = collPos * 1.12;
-            }
-            else {
-                balls[i].amtx = collPos * 0.3;
-                balls[i].amty = (12 - collPos) * 0.07;
-            }
-    
-            // Clamp y ballSpeed
-            if (balls[i].amty > BALL.MAX_AMT) balls[i].amty = BALL.MAX_AMT;
+
+            const dif = balls[i].mesh.pos[0] - plpos[0];
+            // Interpolate the ball's hit x pos relative to players surface to 1-2 value
+            const amt =  math.Abs(math.Min(dif/plw, 1.0));
+            const x = (amt*amt*amt); // +0.2 converts the val to 0.2-1.2 range
+            let y = (1.-(amt))+0.2;
+            
+            if(math.Abs(dif) > plw) 
+                y += 0.2;
+            balls[i].amty = y * BALL.YX_SPEED_RATIO;
+            balls[i].amtx = x;
+
+
+            // Set ball's direction based on where it collided with the player
+            // (ball goes left if collided from center2left or ball goes right if collided from cnter2right)
+            const sign = 2* (dif >> 31) +1; // creates a (-,+)1 out of any number
+            balls[i].xdir = sign;
+
+            // Increase speed when x OR y are in their extremes
+            const xydiff = math.Abs(x-y);
+            balls[i].speed = (xydiff+40)*0.1; 
+            // balls[i].speed = (xydiff+5); 
+            // console.log(xydiff)
+            
+            //' xydiff*val' expands the ratio to which the ballTail fx is stronger-weaker(greater the val, greater the expansion)  
+            BallRedFlame(math.Max(xydiff*2.3, 1));
+
         }
     }
-
 }
 
 export function BallBrickCollision(brpos, brw, brh) {
@@ -452,6 +515,7 @@ export function BallBrickCollision(brpos, brw, brh) {
             else if (ballBottom - BALL.RADIUS_TWO_THIRDS > brTop && ballTop < brTop && balls[i].ydir > 0) {
                 // balls[i].amtx *= 2.0;
                 balls[i].ydir = -accel;
+                balls[i].xdir *= -1;
                 intersects = true;
                 scoreMod = 0.2;
             }
@@ -459,6 +523,7 @@ export function BallBrickCollision(brpos, brw, brh) {
             else if (ballTop + BALL.RADIUS_TWO_THIRDS < brBottom && ballBottom > brBottom && balls[i].ydir < 0) {
                 // balls[i].amtx *= 2.0
                 balls[i].ydir = -accel;
+                balls[i].xdir *= -1;
                 intersects = true;
                 scoreMod = 0.2;
             }
@@ -476,6 +541,7 @@ export function BallBrickCollision(brpos, brw, brh) {
                 // Right Up corner collision
                 // balls[i].amtx *= 2.0;
                 balls[i].ydir = -accel;
+                balls[i].xdir *= -1;
                 intersects = true;
                 
                 scoreMod = 0.2;
@@ -484,7 +550,7 @@ export function BallBrickCollision(brpos, brw, brh) {
                 // Right Bottom corner collision
                 // balls[i].amtx *= 2.0;
                 balls[i].ydir = accel;
-                balls[i].ydir = accel;
+                balls[i].xdir *= -1;
                 intersects = true;
                 
                 scoreMod = 0.2;
@@ -549,12 +615,11 @@ export function BallBrickCollision(brpos, brw, brh) {
   
         
         // Normalize speed
-        if(balls[i].amtx > 2.6) balls[i].amtx = 2.3;
-        if(balls[i].amty > 2.6) balls[i].amty = 2.8;
+        // if(balls[i].amtx > 2.6) balls[i].amtx = 2.3;
+        // if(balls[i].amty > 2.6) balls[i].amty = 2.8;
 
         if(intersects){
             UiCreateModifierValue(brpos, 1.1);
-            // ModCreateAnimation(brpos, 1.1);
             UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
             PowerUpCreate(brpos);
         }
@@ -569,7 +634,7 @@ export function BallBrickCollision(brpos, brw, brh) {
 
 export function BallCreatePowUpBalls(count){
     for(let i = 0; i < count; i++){
-        BallCreate(GetRandomPos([20, Viewport.bottom-90], [Viewport.right-20, Viewport.bottom-120]));
+        BallCreate(GetRandomPos([20, Viewport.bottom-90], [Viewport.right-20, PLAYER.YPOS-100]));
     }
     isOnlyMainBall = false;
 }
@@ -592,7 +657,7 @@ export function BallFxCreateTail(scene){
         step: 0.04,
         duration: 1.0,
     }
-    const numParticles = 80;
+    const numParticles = 260;
     ballTailFx = ParticlesCreateParticleSystem(meshAttr, timerAttr, numParticles, scene, 'Ball Tail');
 
     return ballTailFx;
@@ -601,24 +666,24 @@ export function BallFxCreateTail(scene){
 /** Slow ball speed animation */
 export function BallCreateSlowSpeedAnimation(){
     const animations = AnimationsGet();
-    animations.Create(RunBallSlowSpeedAnimation, BallStopSlowSpeedAnimation);
+    animations.Create(BallSlowSpeedStartAnimation, BallSlowSpeedStopAnimation);
 }
-function BallStopSlowSpeedAnimation(){ 
+function BallSlowSpeedStopAnimation(){ 
     console.log('Stop Ball Animation')
 }
-function RunBallSlowSpeedAnimation(){ // This is the callback to the Animations.clbk at Animations.js
+function BallSlowSpeedStartAnimation(){ // This is the callback to the Animations.clbk at Animations.js
     const intensity = 0.1;
     if(mainBall.speed >= 1){
         BallRedFlame(-intensity*0.9)
         mainBall.speed -= intensity*0.5;
         return true; // Ret true if animation is not over
     }
-    else return false; // Ret false if animation is completed
+    return false; // Ret false if animation is completed
 }
 /** Dim color animation */
 export function BallCreateDimColorAnimation(){
-    const animations = AnimationsGet(); 
-    animations.Create(RunBallDimColorAnimation, BallStopDimColorAnimation);
+    // const animations = AnimationsGet(); 
+    // animations.Create(RunBallDimColorAnimation, BallStopDimColorAnimation);
 }
 function BallStopDimColorAnimation(){ 
     console.log('Stop Ball Animation')

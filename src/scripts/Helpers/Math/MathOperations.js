@@ -34,6 +34,22 @@ export function CopyArr1(src, dst){
 export function SetArrElem(src, dst, idx){
     src[idx] = dst[idx];
 }
+export function CopyArr1_4(src, val){
+    src[0] = val;
+    src[1] = val;
+    src[2] = val;
+    src[3] = val;
+}
+export function CopyArr1_3(src, val){
+    src[0] = val;
+    src[1] = val;
+    src[2] = val;
+}
+export function CopyArr1_2(src, val){
+    src[0] = val;
+    src[1] = val;
+}
+
 
 export function Abs(a){
     return a > 0 ? a : -a;
