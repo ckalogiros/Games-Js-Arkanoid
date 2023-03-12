@@ -44,6 +44,9 @@ See if we can set all animations via Animation class
 
 Change the vars name 'name' in TextLabel class to 'str' or 'text'
 
-*** Make PlayerOnUpdate() or correct existing OnPlayerMove() function
+*** Implement the players xdir momentum to speed up ball
+    Make PlayerOnUpdate() or correct existing OnPlayerMove() function
     to run on every frame so we can update the player's state.inMove, 
-    so that we can include the players χδιρ momentum to balls speed
+
+
+Make the BallUpdateProjectLine() to run smoother with a timer(every 16 ms)

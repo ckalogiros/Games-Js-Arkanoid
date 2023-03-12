@@ -1,12 +1,8 @@
 "use strict";
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
-import { Mesh } from '../../Engine/Drawables/Mesh.js'
-import { GlScale, GlSetColor, GlSetDim, GlSetWpos, GlSetWposX } from '../../Graphics/GlBufferOps.js';
+import { GlSetColor, GlSetDim, GlSetWpos, GlSetWposX } from '../../Graphics/GlBufferOps.js';
 import { BallPlayerCollision } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
-import { DimColor } from '../../Helpers/Helpers.js';
-import { Max3 } from '../../Helpers/Math/MathOperations.js';
-import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { Rect } from '../../Engine/Drawables/Rect.js';
 
 const PLAYER_DEF_COLOR = BLUE_13_125_217;
@@ -48,6 +44,7 @@ export function CreatePlayer(scene) {
         border: 1.0,
         feather: 4.0,
     };
+    PLAYER.XPOS =  Viewport.width / 2;
     PLAYER.YPOS =  Viewport.bottom - 100;
     PLAYER.WIDTH =  80.0;
     PLAYER.HEIGHT =  10.0;
@@ -55,7 +52,7 @@ export function CreatePlayer(scene) {
     const sid = SID_DEFAULT;
     const pl = new Player(
         sid, PLAYER_DEF_COLOR,
-        [PLAYER.WIDTH, PLAYER.HEIGHT], [1.0, 1.0], null, [Viewport.width / 2,  PLAYER.YPOS, 4.0],
+        [PLAYER.WIDTH, PLAYER.HEIGHT], [1.0, 1.0], null, [PLAYER.XPOS,  PLAYER.YPOS, 4.0],
         style, speed
     );
 
@@ -67,6 +64,7 @@ export function CreatePlayer(scene) {
 }
 export function UpdatePlayerPosX(posx, mouseXdir) {
 
+    PLAYER.XPOS = posx;
     player.mesh.pos[0] = posx;
     GlSetWposX(player.gfxInfo, posx);
 

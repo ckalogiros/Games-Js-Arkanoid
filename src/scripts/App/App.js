@@ -17,7 +17,6 @@ import { PrintBuffersAll } from '../Graphics/Debug/GfxDebug.js';
 import { InterpolateToRange } from '../Helpers/Math/MathOperations.js';
 
 
-
 export function AppInit() {
 
     // * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * *  * * * * * * 
@@ -33,8 +32,6 @@ export function AppInit() {
     GfxInitGraphics(); // Creation of some commonly used gl programs(like simple rect rendering and texture rendering)
 
     AddEventListeners();
-    // AddCssUiListeners();
-
 
     AppInitReservedGlBuffers();
 

@@ -8,6 +8,7 @@ import { COMIC_FONT_METRICS } from './Metrics.js'
 // export const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/consolas_sdf35/consolas_sdf35.bmp'
 // const COMIC_FONT_METRICS_PATH = '../../../../resources/fonts/comicBold_sdf35/metrics/comicBold_sdf35.txt'
 
+// export const COMIC_FONT_TEXTURE_PATH = '../../../../consolas_sdf35/consolas_sdf35.bmp'
 export const COMIC_FONT_TEXTURE_PATH = '../../../../consolas_sdf35/consolas_sdf35.bmp'
 // export const COMIC_FONT_TEXTURE_PATH = '../../../../consolas_sdf35/consolas_sdf35_blurred.bmp'
 // export const COMIC_FONT_TEXTURE_PATH = '../../../../consolas_sdf35/consolas_sdf35_blurred.png'

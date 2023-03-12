@@ -75,21 +75,26 @@ export function PrintAttributes(gl) {
                 ' count:', V_WPOS_COUNT, ' stride:', attribsPerVertex, 
                 ' offset:', prog.shaderInfo.wposOffset)
         }
-        if (prog.shaderInfo.attributes.roundLoc >= 0) {
+        if (prog.shaderInfo.attributes.styleLoc >= 0) {
             console.log('   RADIUS: loc:', prog.shaderInfo.attributes.roundLoc,
-                ' count:', V_ROUND_CORNER_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.roundOffset)
+                ' count:', V_STYLE, ' stride:', attribsPerVertex, 
+                ' offset:', prog.shaderInfo.styleOffset)
         }
-        if (prog.shaderInfo.attributes.borderLoc >= 0) {
-            console.log('   BORDER: loc:', prog.shaderInfo.attributes.borderLoc,
-                ' count:', V_BORDER_WIDTH_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.borderOffset)
-        }
-        if (prog.shaderInfo.attributes.featherLoc >= 0) {
-            console.log('   FEATHER: loc:', prog.shaderInfo.attributes.featherLoc,
-                ' count:', V_BORDER_FEATHER_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.featherOffset)
-        }
+        // if (prog.shaderInfo.attributes.roundLoc >= 0) {
+        //     console.log('   RADIUS: loc:', prog.shaderInfo.attributes.roundLoc,
+        //         ' count:', V_ROUND_CORNER_COUNT, ' stride:', attribsPerVertex, 
+        //         ' offset:', prog.shaderInfo.roundOffset)
+        // }
+        // if (prog.shaderInfo.attributes.borderLoc >= 0) {
+        //     console.log('   BORDER: loc:', prog.shaderInfo.attributes.borderLoc,
+        //         ' count:', V_BORDER_WIDTH_COUNT, ' stride:', attribsPerVertex, 
+        //         ' offset:', prog.shaderInfo.borderOffset)
+        // }
+        // if (prog.shaderInfo.attributes.featherLoc >= 0) {
+        //     console.log('   FEATHER: loc:', prog.shaderInfo.attributes.featherLoc,
+        //         ' count:', V_BORDER_FEATHER_COUNT, ' stride:', attribsPerVertex, 
+        //         ' offset:', prog.shaderInfo.featherOffset)
+        // }
         if (prog.shaderInfo.attributes.timeLoc >= 0) {
             console.log('   TIME: loc:', prog.shaderInfo.attributes.timeLoc,
                 ' count:', V_TIME_COUNT, ' stride:', attribsPerVertex, 

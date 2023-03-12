@@ -2,19 +2,17 @@
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { Mesh } from '../../Engine/Drawables/Mesh.js'
 import { BallBrickCollision } from './Ball.js';
-import { GlSetColor, GlSetColorAlpha} from '../../Graphics/GlBufferOps.js';
+import { GlMove, GlSetColor, GlSetColorAlpha} from '../../Graphics/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../Graphics/GlBufferOps.js';
 import { ExplosionsCreateExplosion } from '../../Engine/Explosions.js';
 import { ParticlesCreateParticleSystem } from '../../Engine/ParticlesSystem/Particles.js';
 import { OnStageCompleted } from '../../Engine/Events/SceneEvents.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { Rect } from '../../Engine/Drawables/Rect.js';
+import { GetSign } from '../../Helpers/Helpers.js';
 
 
 class Brick extends Rect{
-    // mesh = null;
-    // gfxInfo = null;
-    
     sid = 0;
     isActive = false;
 
@@ -22,6 +20,30 @@ class Brick extends Rect{
     animation = {
         scaleFactor: 1,
         inUpScale: false,
+        push:{
+            active: false,
+            maxDist: {
+                x:0,
+                y:0,
+            },
+            moveAmt: [0, 0],
+            drag: 0.95,
+        },
+        pull:{
+            active: false,
+            active: false,
+            maxDist: {
+                x:0,
+                y:0,
+            },
+            moveAmt: [0, 0],
+            drag: 1.05,
+        },
+    };
+
+    hit = {
+        leftDir: 0,
+        topDir: 0,
     };
 
     constructor(sid, col, dim, scale, tex, pos, style) {
@@ -34,6 +56,20 @@ class Brick extends Rect{
         this.mesh.col[3] = 0.0;
         GlSetColorAlpha(this.gfxInfo, 0.0);
         this.isActive = false;
+    }
+    MovePush(){
+        this.animation.push.moveAmt[0] *= this.animation.push.drag; // Update the new move ammount 
+        this.animation.push.moveAmt[1] *= this.animation.push.drag;  // Update the new move ammount 
+        GlMove(this.gfxInfo, this.animation.push.moveAmt);
+        this.mesh.pos[0] += this.animation.push.moveAmt[0];
+        this.mesh.pos[1] += this.animation.push.moveAmt[1];
+    }
+    MovePull(){
+        this.animation.pull.moveAmt[0] *= this.animation.pull.drag; // Update the new move ammount 
+        this.animation.pull.moveAmt[1] *= this.animation.pull.drag;  // Update the new move ammount 
+        GlMove(this.gfxInfo, this.animation.pull.moveAmt);
+        this.mesh.pos[0] += this.animation.pull.moveAmt[0];
+        this.mesh.pos[1] += this.animation.pull.moveAmt[1];
     }
 
 };
@@ -143,14 +179,16 @@ export function BrickBallCollision() {
     for (let i = 0; i < bricks.size; i++) {
 
         if (bricks.brick[i].isActive) {
+            const res = BallBrickCollision(bricks.brick[i].mesh.pos, bricks.brick[i].mesh.dim[0], bricks.brick[i].mesh.dim[1]);
+            if (res) {
 
-            if (BallBrickCollision(bricks.brick[i].mesh.pos, bricks.brick[i].mesh.dim[0], bricks.brick[i].mesh.dim[1])) {
+                                
+                // Update the hit direction
+                bricks.brick[i].hit.leftDir = BALL.HIT.LEFT_DIR;
+                bricks.brick[i].hit.topDir = BALL.HIT.TOP_DIR;
                 // Create brick destroy animation
                 BrickDestroyAnimation(i);
-                // Set active the program that draws the explosions
-                ExplosionsCreateExplosion(bricks.brick[i].mesh.pos);
-                BrickCreateParticles(i);
-                
+
                 bricks.brick[i].isActive = false;
                 // bricks.brick[i].SetColorAlpha(0.0);
                 bricks.count--;
@@ -233,18 +271,46 @@ function BrickUpdateParticles() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Animations
  */
+const pushAmt = 2
+const pushDist = 25
+const pullAmt = 2
+const pullDist = 35
+// TODO: Create merthod for creating animations
 export function BrickDestroyAnimation(i) {
+    // animations.Create(BrickDestroyScaleStartAnimation, BrickDestroyScaleStopAnimation, i);
+    // bricks.brick[i].inAnimation = true;
+    // bricks.brick[i].animation.inUpScale = true;
+    // bricks.brick[i].animation.scaleFactor = 1.015;
+    
+    
     const animations = AnimationsGet();
-    animations.Create(BrickDestroyStartAnimation, BrickStopDestroyStopAnimation, i);
-    bricks.brick[i].inAnimation = true;
-    bricks.brick[i].animation.inUpScale = true;
-    bricks.brick[i].animation.scaleFactor = 1.015;
+    animations.Create(BrickDestroyPushStartAnimation, BrickDestroyPushStopAnimation, i);
+    bricks.brick[i].animation.push.active = true;
+    bricks.brick[i].animation.push.maxDist.x = 0;
+    bricks.brick[i].animation.push.maxDist.y = 0;
+    if(bricks.brick[i].hit.leftDir > 0){
+        bricks.brick[i].animation.push.moveAmt[0] = pushAmt;
+        bricks.brick[i].animation.push.maxDist.x = bricks.brick[i].mesh.pos[0] + pushDist;
+    }else if(bricks.brick[i].hit.leftDir < 0){
+        bricks.brick[i].animation.push.moveAmt[0] = -pushAmt
+        bricks.brick[i].animation.push.maxDist.x = bricks.brick[i].mesh.pos[0] + pushDist;
+    }
+    if(bricks.brick[i].hit.topDir > 0){
+        bricks.brick[i].animation.push.moveAmt[1] = pushAmt;
+        bricks.brick[i].animation.push.maxDist.y = bricks.brick[i].mesh.pos[1] + pushDist;
+    }else if(bricks.brick[i].hit.topDir < 0){
+        bricks.brick[i].animation.push.moveAmt[1] = -pushAmt;
+        bricks.brick[i].animation.push.maxDist.y = bricks.brick[i].mesh.pos[1] - pushDist;
+    }
+
+
 }
-function BrickStopDestroyStopAnimation(i) {
-    console.log('Stop Brick Animation')
+function BrickDestroyScaleStopAnimation(i) {
+    // console.log('Stop Brick Animation')
     bricks.brick[i].SetColorAlpha(0.0);
+    
 }
-function BrickDestroyStartAnimation(i) { // This is the callback to the Animations.clbk at Animations.js
+function BrickDestroyScaleStartAnimation(i) { // This is the callback to the Animations.clbk at Animations.js
     if (bricks.brick[i].mesh.scale[0] > 0.15) {
         // Scale
         const scalex = bricks.brick[i].mesh.scale[0];
@@ -252,17 +318,74 @@ function BrickDestroyStartAnimation(i) { // This is the callback to the Animatio
             bricks.brick[i].animation.scaleFactor = 0.9;
             bricks.brick[i].animation.inUpScale = false;
         }
-        // if(!bricks.brick[i].animation.inUpScale && bricks.brick[i].animation.scaleFactor > 0.9){
-        //     bricks.brick[i].animation.scaleFactor *= 0.994
-        // }
-
         bricks.brick[i].ScaleFromVal(bricks.brick[i].animation.scaleFactor);
 
         return true; // Ret true if animation is not over
     }
     else return false; // Ret false if animation is completed
 }
+function BrickDestroyPushStopAnimation(i) {
 
+}
+function BrickDestroyPushStartAnimation(i) { // This is the callback to the Animations.clbk at Animations.js
+    if (bricks.brick[i].animation.push.active) {
+        if (bricks.brick[i].animation.push.maxDist.y &&
+            // bricks.brick[i].animation.push.moveAmt[1] > 0.3 || bricks.brick[i].animation.push.moveAmt[1] < -0.3) {
+                // bricks.brick[i].mesh.pos[1] > bricks.brick[i].animation.push.maxDist.y 
+                // || bricks.brick[i].mesh.pos[1] < bricks.brick[i].animation.push.maxDist.y) {
+            bricks.brick[i].mesh.pos[1] > bricks.brick[i].animation.push.maxDist.y ){
+            bricks.brick[i].MovePush()
+        }
+        else bricks.brick[i].animation.push.active = false;
+        return true;
+    }
+    else{
+        /**
+         * .topDir from bottom is = 1
+         */
+        const animations = AnimationsGet();
+        animations.Create(BrickDestroyPullStartAnimation, BrickDestroyPullStopAnimation, i);
+        bricks.brick[i].animation.pull.active = true;
+        bricks.brick[i].animation.pull.maxDist.x = 0;
+        bricks.brick[i].animation.pull.maxDist.y = 0;
+        if(bricks.brick[i].hit.leftDir > 0){
+            bricks.brick[i].animation.pull.moveAmt[0] = -pullAmt;
+            bricks.brick[i].animation.pull.maxDist.x = bricks.brick[i].mesh.pos[0] + pullDist;
+        }else if(bricks.brick[i].hit.leftDir < 0){
+            bricks.brick[i].animation.pull.moveAmt[0] = pullAmt
+            bricks.brick[i].animation.pull.maxDist.x = bricks.brick[i].mesh.pos[0] + pullDist;
+        }
+        if(bricks.brick[i].hit.topDir > 0){
+            bricks.brick[i].animation.pull.moveAmt[1] = pullAmt;
+            bricks.brick[i].animation.pull.maxDist.y = bricks.brick[i].mesh.pos[1] + pullDist;
+        }else if(bricks.brick[i].hit.topDir < 0){
+            bricks.brick[i].animation.pull.moveAmt[1] = pullAmt;
+            bricks.brick[i].animation.pull.maxDist.y = bricks.brick[i].mesh.pos[1] + pullDist;
+        }
+        return false;
+    }
+    // return false; // Ret false if animation is completed
+}
+
+function BrickDestroyPullStopAnimation(i){
+    bricks.brick[i].SetColorAlpha(0.0);
+    // Set active the program that draws the explosions
+    ExplosionsCreateExplosion(bricks.brick[i].mesh.pos);
+    BrickCreateParticles(i);
+}
+function BrickDestroyPullStartAnimation(i){
+    if (bricks.brick[i].animation.pull.active) {
+        if (bricks.brick[i].animation.pull.maxDist.y &&
+            bricks.brick[i].mesh.pos[1] < bricks.brick[i].animation.pull.maxDist.y ){
+        // if (bricks.brick[i].animation.pull.maxDist.y &&
+        //     bricks.brick[i].animation.pull.moveAmt[1] < 5.0 && bricks.brick[i].animation.pull.moveAmt[1] > -3.0) {
+            bricks.brick[i].MovePull()
+            return true;
+        }
+        bricks.brick[i].animation.pull.active = false;
+        return false
+    }
+}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

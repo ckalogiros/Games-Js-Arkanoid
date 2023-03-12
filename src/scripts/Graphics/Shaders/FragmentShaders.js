@@ -11,23 +11,23 @@ precision highp float;
 out vec4 FragColor;
 
 
-in mediump vec4  v_Color;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump vec2  v_Scale;
-in mediump float v_RoundCorners;
-in mediump float v_Border;
-in mediump float v_Feather;
+in mediump vec4 v_Color;
+in mediump vec2 v_Wpos;
+in mediump vec2 v_Dim;
+in mediump vec2 v_Scale;
+in mediump vec3 v_Style;
 in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+
+
 
 void main(void) {
 
     FragColor = v_Color;
     FragColor.rgb *= FragColor.a;                           // Premultiply alpha
 
-    mediump float uRadius       = v_RoundCorners;           // Radius(in pixels) for rounding corners
-    mediump float borderWidth   = v_Border;                 // Border Width
-    mediump float featherWidth  = v_Feather;                // Border Feather Distance
+    mediump float uRadius       = v_Style.x;                // Radius(in pixels) for rounding corners
+    mediump float borderWidth   = v_Style.y;                // Border Width
+    mediump float featherWidth  = v_Style.z;                // Border Feather Distance
 
     float ypos   = v_Params[1] - v_Wpos.y;                  // Transform y coord from top=0 to top=windowHeight
     float left   = v_Wpos.x - v_Dim.x * v_Scale.x;          // Left side of current geometry
@@ -44,8 +44,8 @@ void main(void) {
     float pixelYpos = gl_FragCoord.y;
     float pixelDist = 0.0;
     
+    /* * * * * * * * * * * * * * * * * * * * * * * BORDER */
 
-    // Set Border Line
     // LEFT BORDER
     if(v_Color.a > 0.0)
     if(pixelXpos < left+borderWidth+featherWidth )
@@ -58,8 +58,7 @@ void main(void) {
             // float alpha = (1.0/featherWidth) * (pixelXpos-left); 
             pixelDist = length(pixelXpos - left);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            FragColor *= alpha;
         }
     }
     // RIGHT BORDER 
@@ -72,8 +71,7 @@ void main(void) {
         {
             pixelDist = length(right - pixelXpos);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            FragColor *= alpha;
         }
     }
     if(v_Color.a > 0.0)
@@ -112,6 +110,10 @@ void main(void) {
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * END OF BORDER */
+    
+    
+    /* * * * * * * * * * * * * * * * * * * * * * * FEATHER */
+
     float check = 0.0;
     vec2 pixelXYpos = gl_FragCoord.xy;
     // // Create Round Corners (for LEFT-UP corner)
@@ -119,7 +121,7 @@ void main(void) {
     if(pixelXpos < v_Wpos.x && pixelYpos > ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos > top-uRadius-featherWidth) 
     {
         pixelDist = length(pixelXYpos - vec2(left+uRadius+featherWidth, top-uRadius-featherWidth));        // Calc the distance of curr pixel pos to the meshe's corner pos
-        if(pixelDist > uRadius)                                                                             // Set feathered outer border side
+        if(pixelDist > uRadius)                                                                            // Set feathered outer border side
         {
             float alpha = 1.0-(1.0/featherWidth) * (pixelDist-uRadius); 
             FragColor = borderColor;
@@ -172,6 +174,8 @@ void main(void) {
         else if(pixelDist > uRadius-borderWidth) // -borderWidth to have round inner corner
             FragColor = borderColor;
     }
+
+    /* * * * * * * * * * * * * * * * * * * * * * * END OF FEATHER */
 }
 `;
 
@@ -711,7 +715,10 @@ void main(void)
  */
 export function FragmentShaderChoose(sid) {
 
-    if (sid & SID.ATTR_TEX2) {
+    if(sid & SID.ATTR_STYLE){
+        return FS_DEFAULT;
+    }
+    else if (sid & SID.ATTR_TEX2) {
         if (sid & SID.TEXT_SDF && sid & SID.ATTR_SDF_PARAMS) {
             return FS_DEFAULT_TEXTURE_SDF;
         }
@@ -730,9 +737,6 @@ export function FragmentShaderChoose(sid) {
     }
     else if(sid & SID.NOISE){
         return NOISE;
-    }
-    else {
-        return FS_DEFAULT;
     }
 }
 

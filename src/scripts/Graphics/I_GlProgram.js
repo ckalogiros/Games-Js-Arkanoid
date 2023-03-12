@@ -9,16 +9,16 @@ export class VertexBuffer {
 	buffer = null;
 	data = [];
 
-	idx = INT_NULL;			// The vertex buffer (float*) idx that this Mesh is stored to.
-	count = 0;			// Current size of the float buffer (in floats)
-	size = 0;			// Total   size of the float buffer (in floats)
-	start = 0;			// The current meshe's starting idx in vertex buffer. 
+	idx = INT_NULL;	// The vertex buffer (float*) idx that this Mesh is stored to.
+	count  = 0;			// Current size of the float buffer (in floats)
+	size   = 0;			// Total   size of the float buffer (in floats)
+	start  = 0;			// The current meshe's starting idx in vertex buffer. 
 	vCount = 0;
 
 	vao = null;
-	vboId = INT_NULL;
-	iboId = INT_NULL;
-	tboId = INT_NULL;
+	vboId  = INT_NULL;
+	iboId  = INT_NULL;
+	tboId  = INT_NULL;
 	texIdx = INT_NULL;
 
 
@@ -69,9 +69,7 @@ export class GlProgram extends Camera{
 		scaleOffset: INT_NULL,
 		texOffset: INT_NULL,
 		wposOffset: INT_NULL,
-		roundOffset: INT_NULL,   // Radius for rounding corners
-		borderOffset: INT_NULL,	// Border width		
-		featherOffset: INT_NULL,	// Border feather distance	
+		styleOffset: INT_NULL,   // Radius for rounding corners
 		timeOffset: INT_NULL,	// Border feather distance	
 		sdfParamsOffset: INT_NULL,	// The inner and outer variables to render sdf text
 
@@ -81,9 +79,7 @@ export class GlProgram extends Camera{
 			scaleLoc: INT_NULL,
 			texLoc: INT_NULL,
 			wposLoc: INT_NULL,
-			roundLoc: INT_NULL,   // Radius for rounding corners
-			borderLoc: INT_NULL,	// Border width		
-			featherLoc: INT_NULL,	// Border feather distance		
+			styleLoc: INT_NULL,
 			timeLoc: INT_NULL,
 			sdfParamsLoc: INT_NULL,
 		},

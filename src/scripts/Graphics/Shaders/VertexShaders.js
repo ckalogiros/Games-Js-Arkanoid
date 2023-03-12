@@ -73,24 +73,21 @@ const VS_DEFAULT = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 5
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec2  a_Scale;
-layout (location = 3) in mediump vec3  a_Wpos;
-layout (location = 4) in mediump float a_RoundCorners;
-layout (location = 5) in mediump float a_Border;
-layout (location = 6) in mediump float a_Feather;
+layout (location = 0) in mediump vec4 a_Col;
+layout (location = 1) in mediump vec2 a_Pos;
+layout (location = 2) in mediump vec2 a_Scale;
+layout (location = 3) in mediump vec3 a_Wpos;
+layout (location = 4) in mediump vec3 a_Style;
+
 
 uniform mat4  u_OrthoProj;
 uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
-out mediump vec4  v_Color; 
-out mediump vec2  v_Wpos; 
-out mediump vec2  v_Dim; 
-out mediump vec2  v_Scale; 
-out mediump float v_RoundCorners; 
-out mediump float v_Border; 
-out mediump float v_Feather; 
+out mediump vec4 v_Color; 
+out mediump vec2 v_Wpos; 
+out mediump vec2 v_Dim; 
+out mediump vec2 v_Scale; 
+out mediump vec3 v_Style; 
 out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
@@ -102,10 +99,8 @@ void main(void) {
     v_Dim       = abs(a_Pos);
     v_Wpos      = a_Wpos.xy;
     v_Scale     = a_Scale;
-    v_Border    = a_Border; 
-    v_Feather   = a_Feather;
+    v_Style     = a_Style; 
     v_Params    = u_Params;
-    v_RoundCorners = a_RoundCorners; 
 }
 `;
 
@@ -314,7 +309,12 @@ void main(void)
  */
 export function VertexShaderChoose(sid){
 
-    if(sid & SID.ATTR_TEX2 && sid & SID.ATTR_SDF_PARAMS){
+    if(
+        (sid & SID.ATTR_STYLE)
+    ){
+        return VS_DEFAULT;
+    }
+    else if(sid & SID.ATTR_TEX2 && sid & SID.ATTR_SDF_PARAMS){
         return VS_DEFAULT_TEXTURE_SDF;
     }
     else if(sid & SID.ATTR_TEX2){
@@ -332,12 +332,5 @@ export function VertexShaderChoose(sid){
     else if(sid & SID.EXPLOSION){
         return VS_EXPLOSION;
     }
-    else if(
-        (sid & SID.ATTR_POS2   && sid & SID.ATTR_COL4  &&
-         sid & SID.ATTR_SCALE2 && sid & SID.ATTR_WPOS3 &&
-         sid & SID.ATTR_ROUND_CORNERS  &&
-         sid & SID.ATTR_BORDER_WIDTH  && sid & SID.ATTR_BORDER_FEATHER)
-    ){
-        return VS_DEFAULT;
-    }
+
 }

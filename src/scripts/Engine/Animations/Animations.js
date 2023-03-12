@@ -15,13 +15,21 @@ export class Animation{
     params = null;
     inAnimation = false;
     isActive = false;
-    
-    Create(animationClbk, stopAnimationClbk, params){
+
+    // For debuging
+    index = 0;
+    name = '';
+
+    Create(animationClbk, stopAnimationClbk, params, index, name){
         this.params = params;
         this.animationClbk = animationClbk;
         this.stopAnimationClbk = stopAnimationClbk;
+        this.index = index;
+        this.name = name;
     }
     Run(){
+        if(this.name === 'jsj')
+        console.log(this.index, this.name, this.isActive)
         this.inAnimation = this.animationClbk(this.params);
     }
     Stop(){
@@ -52,10 +60,10 @@ export class Animations{
         }
         return null;
     }
-    Create(animationClbk, stopAnimationClbk, params){
+    Create(animationClbk, stopAnimationClbk, params, name){
         const freeAnim = this.GetNextFree();
         if(freeAnim){
-            freeAnim.Create(animationClbk, stopAnimationClbk, params);
+            freeAnim.Create(animationClbk, stopAnimationClbk, params, this.count, name);
             freeAnim.inAnimation = true; 
             freeAnim.isActive = true; 
             this.count++;

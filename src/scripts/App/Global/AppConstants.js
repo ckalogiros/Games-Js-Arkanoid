@@ -105,18 +105,24 @@ const BALL = {
     RADIUS: 12,
     MAX_AMT: 7.2,
     MIN_AMT: -7.2,
-    HIT_ACCEL: 1.05, //1.15,
+    HIT:{
+        LEFT_DIR: 0,
+        TOP_DIR: 0,
+        HIT_ACCEL: 1.05, //1.15,
+        CORNER_HIT_ACCEL: 1.15, //1.4,
+    },
     YX_SPEED_RATIO: 1.3,
-    CORNER_HIT_ACCEL: 1.15, //1.4,
     RADIUS_TWO_THIRDS: 0,
     MODE: {
         powerBall: false,
     },
     DIR:{X:1, Y:1},
+    SIGN: 0,
 };
 
 /** Player */
 const PLAYER = {
+    XPOS: 0,
     YPOS: 0,
     WIDTH: 0,
     HEIGHT: 0,

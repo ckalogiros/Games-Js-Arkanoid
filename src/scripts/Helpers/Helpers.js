@@ -107,3 +107,8 @@ export function CalculateSdfOuterFromDim(dim){
     return sdfOuter;
 }
 
+// Returns the sign (-1,+1) out of any number
+export function GetSign(val){
+    return (2 * (val >> 31) + 1);
+}
+

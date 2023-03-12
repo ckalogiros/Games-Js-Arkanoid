@@ -15,9 +15,10 @@ const SID = {
 	ATTR_SCALE2:                0x4,
 	ATTR_TEX2: 	                0x8,
 	ATTR_WPOS3:                 0x10,
-	ATTR_ROUND_CORNERS:         0x20,
-	ATTR_BORDER_WIDTH:          0x40,
-	ATTR_BORDER_FEATHER:        0x80,
+	ATTR_STYLE:                 0x20,
+	// ATTR_ROUND_CORNERS:         0x20,
+	// ATTR_BORDER_WIDTH:          0x40,
+	// ATTR_BORDER_FEATHER:        0x80,
 	ATTR_TIME:                  0x100,
 	ATTR_SDF_PARAMS:            0x200,
 
@@ -31,7 +32,7 @@ const SID = {
     // Post processing shaders
     FIRE_FS:                    0x100000,
     EXPLOSION:                  0x200000,
-    NOISE:                   0x400000,
+    NOISE:                      0x400000,
 	
 };
 /**
@@ -40,7 +41,7 @@ const SID = {
  */
 
 const SID_DEFAULT = 
-    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_ROUND_CORNERS | SID.ATTR_BORDER_WIDTH | SID.ATTR_BORDER_FEATHER);
+    (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_STYLE);
 const SID_DEFAULT_TEXTURE = 
     (SID.ATTR_COL4 | SID.ATTR_POS2 | SID.ATTR_SCALE2 | SID.ATTR_WPOS3 | SID.INDEXED | SID.ATTR_TEX2);
 const SID_DEFAULT_TEXTURE_SDF = 
@@ -74,11 +75,14 @@ const V_POS_COUNT 		     = 2
 const V_SCALE_COUNT 	     = 2 
 const V_TEX_COUNT 		     = 2 
 const V_WPOS_COUNT 		     = 3 
+const V_STYLE                = 3 
 const V_SDF_PARAMS_COUNT     = 2 
-const V_ROUND_CORNER_COUNT	 = 1 
-const V_BORDER_WIDTH_COUNT	 = 1 
-const V_BORDER_FEATHER_COUNT = 1 
 const V_TIME_COUNT           = 1 
+
+// The style's buffer attribute strides(buffer indexes) 
+const V_ROUND_CORNER_STRIDE	  = 0 
+const V_BORDER_WIDTH_STRIDE	  = 1 
+const V_BORDER_FEATHER_STRIDE = 2 
 
 // 
 const CREATE_NEW_GL_BUFFER      = true;

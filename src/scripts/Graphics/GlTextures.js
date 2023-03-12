@@ -52,9 +52,15 @@ export function GlCreateTexture(name, gl, url) {
     if(!texture.tex)
         alert('Could not create Texture');
 
-    texture.img     = new Image();
-    texture.imgSrc  = url;
-    texture.img.src = url;
+    const img = document.getElementById("fontTexture")
+    texture.img     = img
+    console.log(img)
+    console.log(img.src)
+    texture.imgSrc  = img.src;
+    texture.img.src = img.src;
+    // texture.img     = new Image();
+    // texture.imgSrc  = url;
+    // texture.img.src = url;
     LoadTexture(gl, texture);
 
 
@@ -66,20 +72,32 @@ export function LoadTexture(gl, texture) {
 
     if(texture.imgSrc){
 
-        texture.img.onload = function () {
+        // texture.img.onload = function () {
             
-            gl.bindTexture(gl.TEXTURE_2D, texture.tex);
-            Texture.boundTexture = texture.idx;
-            gl.texImage2D(gl.TEXTURE_2D, texture.level, texture.internalFormat, 
-                texture.srcFormat, texture.srcType, texture.img);
+        //     gl.bindTexture(gl.TEXTURE_2D, texture.tex);
+        //     Texture.boundTexture = texture.idx;
+        //     gl.texImage2D(gl.TEXTURE_2D, texture.level, texture.internalFormat, 
+        //         texture.srcFormat, texture.srcType, texture.img);
             
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     
-            texture.width = texture.img.width;
-            texture.height = texture.img.height;
-        };
+        //     texture.width = texture.img.width;
+        //     texture.height = texture.img.height;
+        // };
+
+        gl.bindTexture(gl.TEXTURE_2D, texture.tex);
+        Texture.boundTexture = texture.idx;
+        gl.texImage2D(gl.TEXTURE_2D, texture.level, texture.internalFormat, 
+            texture.srcFormat, texture.srcType, texture.img);
+        
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+        texture.width = texture.img.width;
+        texture.height = texture.img.height;
 
     }
     else{

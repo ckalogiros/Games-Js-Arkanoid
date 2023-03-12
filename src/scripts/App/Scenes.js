@@ -219,20 +219,20 @@ export function ScenesCreateAllMeshes() {
     scenes.AddMesh(finishStageBk, APP_MESHES_IDX.background.finishStage);
 
     // Create 'stage' background
-    dim = [Viewport.width / 2, MENU_BAR_HEIGHT];
-    pos = [Viewport.width / 2, MENU_BAR_HEIGHT, -2];
-    style = { pad: 10, roundCorner: 6, border: 1, feather: 10 };
+    dim = [Viewport.width / 2, Viewport.height / 2 - dim[1]];
+    pos = [Viewport.width / 2, Viewport.height / 2 , -2];
     const stageBk = RectCreateRect('stageBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null);
     stageBk.gfxInfo = GlAddMesh(stageBk.sid, stageBk.mesh, 1, SCENE.stage, 'Background Stage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
-    scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stage);
-
+    scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stageMenu);
+    
     // Create stage menu background
-    dim = [Viewport.width / 2, Viewport.height / 2 - dim[1]];
-    pos = [Viewport.width / 2, Viewport.height / 2 + MENU_BAR_HEIGHT, -2];
-    const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null);
+    dim = [Viewport.width / 2, ];
+    pos = [Viewport.width / 2, MENU_BAR_HEIGHT, -2];
+    style = { pad: 10, roundCorner: 6, border: 1, feather: 10 };
+    const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT, DarkenColor(ORANGE_230_148_0, 0.1), dim, [1, 1], null, pos, style, null);
     stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage', DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
-    // 1, SCENE.stage, DONT_CREATE_NEW_GL_BUFFER, NO_SPECIFIC_GL_BUFFER);
-    scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
+    scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stage);
+    
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Backgrounds */
 

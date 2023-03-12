@@ -7,9 +7,3 @@ window.onload = Entry;
 function Entry(){
   AppInit();
 }
-
-// (function Entry() {
-
-//   AppInit();
-
-// })();

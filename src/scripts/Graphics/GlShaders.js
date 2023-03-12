@@ -3,7 +3,19 @@ import { VertexShaderChoose } from './Shaders/VertexShaders.js'
 import { FragmentShaderChoose } from './Shaders/FragmentShaders.js'
 import * as dbg from './Debug/GfxDebug.js'
 
-
+/**
+ * How to add an attribute to a program
+ * 
+ * 	. Set the SID.attribute in GfxConstants
+ * 	. Set the V_ attribute length in floats in GfxConstants
+ * 
+ * 	. Add a loc and offset variables in I_GlProgram object
+ * 
+ * 	. Add the attribute to the vertex shader
+ * 	. Get the attribut location in GlCreateShaderInfo(), also add the loc to the shaderInfo variable of the same function
+ * 	. Enable the attribute location with GlEnableAttribsLocations()
+ * 
+ */
 
 export function LoadShaderProgram(gl, sid) {
 
@@ -75,28 +87,26 @@ export function GlCreateShaderInfo(gl, program, sid) {
 		// must match the exact name in the vertex shader code.
 		attributes: {
 
-			colLoc: gl.getAttribLocation(program, 'a_Col'),		// Color attrib	
-			posLoc: gl.getAttribLocation(program, 'a_Pos'),		// Vertex Position attrib	 
-			scaleLoc: gl.getAttribLocation(program, 'a_Scale'),	// Scale attrib	 		
-			texLoc: gl.getAttribLocation(program, 'a_Tex'),		// texture Coords attrib	 	
-			wposLoc: gl.getAttribLocation(program, 'a_Wpos'),	// World Position attrib	 		
+			colLoc: 		gl.getAttribLocation(program, 'a_Col'),	// Color attrib	
+			posLoc: 		gl.getAttribLocation(program, 'a_Pos'),	// Vertex Position attrib	 
+			scaleLoc: 	gl.getAttribLocation(program, 'a_Scale'),	// Scale attrib	 		
+			texLoc: 		gl.getAttribLocation(program, 'a_Tex'),	// texture Coords attrib	 	
+			wposLoc: 	gl.getAttribLocation(program, 'a_Wpos'),	// World Position attrib	 		
+			styleLoc: 	gl.getAttribLocation(program, 'a_Style'),	// Sdf Params attrib 	 		
 			sdfParamsLoc: gl.getAttribLocation(program, 'a_Sdf'),	// Sdf Params attrib 	 		
-			roundLoc: gl.getAttribLocation(program, 'a_RoundCorners'),	// Radius attrib (for round mesh corners)	 		
-			borderLoc: gl.getAttribLocation(program, 'a_Border'),	// Border attrib (border width)	 		
-			featherLoc: gl.getAttribLocation(program, 'a_Feather'),	// Feather attrib (border feather distance )	 		
-			timeLoc: gl.getAttribLocation(program, 'a_Time'),	// Time attrib 	 		
+			timeLoc: 	gl.getAttribLocation(program, 'a_Time'),	// Time attrib 	 		
 		},
 		uniforms: {
 
 			// Static uniforms
-			orthoProj: gl.getUniformLocation(program, 'u_OrthoProj'), 	// Orthographic Projection Matrix4 	
-			sampler: gl.getUniformLocation(program, 'u_Sampler0'),	// Sampler for texture units 	
+			orthoProj: 	gl.getUniformLocation(program, 'u_OrthoProj'), 	// Orthographic Projection Matrix4 	
+			sampler: 	gl.getUniformLocation(program, 'u_Sampler0'),	// Sampler for texture units 	
 
 			/**
 			 * Variable Uniforms
-		 * Uniforms paramsBuffer is an array of floats to be used as a buffer
-			 * to pass any kind of float values to the shaders.
-		 */
+		 	 * Uniforms paramsBuffer is an array of floats to be used as a 
+			 * buffer to pass any kind of float values to the shaders.
+		 	 */
 			paramsBufferLoc: gl.getUniformLocation(program, 'u_Params'),	// The location of the uniform
 			paramsBuffer: null, // The actual array
 		},
@@ -127,17 +137,9 @@ export function GlCreateShaderInfo(gl, program, sid) {
 		shaderInfo.sdfParamsOffset = attribsOffset;
 		attribsOffset += V_SDF_PARAMS_COUNT
 	}
-	if (shaderInfo.attributes.roundLoc >= 0) {
-		shaderInfo.roundOffset = attribsOffset;
-		attribsOffset += V_ROUND_CORNER_COUNT
-	}
-	if (shaderInfo.attributes.borderLoc >= 0) {
-		shaderInfo.borderOffset = attribsOffset;
-		attribsOffset += V_BORDER_WIDTH_COUNT
-	}
-	if (shaderInfo.attributes.featherLoc >= 0) {
-		shaderInfo.featherOffset = attribsOffset;
-		attribsOffset += V_BORDER_FEATHER_COUNT
+	if (shaderInfo.attributes.styleLoc >= 0) {
+		shaderInfo.styleOffset = attribsOffset;
+		attribsOffset += V_STYLE
 	}
 	if (shaderInfo.attributes.timeLoc >= 0) {
 		shaderInfo.timeOffset = attribsOffset;

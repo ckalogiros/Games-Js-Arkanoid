@@ -72,7 +72,12 @@ export class PowerUps{
         // this.powUp[i].gfxInfo = GlAddMesh(this.powUp[i].sid, this.powUp[i].mesh, 1, 
         //                             gfxInfo.sceneIdx, 'PowUp', DONT_CREATE_NEW_GL_BUFFER, gfxInfo.vb.idx);
         
-        const style = POW_UP.STYLE;
+        const style = {
+            roundCorner:POW_UP.STYLE.ROUNDNENSS,
+            border:POW_UP.STYLE.BORDER,
+            feather:POW_UP.STYLE.FEATHER,
+        }
+        POW_UP.STYLE;
         for(let i = 0; i < this.size; i++){
 
             this.powUp[i] = new PowerUp(sid, TRANSPARENT, [28, 14, 0], [1,1], null,  [0,0,3], style);
@@ -212,7 +217,6 @@ export function PowerUpPlayerCollision(plPos, plw, plh) {
                     // DestroyPowerUp(i);
                     scoreMod  = 0.5;
                     // UiCreateModifierValue(powpos, scoreMod);
-                    console.log('-------1:', powUps.powUp[i].mesh.pos[0])
                     UiCreateModifierValue(powUps.powUp[i].mesh.pos, scoreMod);
                     UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
                     powUps.Destroy(i);

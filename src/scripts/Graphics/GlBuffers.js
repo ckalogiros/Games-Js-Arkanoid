@@ -8,7 +8,7 @@ import { GlFrameBuffer }        from './I_GlProgram.js'
 // For Debuging
 import * as dbg from './Debug/GfxDebug.js'
 import { GlCreateProgram } from './GfxCreateProgram.js'
-import { GlCreateTexture, GlTexture, glTextures, LoadTexture, StoreGlobalTextureIndex } from './GlTextures.js';
+import { GlCreateTexture } from './GlTextures.js';
 
 
 const glReservedBuffers = [];
@@ -232,17 +232,9 @@ export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffe
         GlOps.VbSetAttrSdfParams(vb, start + progs[progIdx].shaderInfo.sdfParamsOffset, 
             count, attribsPerVertex - V_SDF_PARAMS_COUNT, mesh.sdfParams)
     }
-    if (sid & SID.ATTR_ROUND_CORNERS) { // Mesh round corners
-        GlOps.VbSetAttrRoundCorner(vb, start + progs[progIdx].shaderInfo.roundOffset, 
-            count, attribsPerVertex - V_ROUND_CORNER_COUNT, mesh.roundCorner)
-    }
-    if (sid & SID.ATTR_BORDER_WIDTH) { // Mesh border
-        GlOps.VbSetAttrBorderWidth(vb, start + progs[progIdx].shaderInfo.borderOffset, 
-            count, attribsPerVertex - V_BORDER_WIDTH_COUNT, mesh.border);
-    }
-    if (sid & SID.ATTR_BORDER_FEATHER) { // Mesh border feather 
-        GlOps.VbSetAttrBorderFeather(vb, start + progs[progIdx].shaderInfo.featherOffset, 
-            count, attribsPerVertex - V_BORDER_FEATHER_COUNT, mesh.feather);
+    if (sid & SID.ATTR_STYLE) { // Mesh round corners
+        GlOps.VbSetAttrStyle(vb, start + progs[progIdx].shaderInfo.styleOffset, 
+            count, attribsPerVertex - V_STYLE, mesh.style)
     }
     if (sid & SID.ATTR_TIME) { // Timer for qnimations  
         GlOps.VbSetAttrTime(vb, start + progs[progIdx].shaderInfo.timeOffset, 
@@ -438,20 +430,10 @@ function GlEnableAttribsLocations(gl, prog) {
         gl.vertexAttribPointer(prog.shaderInfo.attributes.wposLoc,
             V_WPOS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.wposOffset * FLOAT);
     }
-    if (prog.shaderInfo.attributes.roundLoc >= 0) {
-        gl.enableVertexAttribArray(prog.shaderInfo.attributes.roundLoc);
-        gl.vertexAttribPointer(prog.shaderInfo.attributes.roundLoc,
-            V_ROUND_CORNER_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.roundOffset * FLOAT);
-    }
-    if (prog.shaderInfo.attributes.borderLoc >= 0) {
-        gl.enableVertexAttribArray(prog.shaderInfo.attributes.borderLoc);
-        gl.vertexAttribPointer(prog.shaderInfo.attributes.borderLoc,
-            V_ROUND_CORNER_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.borderOffset * FLOAT);
-    }
-    if (prog.shaderInfo.attributes.featherLoc >= 0) {
-        gl.enableVertexAttribArray(prog.shaderInfo.attributes.featherLoc);
-        gl.vertexAttribPointer(prog.shaderInfo.attributes.featherLoc,
-            V_ROUND_CORNER_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.featherOffset * FLOAT);
+    if (prog.shaderInfo.attributes.styleLoc >= 0) {
+        gl.enableVertexAttribArray(prog.shaderInfo.attributes.styleLoc);
+        gl.vertexAttribPointer(prog.shaderInfo.attributes.styleLoc,
+            V_STYLE, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.styleOffset * FLOAT);
     }
     if (prog.shaderInfo.attributes.timeLoc >= 0) {
         gl.enableVertexAttribArray(prog.shaderInfo.attributes.timeLoc);

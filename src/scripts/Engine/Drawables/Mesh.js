@@ -11,9 +11,7 @@ export class Mesh {
     scale = [0, 0];
     tex = [0, 0, 0, 0];
     pos = [0, 0, 0];
-    roundCorner = 0.0;
-    border = 0.0;
-    feather = 0.0;
+    style = [0, 0, 0];
     time = 0.0;
     sdfParams = [0, 0]
     defDim = [0, 0]
@@ -34,9 +32,9 @@ export class Mesh {
         math.CopyArr3(this.pos, pos);
 
         if (style) {
-            this.roundCorner = style.roundCorner;
-            this.border = style.border;
-            this.feather = style.feather;
+            this.style[0] = style.roundCorner;
+            this.style[1] = style.border;
+            this.style[2] = style.feather;
         }
         
         this.time = time;

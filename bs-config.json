@@ -1,6 +1,6 @@
 
 {
     "port":5501,
-    "files":["./src/**/*.{html,css}", "/src/scripts/**/*", "/images"],
-    "server":{"baseDir":"./src"}
+    "files":["./src/**/*.{html,css}", "./src/scripts/**/*", "./resources"],
+    "server":{"baseDir":"./"}
 }

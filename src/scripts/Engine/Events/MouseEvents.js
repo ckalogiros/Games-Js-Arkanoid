@@ -2,7 +2,7 @@
 import { ScenesLoadScene } from "../../App/Scenes.js";
 import { OnHover, OnPlayerMove, OnStageStart } from "./SceneEvents.js";
 import { ScenesGetScene } from "../../App/Scenes.js";
-import { BallIsInStartPos, BallRelease, BallReset } from "../../App/Drawables/Ball.js";
+import { BallGetInStartPos, BallRelease, BallReset } from "../../App/Drawables/Ball.js";
 import { StageGetNextStage } from "../../App/Stages.js";
 
 
@@ -106,7 +106,7 @@ export function OnMouseClick(event) {
     }
 
     // If mouse clicked and ball is not moving(start of a stage), release the ball
-    else if (BallIsInStartPos() && SCENE.active.idx === SCENE.stage &&
+    else if (BallGetInStartPos() && SCENE.active.idx === SCENE.stage &&
         mouse.x > Viewport.left && mouse.x < Viewport.right && 
         mouse.y > Viewport.top && mouse.y < Viewport.bottom)
         BallRelease();

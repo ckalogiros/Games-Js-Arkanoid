@@ -292,7 +292,6 @@ export function UiCreateModifierValue(targetPos, modVal) {
     const obj = mods.GetNextFree();
     if(obj){
         const mod = obj.mod;
-        console.log(obj.idx)
         GlSetColor(mod.text.letters[0].gfxInfo, WHITE);
         const text = '+' + modVal.toFixed(1);
         const textHalfWidth = text.length * (mod.fontSize);

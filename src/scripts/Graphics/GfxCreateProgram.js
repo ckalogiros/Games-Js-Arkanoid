@@ -72,7 +72,8 @@ export function GlCreateProgram(sid) {
     prog.program = LoadShaderProgram(gfxCtx.gl, sid);
 
     gfxCtx.gl.useProgram(prog.program);
-    prog.shaderInfo = GlCreateShaderInfo(gfxCtx.gl, prog.program, SID_DEFAULT);
+    // prog.shaderInfo = GlCreateShaderInfo(gfxCtx.gl, prog.program, SID_DEFAULT);
+    prog.shaderInfo = GlCreateShaderInfo(gfxCtx.gl, prog.program, sid);
     PrintShaderInfo(prog);
 
     prog.info.sid = sid;
@@ -95,7 +96,7 @@ export function GlCreateProgram(sid) {
         prog.CameraSet();
         // Store globally the fire shader program index
         UNIFORM_PARAMS.brickExplosion.progIdx = progIdx;
-        PROGRAM.explosions = progIdx; // HACK:TEMP to have a globbal refference to the explosions shader program
+        PROGRAM.explosions = progIdx; // HACK:TEMP to have a global refference to the explosions shader program
         // Create the uniforms buffer 
         prog.shaderInfo.uniforms.paramsBuffer = new Float32Array(UNIFORM_PARAMS.brickExplosion.count);
         prog.UniformsSetParamsBufferValue(Viewport.width,  UNIFORM_PARAMS.brickExplosion.widthIdx);

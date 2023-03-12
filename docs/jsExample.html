@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>WebGL_Basic</title>
+  <link rel="stylesheet" type="text/css" href="style/style.css">
+</head>
+
+<style>
+  html {
+    background-color: rgb(37, 37, 37);
+    color: rgb(208, 208, 208);
+  }
+
+  code {
+    white-space: break-spaces;
+  }
+</style>
+
+</html>
+
+<div>
+  <code>
+    import { gfxCtx } from './I_WebGL.js'
+    // import { UniformsSet } from './GlUniforms.js'
+    import { GfxInfoMesh } from './I_GlProgram.js'
+    import * as GlOps from './GlBufferOps.js';
+    import { VertexBuffer, IndexBuffer } from './I_GlProgram.js'
+    import { GlFrameBuffer } from './I_GlProgram.js'
+
+    // For Debuging
+    import * as dbg from './Debug/GfxDebug.js'
+    import { GlCreateProgram } from './GfxCreateProgram.js'
+    import { GlCreateTexture } from './GlTextures.js';
+
+
+    const glReservedBuffers = [];
+    let glReservedBufferCount = 0;
+
+    (function GlInitReservedBuffer(){
+
+      // Create Max 10 reserved buffers
+      for(let i = 0; i MAX_RESERVED_BUFFERS; i++){
+        glReservedBuffers[i]={ sid: 0, progIdx: INT_NULL, vbIdx: INT_NULL, };
+      }
+    })();
+
+
+    function GlSetReservedBuffer(gfxInfo){
+      glReservedBuffers[glReservedBufferCount].sid=gfxInfo.sid;
+      glReservedBuffers[glReservedBufferCount].progIdx=gfxInfo.prog.idx;
+      glReservedBuffers[glReservedBufferCount].vbIdx=gfxInfo.vb.idx;
+      glReservedBufferCount++;
+    }
+    export function GlCreateReservedBuffer(sid, sceneIdx, vbName){
+    const progs=g_glPrograms; const gfxInfo=new GfxInfoMesh; // ProgramExists returns 0 index based program or -1 for not found
+    const progIdx=ProgramExists(sid, progs); // If the program already exists, add mesh if (progIdx>= 0) {
+
+    const program = progs[progIdx].program;
+
+
+    gfxCtx.gl.useProgram(program)
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Create Vertex Buffer
+    */
+    const vbIdx = progs[progIdx].vertexBufferCount++;
+    progs[progIdx].vertexBuffer[vbIdx] = new VertexBuffer;
+    const vb = progs[progIdx].vertexBuffer[vbIdx];
+    vb.name = vbName;
+    vb.sceneIdx = sceneIdx;
+    vb.idx = vbIdx;
+
+    const vao = gfxCtx.gl.createVertexArray();
+    gfxCtx.gl.bindVertexArray(vao);
+    vb.buffer = gfxCtx.gl.createBuffer();
+    gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.buffer);
+    vb.data = new Float32Array(MAX_VERTEX_BUFFER_COUNT);
+    vb.needsUpdate = true;
+    vb.vao = vao;
+    // Must initialize attribute locations of the shader for every newly created program
+    GlEnableAttribsLocations(gfxCtx.gl, progs[progIdx]);
+    console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:', progIdx);
+
+
+    // Cash values
+    const vertsPerRect = progs[progIdx].shaderInfo.verticesPerRect;
+    const attribsPerVertex = progs[progIdx].shaderInfo.attribsPerVertex;
+
+    const start = vb.count; // Add meshes to the vb continuously
+
+    // Set meshes gfx info
+    gfxInfo.vao = vb.vao;
+    gfxInfo.numFaces = 0;
+    gfxInfo.vertsPerRect = vertsPerRect;
+    gfxInfo.attribsPerVertex = attribsPerVertex;
+    gfxInfo.prog.idx = progIdx;
+    gfxInfo.vb.idx = vbIdx;
+    gfxInfo.vb.buffer = vb.buffer;
+    gfxInfo.vb.start = start;
+    gfxInfo.vb.count = 0;
+    gfxInfo.sceneIdx = sceneIdx;
+    gfxInfo.sid = sid;
+
+    progs[progIdx].isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Add Mesh to Index Buffer
+    * TODO: Put this some place else, but keep CreateIndices() here
+    */
+    if (sid & SID.INDEXED || ((sid & SID.INDEXED) && addNewGlBuffer)) {
+
+    const ibIdx = progs[progIdx].indexBufferCount++;
+    progs[progIdx].indexBuffer[vbIdx] = new IndexBuffer;
+    const ib = progs[progIdx].indexBuffer[vbIdx];
+    ib.name = dbg.GetShaderTypeId(sid);
+    ib.sceneIdx = sceneIdx;
+    ib.buffer = gfxCtx.gl.createBuffer();
+    gfxCtx.gl.bindBuffer(gfxCtx.gl.ELEMENT_ARRAY_BUFFER, ib.buffer);
+    ib.data = new Uint16Array(MAX_INDEX_BUFFER_COUNT);
+    ib.vao = vb.vao;
+    ib.count = 0;
+    console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:', progIdx)
+
+    // Set meshes gfx info
+    gfxInfo.ib.idx = ibIdx;
+    gfxInfo.ib.buffer = ib.buffer;
+    gfxInfo.ib.start = start;
+    gfxInfo.ib.count = 0;
+    }
+
+
+    // Update viewport for the curent program
+    progs[progIdx].CameraUpdate(gfxCtx.gl);
+
+    } else { // Else create new program
+    // alert('Gl Program Does not Exist!. See: GlBuffers.js');
+    }
+    // dbg.PrintAttributes(gfxCtx.gl, progs[progIdx]);
+
+    GlSetReservedBuffer(gfxInfo);
+
+    return gfxInfo;
+    }
+
+    export function GlAddMesh(sid, mesh, numFaces, sceneIdx, meshName, addNewGlBuffer, addToSpecificGlBuffer) {
+
+    const progs = g_glPrograms;
+    const gfxInfo = new GfxInfoMesh;
+
+    // ProgramExists returns 0 index based program or -1 for not found
+    let progIdx = ProgramExists(sid, progs);
+
+    // If the program already exists, add mesh
+    if (progIdx === INT_NULL) { // Else create new program
+    progIdx = GlCreateProgram(sid);
+    }
+
+    // const program = progs[progIdx].program;
+    gfxCtx.gl.useProgram(progs[progIdx].program)
+
+    let vbIdx = INT_NULL;
+    if(addToSpecificGlBuffer !== INT_NULL)
+    vbIdx = addToSpecificGlBuffer;
+    else
+    vbIdx = VertexBufferExists(sceneIdx, progs[progIdx])
+    let vb = null;
+    let ib = null;
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Add Mesh to Vertex Buffer
+    */
+    if (vbIdx 0 || addNewGlBuffer) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.colLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.colLoc,
+    V_COL_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.colOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.posLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.posLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.posLoc,
+    V_POS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.posOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.scaleLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.scaleLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.scaleLoc,
+    V_SCALE_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.scaleOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.texLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.texLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.texLoc,
+    V_TEX_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.texOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.wposLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.wposLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.wposLoc,
+    V_WPOS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.wposOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.styleLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.styleLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.styleLoc,
+    V_STYLE, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.styleOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.timeLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.timeLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.timeLoc,
+    V_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.timeOffset * FLOAT);
+    }
+    if (prog.shaderInfo.attributes.sdfParamsLoc >= 0) {
+    gl.enableVertexAttribArray(prog.shaderInfo.attributes.sdfParamsLoc);
+    gl.vertexAttribPointer(prog.shaderInfo.attributes.sdfParamsLoc,
+    V_SDF_PARAMS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.sdfParamsOffset * FLOAT);
+    }
+
+
+    }
+
+
+    export function GlCreateFrameBuffer(gl){
+
+
+    /************************************
+    * Create the texture thst Gl will render to
+    */
+    const texture = GlCreateTexture('FrameBufferTexture0', gl, null);
+
+
+    /************************************
+    * Render Buffer
+    */
+    const depthBuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, texture.width, texture.height);
+
+
+    /************************************
+    * Frame Buffer
+    */
+    const fb = gl.createFramebuffer();
+    if(!fb){ alert('Could not create FrameBuffer.') }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, texture.tex, texture.level);
+    gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.tex, texture.level);
+
+
+    /*********************************
+    * Render Buffer again
+    */
+
+    GlFrameBuffer.buffer = fb;
+    GlFrameBuffer.tex = texture.tex;
+    GlFrameBuffer.texId = texture.texId;
+    GlFrameBuffer.texIdx = texture.idx;
+    GlFrameBuffer.texWidth = texture.width;
+    GlFrameBuffer.texHeight = texture.height;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    let e = gl.checkFramebufferStatus(gl.FRAMEBUFFER, null);
+    if(e !== gl.FRAMEBUFFER_COMPLETE){
+    alert('FrameBBbuffer is not Complete')
+    }
+
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return GlFrameBuffer;
+    }
+
+
+
+    // Helpers
+    function AddUnique(strArr, str){
+    for(let i=0; i strArr.length; i++){ if(strArr[i]===str){
+    return;
+    }
+    }
+  </code>
+</div>

@@ -108,23 +108,7 @@ export function VbSetAttribWpos(vb, start, count, stride, pos) {
         vb.count += V_WPOS_COUNT;
     }
 }
-export function VbSetAttrDecorationAll3(vb, start, count, stride, radius, border, feather) {
 
-    let index = start;
-    const end = start + count;
-
-    while (index < end) {
-
-        vb.data[index++] = radius;
-        vb.data[index++] = border;
-        vb.data[index++] = feather;
-
-        index += stride-2;
-        vb.count += V_ROUND_CORNER_COUNT;
-        vb.count += V_BORDER_WIDTH_COUNT;
-        vb.count += V_BORDER_FEATHER_COUNT;
-    }
-}
 export function VbSetAttrSdfParams(vb, start, count, stride, sdfParams) {
 
     let index = start;
@@ -139,6 +123,21 @@ export function VbSetAttrSdfParams(vb, start, count, stride, sdfParams) {
         vb.count += V_SDF_PARAMS_COUNT;
     }
 }
+export function VbSetAttrStyle(vb, start, count, stride, style) {
+
+    let index = start;
+    const end = start + count;
+
+    while (index < end) {
+
+        vb.data[index++] = style[0];
+        vb.data[index++] = style[1];
+        vb.data[index++] = style[2];
+
+        index += stride;
+        vb.count += V_STYLE;
+    }
+}
 export function VbSetAttrRoundCorner(vb, start, count, stride, radius) {
 
     let index = start;
@@ -149,7 +148,7 @@ export function VbSetAttrRoundCorner(vb, start, count, stride, radius) {
         vb.data[index++] = radius;
 
         index += stride;
-        vb.count += V_ROUND_CORNER_COUNT;
+        vb.count += 2; // for the rest style attributes
     }
 }
 export function VbSetAttrBorderWidth(vb, start, count, stride, border) {
@@ -162,7 +161,7 @@ export function VbSetAttrBorderWidth(vb, start, count, stride, border) {
         vb.data[index++] = border;
 
         index += stride;
-        vb.count += V_BORDER_WIDTH_COUNT;
+        vb.count += 2; // for the rest style attributes
     }
 }
 export function VbSetAttrBorderFeather(vb, start, count, stride, feather) {
@@ -175,7 +174,7 @@ export function VbSetAttrBorderFeather(vb, start, count, stride, feather) {
         vb.data[index++] = feather;
 
         index += stride;
-        vb.count += V_BORDER_FEATHER_COUNT;
+        vb.count += 2; // for the rest style attributes
     }
 }
 export function VbSetAttrTime(vb, start, count, stride, time) {
@@ -419,9 +418,9 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
     const progs = g_glPrograms;
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.roundOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_ROUND_CORNER_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
-    let stride = gfxInfo.attribsPerVertex - V_ROUND_CORNER_COUNT;
+    let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
     while (verts) {
 
@@ -438,9 +437,9 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
     const progs = g_glPrograms;
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.borderOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_BORDER_WIDTH_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
-    let stride = gfxInfo.attribsPerVertex - V_BORDER_WIDTH_COUNT;
+    let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
     while (verts) {
 
@@ -457,9 +456,9 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
     const progs = g_glPrograms;
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.featherOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_BORDER_FEATHER_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
-    let stride = gfxInfo.attribsPerVertex - V_BORDER_FEATHER_COUNT;
+    let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
     while (verts) {
 
