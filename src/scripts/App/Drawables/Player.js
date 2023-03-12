@@ -73,8 +73,6 @@ export function UpdatePlayerPosX(posx, mouseXdir) {
      * is negative etc.*/
     player.xdir = mouseXdir; // Player's direction is always the mouse's direction.
     PLAYER.XDIR = player.xdir; // Store globally
-    // player.state.inMove = true;
-    // console.log(player.xdir)
 }
 export function PlayerBallCollision() {
     BallPlayerCollision(player.mesh.pos, player.mesh.dim[0], player.mesh.dim[1], player.xdir);

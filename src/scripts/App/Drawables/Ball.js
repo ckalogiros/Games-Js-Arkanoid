@@ -1,6 +1,6 @@
 "use strict";
 import { GlAddMesh } from "../../Graphics/GlBuffers.js";
-import { GlSetWpos, GlSetColor, GlSetDim, GlSetAttrRoundCorner } from "../../Graphics/GlBufferOps.js";
+import { GlSetWpos, GlSetColor, GlSetDim, GlSetAttrRoundCorner, GlMove } from "../../Graphics/GlBufferOps.js";
 import { PlayerGetPos, PlayerGetDim } from "./Player.js";
 import { UiCreateModifierValue, UiUpdate } from './Ui/Ui.js'
 import { MouseGetXdir } from "../../Engine/Events/MouseEvents.js";
@@ -13,7 +13,7 @@ import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Rect } from "../../Engine/Drawables/Rect.js";
 
 
-const BALL_SPEED_REGULATION = 1.0;
+const BALL_SPEED_REGULATION = 2.0;
 const MAX_BALLS_COUNT = 1;
 const BALL_MAX_SPEED = 12;
 const BALL_MIN_SPEED = 1.2;
@@ -171,11 +171,6 @@ export function BallResetPos() {
     mainBall.ResetPos();
     ballInStartPos = true;
 }
-// function BallSetTailFlameIntensity(val) {
-//     mainBall.tail.intensity = val;
-//     const prog = GlGetProgram(UNIFORM_PARAMS.particles.progIdx);
-//     prog.UniformsSetParamsBufferValue(val, UNIFORM_PARAMS.particles.speedIdx);
-// }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -378,6 +373,7 @@ function BallInitProjectLine(sceneIdx) {
     }
 }
 
+
 export function BallUpdatePos(ball) {
 
     if (!ball) return;
@@ -402,23 +398,21 @@ export function BallUpdatePos(ball) {
 
         const playerPos = PlayerGetPos();
         const playerDim = PlayerGetDim();
-        const mouseDir = MouseGetXdir();
-        let inMove = false;
+        const mouseDir  = MouseGetXdir();
         ball.inLock = false;
+        const move = 4
 
         // Make the ball not leave the players's width area
         if (ball.mesh.pos[0] < playerPos[0] - playerDim[0] && mouseDir > 0) {
-            ball.mesh.pos[0] = playerPos[0] - playerDim[0];
-            inMove = true;
+            GlMove(ball.gfxInfo, [move, 0]);
+            ball.mesh.pos[0] += move;
         }
-        if (ball.mesh.pos[0] > playerPos[0] + playerDim[0] && mouseDir < 0) {
-            ball.mesh.pos[0] = playerPos[0] + playerDim[0];
-            inMove = true;
-        }
-        if (inMove) {
-            GlSetWpos(ball.gfxInfo, ball.mesh.pos);
+        else if (ball.mesh.pos[0] > playerPos[0] + playerDim[0] && mouseDir < 0) {
+            GlMove(ball.gfxInfo, [-move, 0]);
+            ball.mesh.pos[0] += -move;
             ball.inMove = true;
         }
+
         BallUpdateProjectLine(mainBall);
     }
 
@@ -611,7 +605,6 @@ export function BallBrickCollision(brpos, brw, brh) {
         }
         // Bricks Left Side Collision Check
         else if (ballRight >= brLeft && balls[i].mesh.pos[0] < brLeft && balls[i].xdir > 0) {
-
             BALL.HIT.LEFT_DIR = 1;
             if (balls[i].mesh.pos[1] - BALL.RADIUS_TWO_THIRDS > brTop && balls[i].mesh.pos[1] + BALL.RADIUS_TWO_THIRDS < brBottom) {
                 balls[i].xdir = -accel;
@@ -627,6 +620,7 @@ export function BallBrickCollision(brpos, brw, brh) {
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.TOP_DIR = 1;
+                console.log('-- LEFT Up --')
             }
             // Left Bottom corner collision
             else if (ballTop + BALL.RADIUS_TWO_THIRDS < brBottom && ballBottom > brBottom && balls[i].ydir < 0) {
@@ -636,11 +630,11 @@ export function BallBrickCollision(brpos, brw, brh) {
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.TOP_DIR = -1;
+                console.log('-- LEFT Bottom --')
             }
         }
         // Bricks Right Side Collision Check
         else if (ballLeft <= brRight && balls[i].mesh.pos[0] > brRight && balls[i].xdir < 0) {
-
             BALL.HIT.LEFT_DIR = -1;
             if (balls[i].mesh.pos[1] - BALL.RADIUS_TWO_THIRDS > brTop && balls[i].mesh.pos[1] + BALL.RADIUS_TWO_THIRDS < brBottom) {
                 // Collision to bricks right side
@@ -651,12 +645,12 @@ export function BallBrickCollision(brpos, brw, brh) {
             }
             else if (ballBottom - BALL.RADIUS_TWO_THIRDS > brTop && ballTop < brTop && balls[i].ydir > 0) {
                 // Right Up corner collision
-                // balls[i].amtx *= 2.0;
                 balls[i].ydir = -accel;
                 balls[i].xdir *= -1;
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.TOP_DIR = 1;
+                console.log('-- RIGHT Up --')
             }
             // Right Bottom corner collision
             else if (ballTop + BALL.RADIUS_TWO_THIRDS < brBottom && ballBottom > brBottom && balls[i].ydir < 0) {
@@ -665,11 +659,11 @@ export function BallBrickCollision(brpos, brw, brh) {
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.TOP_DIR = -1;
+                console.log('-- RIGHT Bottom --')
             }
         }
         // Bricks Bottom Side Collision Check
         else if (ballTop <= brBottom && balls[i].mesh.pos[1] > brBottom && balls[i].ydir < 0) {
-
             BALL.HIT.TOP_DIR = -1;
             if (balls[i].mesh.pos[0] - BALL.RADIUS_TWO_THIRDS > brLeft && balls[i].mesh.pos[0] + BALL.RADIUS_TWO_THIRDS < brRight) {
                 // Collision to bricks bottom side
@@ -680,26 +674,25 @@ export function BallBrickCollision(brpos, brw, brh) {
             }
             // Bottom Left corner collision
             else if (ballRight - BALL.RADIUS_TWO_THIRDS > brLeft && ballLeft < brLeft && balls[i].xdir > 0) {
-                // balls[i].amtx *= 2.0;
-                balls[i].xdir = -accel;
+                balls[i].xdir =  accel;
                 balls[i].ydir = -accel;
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.LEFT_DIR = 1;
+                console.log('-- BOTTOM Left --')
             }
             else if (ballLeft + BALL.RADIUS_TWO_THIRDS < brRight && ballRight > brRight && balls[i].xdir < 0) {
                 // Bottom Right corner collision
-                // balls[i].amtx *= 2.0;
                 balls[i].xdir = -accel;
                 balls[i].ydir = -accel;
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.LEFT_DIR = -1;
+                console.log('-- BOTTOM Right --')
             }
         }
         // Bricks Top Side Collision Check
         else if (ballBottom >= brTop && balls[i].mesh.pos[1] < brTop && balls[i].ydir > 0) {
-
             BALL.HIT.TOP_DIR = 1;
             if (balls[i].mesh.pos[0] - BALL.RADIUS_TWO_THIRDS > brLeft && balls[i].mesh.pos[0] + BALL.RADIUS_TWO_THIRDS < brRight) {
                 // Collision to bricks Top side
@@ -708,19 +701,24 @@ export function BallBrickCollision(brpos, brw, brh) {
                 scoreMod = 0.1;
                 BALL.HIT.LEFT_DIR = 0;
             }
-            else if (ballRight + BALL.RADIUS_TWO_THIRDS > brLeft && ballLeft < brLeft && balls[i].xdir > 0) {
-                // Top Left corner collision
-                balls[i].ydir = -accel;
+            
+            // Top Left corner collision
+            else if (ballRight - BALL.RADIUS_TWO_THIRDS > brLeft && ballLeft < brLeft && balls[i].xdir > 0) {
+                balls[i].xdir = accel;
+                balls[i].ydir = accel;
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.LEFT_DIR = 1;
+                console.log('-- TOP Left --')
             }
-            else if (ballLeft - BALL.RADIUS_TWO_THIRDS < brRight && ballRight > brRight && balls[i].xdir < 0) {
+            else if (ballLeft + BALL.RADIUS_TWO_THIRDS < brRight && ballRight > brRight && balls[i].xdir < 0) {
                 // Top Right corner collision
-                balls[i].ydir = -accel;
+                balls[i].xdir = -accel;
+                balls[i].ydir = accel;
                 intersects = true;
                 scoreMod = 0.2;
                 BALL.HIT.LEFT_DIR = -1;
+                console.log('-- TOP Right --')
             }
         }
 
@@ -732,7 +730,7 @@ export function BallBrickCollision(brpos, brw, brh) {
         if (intersects) {
             UiCreateModifierValue(brpos, 1.1);
             UiUpdate(UI_TEXT_INDEX.SCORE_MOD, scoreMod);
-            PowerUpCreate(brpos);
+            // PowerUpCreate(brpos);
         }
 
         // If at least one ball intersects, return. No need to check for the rest of the balls 

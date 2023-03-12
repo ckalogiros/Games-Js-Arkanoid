@@ -1,6 +1,7 @@
 "use strict";
 
-import { GlSetAttrTime, GlSetWpos } from "../../Graphics/GlBufferOps.js";
+import * as math from '../../Helpers/Math/MathOperations.js'
+import { GlSetAttrTime, GlSetWpos, GlSetColor } from "../../Graphics/GlBufferOps.js";
 import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { Mesh } from "../Drawables/Mesh.js";
 import { TimersCreateTimer } from "../Timer/Timer.js";
@@ -39,6 +40,7 @@ export class Particles{
                     GlSetWpos(this.buffer[i].gfxInfo,     [Viewport.bottom+100, 0]);
                 }
                 else{
+                    GlSetColor(this.buffer[i].gfxInfo,      this.buffer[i].mesh.col);
                     GlSetWpos(this.buffer[i].gfxInfo,     this.buffer[i].mesh.pos);
                     GlSetAttrTime(this.buffer[i].gfxInfo, this.buffer[i].timer.t);
                 }    
@@ -46,9 +48,10 @@ export class Particles{
         }
     }
 
-    Create(xpos, ypos, dir){
+    Create(xpos, ypos, dir, col){
         const idx = this.GetNextFree();
         if(idx !== null){
+            if(col) math.CopyArr4(this.buffer[idx].mesh.col, col);
             this.buffer[idx].mesh.pos[0] = xpos;
             this.buffer[idx].mesh.pos[1] = ypos;
             this.buffer[idx].timer   = TimersCreateTimer(0.01, this.lifeTime, this.timerStep);

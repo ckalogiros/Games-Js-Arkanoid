@@ -59,6 +59,7 @@ void main(void) {
             pixelDist = length(pixelXpos - left);
             float alpha = (1.0/featherWidth) * (pixelDist); 
             FragColor *= alpha;
+            FragColor.a = alpha;
         }
     }
     // RIGHT BORDER 
@@ -72,6 +73,7 @@ void main(void) {
             pixelDist = length(right - pixelXpos);
             float alpha = (1.0/featherWidth) * (pixelDist); 
             FragColor *= alpha;
+            FragColor.a = alpha;
         }
     }
     if(v_Color.a > 0.0)

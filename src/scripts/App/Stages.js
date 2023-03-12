@@ -1,5 +1,6 @@
 "use strict";
 
+import { GetRandomColor } from "../Helpers/Helpers.js";
 import { BrickCreateBrick, BrickCreateParticleSystem, BrickGetBricksBuffer } from "./Drawables/Brick.js";
 
 /**
@@ -65,9 +66,10 @@ export function StageCreateStage1() {
    const padStart = 100;
    const dim = [BRICK.WIDTH, BRICK.HEIGHT];
    let pos = [padStart + dim[0] + pad, 220 + dim[1] + 100, -1];
-
+   
    for (let i = 0; i < 20; i++) {
-       BrickCreateBrick(pos, dim); 
+       const col = GetRandomColor();
+       BrickCreateBrick(col, pos, dim); 
        pos[0] += dim[0] * 2 + pad;
        if (pos[0] + dim[0] * 2 + 50 > Viewport.right) {
            pos[1] += dim[1] * 2 + pad;
